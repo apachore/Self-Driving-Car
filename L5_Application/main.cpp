@@ -26,6 +26,8 @@
 #include "tasks.hpp"
 #include "examples/examples.hpp"
 
+#include "gps.hpp"
+
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
  * for details.  There is a very simple example towards the beginning of this class's declaration.
@@ -62,6 +64,8 @@ int main(void)
     scheduler_add_task(new periodicSchedulerTask());
     #endif
 
+    /*Task for getting GPS data from module and computing required distance and bearing*/
+    scheduler_add_task(new gpsTask(PRIORITY_CRITICAL));
     /* The task for the IR receiver */
     // scheduler_add_task(new remoteTask  (PRIORITY_LOW));
 
