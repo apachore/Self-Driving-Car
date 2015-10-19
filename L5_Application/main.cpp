@@ -25,6 +25,8 @@
  */
 #include "tasks.hpp"
 #include "examples/examples.hpp"
+#include "utilities.h"
+#include "lpc_pwm.hpp"
 
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
@@ -52,10 +54,10 @@ int main(void)
      * such that it can save remote control codes to non-volatile memory.  IR remote
      * control codes can be learned by typing the "learn" terminal command.
      */
-    scheduler_add_task(new terminalTask(PRIORITY_HIGH));
+//    scheduler_add_task(new terminalTask(PRIORITY_HIGH));
 
     /* Consumes very little CPU, but need highest priority to handle mesh network ACKs */
-    scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
+//    scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
 
     /* Change "#if 0" to "#if 1" to run period tasks; @see period_callbacks.cpp */
     #if 0
@@ -123,6 +125,79 @@ int main(void)
         scheduler_add_task(new wifiTask(Uart3::getInstance(), PRIORITY_LOW));
     #endif
 
-    scheduler_start(); ///< This shouldn't return
+//    Initializing the PWM pins of SJONE board for Speed and Direction control of the Motors
+//    pwm2 --> DC Motor (10% extreme Left, 15% straight, 20% extreme Right)
+//    pwm1 --> Servo Motor (10% extreme reverse, 15% standstill, 20% extreme Forward)
+    PWM pwm2(PWM::pwm2, 100);
+    PWM pwm1(PWM::pwm1, 100);
+    pwm2.set(15);
+    pwm1.set(15);
+
+    while (1)
+    {
+
+        pwm2.set(15.5);
+        pwm1.set(15.5);
+        delay_ms(1000);
+
+        pwm2.set(16);
+        pwm1.set(16.0);
+        delay_ms(3000);
+
+        pwm2.set(16.5);
+        pwm1.set(16.5);
+        delay_ms(3000);
+
+        pwm2.set(16.0);
+        pwm1.set(16.0);
+        delay_ms(3000);
+
+        pwm2.set(15.5);
+        pwm1.set(15.5);
+        delay_ms(3000);
+
+        pwm2.set(15.0);
+        pwm1.set(15.0);
+        delay_ms(4000);
+
+        pwm2.set(14.8);
+        pwm1.set(14.8);
+        delay_ms(1000);
+
+        pwm2.set(14.5);
+        pwm1.set(14.5);
+        delay_ms(3000);
+
+        pwm2.set(14.0);
+        pwm1.set(14.5);
+        delay_ms(3000);
+
+        pwm2.set(13.5);
+        pwm1.set(13.5);
+        delay_ms(3000);
+
+        pwm2.set(13.0);
+        delay_ms(3000);
+
+        pwm2.set(12.5);
+        pwm1.set(12.5);
+        delay_ms(3000);
+
+        pwm2.set(13.0);
+        delay_ms(3000);
+
+        pwm2.set(13.5);
+        pwm1.set(13.5);
+        delay_ms(3000);
+
+        pwm2.set(14.5);
+        delay_ms(3000);
+
+        pwm2.set(15.0);
+        delay_ms(6000);
+
+    }
+
+//    scheduler_start(); ///< This shouldn't return
     return -1;
 }
