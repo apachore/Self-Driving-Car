@@ -39,20 +39,56 @@ volatile int sensor2_start_time = 0,sensor2_echo_width = 0, distance2 = 0, sum2 
 volatile int sensor3_start_time = 0,sensor3_echo_width = 0, distance3 = 0, sum3 = 0, avg3 = 0;
 int reading = 0,sum4 = 0, avg4= 0;
 
+void sensor_trig(int sensor)
+{
+    if(sensor ==1)
+    { GPIO trig1(P2_0);
+        trig1.setAsOutput();
+        trig1.setLow();
+        trig1.setHigh();
+        delay_us(10);
+        trig1.setLow();
+        sensor1_start_time = lpc_timer_get_value(lpc_timer0);
+    }
+    else if(sensor ==2)
+    {
+        GPIO trig2(P2_2);
+        trig2.setAsOutput();
+        trig2.setHigh();
+        delay_us(10);
+        trig2.setLow();
+        sensor2_start_time = lpc_timer_get_value(lpc_timer0);
+
+    }
+    else if(sensor == 3)
+    {
+        GPIO trig3(P2_4);
+        trig3.setAsOutput();
+        trig3.setLow();
+        trig3.setHigh();
+        delay_us(10);
+        trig3.setLow();
+        sensor3_start_time = lpc_timer_get_value(lpc_timer0);
+    }
+}
+
 void sensor1_fall_edge()
 {
         sensor1_echo_width = lpc_timer_get_value(lpc_timer0)-sensor1_start_time;
         distance1 =  (sensor1_echo_width* 0.017) - 7;
+        sensor_trig(2);
 }
 void sensor2_fall_edge()
 {
     sensor2_echo_width = lpc_timer_get_value(lpc_timer0)-sensor2_start_time;
         distance2 =  (sensor2_echo_width* 0.017) - 7;
+        sensor_trig(3);
 }
 void sensor3_fall_edge()
 {
     sensor3_echo_width = lpc_timer_get_value(lpc_timer0)-sensor3_start_time;
         distance3 =  (sensor3_echo_width* 0.017) - 7;
+        sensor_trig(1);
 }
 class sensorTask : public scheduler_task
 {
@@ -64,7 +100,7 @@ class sensorTask : public scheduler_task
 
     }
     bool init(void)
-    {
+    {void sensor_trig(int sensor);
         const uint8_t port2_1 = 1,port2_3 =3,port2_5 = 5;
         eint3_enable_port2(port2_1, eint_falling_edge, sensor1_fall_edge);
         eint3_enable_port2(port2_3, eint_falling_edge, sensor2_fall_edge);
@@ -72,38 +108,20 @@ class sensorTask : public scheduler_task
         LPC_PINCON->PINSEL3 |=  (3 << 28); // ADC-4 is on P1.30, select this as ADC0.4
 
         lpc_timer_enable(lpc_timer0,1);
-
+        sensor_trig(1);
 
         return true;
     }
     bool run(void *p)
     {
-    GPIO trig1(P2_0);
-    trig1.setAsOutput();
-    trig1.setLow();
-    trig1.setHigh();
-    delay_us(10);
-    trig1.setLow();
-    sensor1_start_time = lpc_timer_get_value(lpc_timer0);
+
     printf("\nsensor1 distance = %d\n",distance1);
 
         delay_us(500000);
-        GPIO trig2(P2_2);
-        trig2.setAsOutput();
-        trig2.setHigh();
-        delay_us(10);
-        trig2.setLow();
-        sensor2_start_time = lpc_timer_get_value(lpc_timer0);
+
        printf("\nsensor2 distance = %d\n",distance2);
 
         delay_us(500000);
-        GPIO trig3(P2_4);
-                trig3.setAsOutput();
-                trig3.setLow();
-                trig3.setHigh();
-                delay_us(10);
-                trig3.setLow();
-                sensor3_start_time = lpc_timer_get_value(lpc_timer0);
                 printf("\nsensor3 distance = %d\n",distance3);
                 delay_us(500000);
         sum1= sum1+distance1;
