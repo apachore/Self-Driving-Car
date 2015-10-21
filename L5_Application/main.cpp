@@ -19,13 +19,112 @@
 /**
  * @file
  * @brief This is the application entry point.
- * 			FreeRTOS and stdio printf is pre-configured to use uart0_min.h before main() enters.
- * 			@see L0_LowLevel/lpc_sys.h if you wish to override printf/scanf functions.
+ *             FreeRTOS and stdio printf is pre-configured to use uart0_min.h before main() enters.
+ *             @see L0_LowLevel/lpc_sys.h if you wish to override printf/scanf functions.
  *
  */
 #include "tasks.hpp"
 #include "examples/examples.hpp"
 
+//RC
+#include "eint.h"
+#include "GPIO.hpp"
+#include "LED.hpp"
+#include "lpc_timers.h"
+#include "utilities.h"
+#include "lpc_pwm.hpp"
+#include "adc0.h"
+volatile int sensor1_start_time = 0,sensor1_echo_width = 0, distance1 = 0, sum1 = 0, avg1 = 0,count=1;
+volatile int sensor2_start_time = 0,sensor2_echo_width = 0, distance2 = 0, sum2 = 0, avg2 = 0;
+volatile int sensor3_start_time = 0,sensor3_echo_width = 0, distance3 = 0, sum3 = 0, avg3 = 0;
+int reading = 0,sum4 = 0, avg4= 0;
+
+void sensor1_fall_edge()
+{
+        sensor1_echo_width = lpc_timer_get_value(lpc_timer0)-sensor1_start_time;
+        distance1 =  (sensor1_echo_width* 0.017) - 7;
+}
+void sensor2_fall_edge()
+{
+    sensor2_echo_width = lpc_timer_get_value(lpc_timer0)-sensor2_start_time;
+        distance2 =  (sensor2_echo_width* 0.017) - 7;
+}
+void sensor3_fall_edge()
+{
+    sensor3_echo_width = lpc_timer_get_value(lpc_timer0)-sensor3_start_time;
+        distance3 =  (sensor3_echo_width* 0.017) - 7;
+}
+class sensorTask : public scheduler_task
+{
+    private:
+
+    public:
+        sensorTask(uint8_t priority) : scheduler_task("sensorTask", 2000, priority)
+    {
+
+    }
+    bool init(void)
+    {
+        const uint8_t port2_1 = 1,port2_3 =3,port2_5 = 5;
+        eint3_enable_port2(port2_1, eint_falling_edge, sensor1_fall_edge);
+        eint3_enable_port2(port2_3, eint_falling_edge, sensor2_fall_edge);
+        eint3_enable_port2(port2_5, eint_falling_edge, sensor3_fall_edge);
+        LPC_PINCON->PINSEL3 |=  (3 << 28); // ADC-4 is on P1.30, select this as ADC0.4
+
+        lpc_timer_enable(lpc_timer0,1);
+
+
+        return true;
+    }
+    bool run(void *p)
+    {
+    GPIO trig1(P2_0);
+    trig1.setAsOutput();
+    trig1.setLow();
+    trig1.setHigh();
+    delay_us(10);
+    trig1.setLow();
+    sensor1_start_time = lpc_timer_get_value(lpc_timer0);
+    printf("\nsensor1 distance = %d\n",distance1);
+
+        delay_us(500000);
+        GPIO trig2(P2_2);
+        trig2.setAsOutput();
+        trig2.setHigh();
+        delay_us(10);
+        trig2.setLow();
+        sensor2_start_time = lpc_timer_get_value(lpc_timer0);
+       printf("\nsensor2 distance = %d\n",distance2);
+
+        delay_us(500000);
+        GPIO trig3(P2_4);
+                trig3.setAsOutput();
+                trig3.setLow();
+                trig3.setHigh();
+                delay_us(10);
+                trig3.setLow();
+                sensor3_start_time = lpc_timer_get_value(lpc_timer0);
+                printf("\nsensor3 distance = %d\n",distance3);
+                delay_us(500000);
+        sum1= sum1+distance1;
+        sum2= sum2+distance2;
+        sum3= sum3+distance3;
+       // reading = adc0_get_reading(4);
+
+        count++;
+        if (count == 10)
+            {avg1= sum1/10;
+            avg2= sum2/10;
+            avg3= sum3/10;
+            printf("sensor1 distance = %d\n",avg1);
+            printf("sensor2 distance = %d\n",avg2);
+            printf("sensor3 Reading: %d\n", avg3);
+            count=0;
+            sum1 = sum2 = sum3=0;
+            }
+        return true;
+    }
+};
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
  * for details.  There is a very simple example towards the beginning of this class's declaration.
@@ -42,6 +141,7 @@
  */
 int main(void)
 {
+
     /**
      * A few basic tasks for this bare-bone system :
      *      1.  Terminal task provides gateway to interact with the board through UART terminal.
@@ -52,12 +152,24 @@ int main(void)
      * such that it can save remote control codes to non-volatile memory.  IR remote
      * control codes can be learned by typing the "learn" terminal command.
      */
+
+    //             reading = adc0_get_reading(4); // Read current value of ADC-4
+    //   reading 4800/(adc0_get_reading(4)- 20))/2.54);
+    //             printf("\nADC Reading: %d", reading);
+
     scheduler_add_task(new terminalTask(PRIORITY_HIGH));
 
     /* Consumes very little CPU, but need highest priority to handle mesh network ACKs */
     scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
 
-    /* Change "#if 0" to "#if 1" to run period tasks; @see period_callbacks.cpp */
+    #if 1
+    scheduler_add_task(new sensorTask(PRIORITY_CRITICAL));
+    #endif
+    /* Change "#if 0" t "#if 1" to runCAN msg task*/
+    #if 0
+    scheduler_add_task(new CANTask(PRIORITY_CRITICAL));
+    #endif
+    /* Change "#if 0" t "#if 1" to run period tasks; @see period_callbacks.cpp */
     #if 0
     scheduler_add_task(new periodicSchedulerTask());
     #endif
@@ -89,8 +201,8 @@ int main(void)
     #endif
 
     /**
-	 * Try the rx / tx tasks together to see how they queue data to each other.
-	 */
+     * Try the rx / tx tasks together to see how they queue data to each other.
+     */
     #if 0
         scheduler_add_task(new queue_tx());
         scheduler_add_task(new queue_rx());
