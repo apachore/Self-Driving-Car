@@ -25,6 +25,8 @@
  */
 #include "tasks.hpp"
 #include "examples/examples.hpp"
+#include "source/can_base_communication.hpp"
+#include "source/can_transmission_reception.hpp"
 
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
@@ -42,6 +44,9 @@
  */
 int main(void)
 {
+    CANInitialization();
+    scheduler_add_task(new canReceiver(PRIORITY_HIGH));
+
     /**
      * A few basic tasks for this bare-bone system :
      *      1.  Terminal task provides gateway to interact with the board through UART terminal.

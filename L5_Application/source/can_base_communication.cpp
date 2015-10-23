@@ -14,35 +14,18 @@
 #include "string.h"
 #include "can.h"
 #include "can_base_communication.hpp"
-
-void BusOffCb(uint32_t param)
-{
-    printf("BusOffCb : Error");
-    CAN_reset_bus(can1);
-}
-
-void DataOverCanBuffer(uint32_t param)
-{
-    printf("DataOverCanBuffer : Error");
-    CAN_reset_bus(can1);
-}
+#include "can_transmission_reception.hpp"
 
 canReceiver::canReceiver(uint8_t priority) : scheduler_task("CAN Base Communication", 500, priority)
 {
 
 }
 
-bool canReceiver::init()
-{
-    CAN_init(can1, 100, 20, 20, *BusOffCb,*DataOverCanBuffer);
-    CAN_bypass_filter_accept_all_msgs();
-
-    return true;
-}
-
 bool canReceiver::run(void *p)
 {
+
     can_msg_t canMessageBlock;
-    bool flag = CAN_rx(can1, &canMessageBlock, 1000);
+
+    CANReception(canMessageBlock);
     return true;
 }
