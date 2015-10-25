@@ -14,7 +14,7 @@
 #include "string.h"
 #include "can.h"
 #include "can_base_communication.hpp"
-#include "can_transmission_reception.hpp"
+#include "can_transmission_reception.h"
 
 canReceiver::canReceiver(uint8_t priority) : scheduler_task("CAN Base Communication", 500, priority)
 {
@@ -23,9 +23,8 @@ canReceiver::canReceiver(uint8_t priority) : scheduler_task("CAN Base Communicat
 
 bool canReceiver::run(void *p)
 {
-
     can_msg_t canMessageBlock;
 
-    CANReception(canMessageBlock);
+
     return true;
 }

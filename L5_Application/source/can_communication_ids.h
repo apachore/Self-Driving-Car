@@ -79,7 +79,7 @@ const can_std_id_t canMessagesFilterList[] =
         CAN_gen_sid(can1, RBootReplyFromSensor), CAN_gen_sid(can1, RSensorDataFromSensor), CAN_gen_sid(can1, RBatteryStatusFromSensor),
         CAN_gen_sid(can1, RDistanceFinalAndNextCheckpoint), CAN_gen_sid(can1, RHeadingAndBearingToGeo),
         CAN_gen_sid(can1, RStopMessageFromAndroid), CAN_gen_sid(can1, RKillMessageFromAndroid),
-        CAN_gen_sid(can1, RunAndPauseCommandFromAndroid), CAN_gen_sid(can1, RHeartbeatMessageFomMotor),
+        CAN_gen_sid(can1, RRunAndPauseCommandFromAndroid), CAN_gen_sid(can1, RHeartbeatMessageFomMotor),
         CAN_gen_sid(can1, RHeartbeatFromGeo), CAN_gen_sid(can1, RHeartbeatFromAndroid),
         CAN_gen_sid(can1, RHeartbeatFromSensor)
 };

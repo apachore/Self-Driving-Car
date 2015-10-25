@@ -19,6 +19,7 @@ class canReceiver : public scheduler_task
     public:
         canReceiver(uint8_t priority);
         bool run(void *p);
+        bool init(void);
 
     private:
 
