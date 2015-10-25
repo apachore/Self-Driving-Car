@@ -1,9 +1,10 @@
-/*
- * gps.hpp
- *
- *  Created on: 18-Oct-2015
- *      Author: Amit
- */
+/*===========================================================================================
+ Name        : gps.hpp
+ Author      : Amit Pachore
+ Version     : 1.0
+ Description : Header file for class declaration of GPS task
+=============================================================================================
+*/
 
 #ifndef L5_APPLICATION_GPS_HPP_
 #define L5_APPLICATION_GPS_HPP_
@@ -23,10 +24,10 @@ class gpsTask : public scheduler_task
 {
 
     public:
-        char message_type[10];
+        //char message_type[10];
         gpsTask(uint8_t priority);
         bool init(void);
-        void parse_gps_string(void);
+        //void parse_gps_string(void);
         float calculateBearing();
         float calculateDistance();
         bool run(void *p);
