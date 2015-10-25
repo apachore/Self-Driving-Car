@@ -1,19 +1,27 @@
 /*
- * This file includes the function that are needed to send the data over can
- * and receive data from CAN depending on particular filters
+ * can_transmission_reception.cpp
  *
- * Author : Gaurao Chaudhari
- * Date   : 10/18/2015
+ *  Created on: Oct 24, 2015
+ *      Author: Gaurao Chaudhari
  */
 
-#ifndef CAN_TRANSMISSION_RECEPTION_HPP__
-#define CAN_TRANSMISSION_RECEPTION_HPP__
 
 #include "stdio.h"
 #include "stdlib.h"
 #include "can.h"
 #include "io.hpp"
-#include "can_transmission_reception.hpp"
+#include "can_communication_ids.h"
+#include "can_transmission_reception.h"
+#include "scheduler_task.hpp"
+#include "queue.h"
+#include "file_logger.h"
+
+
+CANTransmissionReception::CANTransmissionReception()
+{
+    if(receivedDataQueue == NULL)
+        receivedDataQueue = xQueueCreate(50, sizeof(can_msg_t));
+}
 
 void BusOffCb(uint32_t param)
 {
@@ -27,47 +35,51 @@ void DataOverCanBuffer(uint32_t param)
     CAN_reset_bus(can1);
 }
 
-void CANInitialization()
+void CANTransmissionReception::CANInitialization()
 {
-    CAN_init(can1, 100, 20, 20, *BusOffCb,*DataOverCanBuffer);
-    CAN_bypass_filter_accept_all_msgs();
+    CAN_init(can1, 100, 20, 20, *BusOffCb, *DataOverCanBuffer);
 
+    // Create a queue which would send the data to wherever received
+    QueueHandle_t receivedDataQueue = xQueueCreate(50, sizeof(can_msg_t));
+    scheduler_task::addSharedObject("receivedMessagesQueue", receivedDataQueue);
 
-/*  can_std_id_t msg1_std[2];
-    msg1_std[0].id = 0x3;
-    msg1_std[0].can_num = 0;
-    msg1_std[0].disable = 0;
-    msg1_std[1].id = 0x4;
-    msg1_std[1].can_num = 0;
-    msg1_std[1].disable = 0;
+    /* HACK:
+        addSharedObject("gps_data", &gps_data);*/
 
-    can_std_grp_id_t *grplist=NULL;
-    can_ext_id_t *ext=NULL;
-    can_ext_grp_id_t *extgrp=NULL;
-    CAN_setup_filter(msg1_std,2,grplist,0,ext,0,extgrp,0);*/
-
+    //Any message with 0xffff would disable the message
+    CAN_setup_filter(canMessagesFilterList , 15, NULL, 0, NULL, 0, NULL, 0);
 }
 
-void CANTransmission(can_msg_t canMessageBlock)
+void CANTransmissionReception::CANTransmission(/*can_msg_t canMessageBlock*/)
 {
-    canMessageBlock.msg_id = 0x2;
+/*    canMessageBlock.msg_id = 0x2;
     canMessageBlock.frame_fields.data_len = 8;
-    canMessageBlock.data.qword = 0x222;
+    canMessageBlock.data.qword = 0x222;*/
 
-    bool flag = CAN_tx(can1,&canMessageBlock, 1000);
+    bool flag = CAN_tx(can1,&canMessageTransmittedBlock, 0);
 }
 
-void CANReception(can_msg_t canMessageBlock)
+void CANTransmissionReception::CANReception()
 {
-    bool flag = CAN_rx(can1, &canMessageBlock, 1000);
-    printf("%x\n", canMessageBlock.msg_id);
-
-    if(canMessageBlock.msg_id == 0x3){
+    if(CAN_rx(can1, &canMessageReceivedBlock, 0))
+    {
         LE.on(1);
+        if (!xQueueSend(receivedDataQueue, &canMessageReceivedBlock, 0))
+        {
+            // unexpected led
+            LE.on(2);
+            LOG_ERROR("This should never happen");
+        }
+        printf("%x\n", canMessageReceivedBlock.msg_id);
     }
-    else if(canMessageBlock.msg_id == 0x4) {
-        LE.off(1);
+    else
+    {
+        LE.on(3);
     }
+
 }
 
-#endif /* CAN_TRANSMISSION_RECEPTION_HPP__ */
+void CANTransmissionReception::CANSetupFilter()
+{
+
+}

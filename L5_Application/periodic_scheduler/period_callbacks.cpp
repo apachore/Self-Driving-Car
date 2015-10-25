@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include "io.hpp"
 #include "periodic_callback.h"
+#include "source/can_transmission_reception.h"
 
 
 
@@ -56,5 +57,8 @@ void period_100Hz(void)
 
 void period_1000Hz(void)
 {
+    CANTransmissionReception canReceivedMessage;
+    canReceivedMessage.CANReception();
+
     LE.toggle(4);
 }
