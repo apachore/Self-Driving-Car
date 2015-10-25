@@ -65,7 +65,9 @@ int main(void)
     #endif
 
     /*Task for getting GPS data from module and computing required distance and bearing*/
-    scheduler_add_task(new gpsTask(PRIORITY_CRITICAL));
+    scheduler_add_task(new gpsTask(PRIORITY_HIGH));
+
+
     /* The task for the IR receiver */
     // scheduler_add_task(new remoteTask  (PRIORITY_LOW));
 

@@ -34,6 +34,7 @@
 
 
 
+
 /**
  * Terminal task is our UART0 terminal that handles our commands into the board.
  * This also saves and restores the "disk" telemetry.  Disk telemetry variables
@@ -134,5 +135,6 @@ class periodicSchedulerTask : public scheduler_task
     private:
         bool handlePeriodicSemaphore(const uint8_t index, const uint8_t frequency);
 };
+
 
 #endif /* TASKS_HPP_ */

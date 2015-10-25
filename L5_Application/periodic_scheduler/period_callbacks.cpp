@@ -32,6 +32,8 @@
 #include "io.hpp"
 #include "periodic_callback.h"
 
+#include "gps.hpp"
+
 
 
 /// This is the stack size used for each of the period tasks
@@ -46,6 +48,17 @@ void period_1Hz(void)
 
 void period_10Hz(void)
 {
+    QueueHandle_t gps_data_q = scheduler_task::getSharedObject("gps_queue");
+    coordinates current_gps_data;
+
+    if (NULL == gps_data_q)
+    {
+        //light_up_the_project_blown_led();
+    }
+    else if (xQueueReceive(gps_data_q, &current_gps_data, 0))
+    {
+
+    }
     LE.toggle(2);
 }
 

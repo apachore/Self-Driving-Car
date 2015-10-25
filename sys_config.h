@@ -131,7 +131,7 @@ unsigned int sys_get_cpu_clock();
  *  - 1 : printf from stdio.h without floating point printf/scanf
  */
 #define SYS_CFG_REDUCED_PRINTF      0     ///< If non-zero, floating-point printf() and scanf() is not supported
-#define SYS_CFG_UART0_BPS           38400 ///< UART0 is configured at this BPS by start-up code - before main()
+#define SYS_CFG_UART0_BPS           115200 ///< UART0 is configured at this BPS by start-up code - before main()
 #define SYS_CFG_UART0_TXQ_SIZE      256   ///< UART0 transmit queue size before blocking starts to occur
 /** @} */
 
