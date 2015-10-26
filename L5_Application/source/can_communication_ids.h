@@ -81,7 +81,7 @@ const can_std_id_t canMessagesFilterList[] =
 };
 
 
-const can_std_grp_id_t group_list[] = { {CAN_gen_sid(can1, RHeartbeatMessageFomMotor), CAN_gen_sid(can1, RHeartbeatFromSensor)},
+const can_std_grp_id_t groupList[] = { {CAN_gen_sid(can1, RHeartbeatMessageFomMotor), CAN_gen_sid(can1, RHeartbeatFromSensor)},
                                         {CAN_gen_sid(can1, RBootReplyFromMotor), CAN_gen_sid(can1, RBootReplyFromAndroid)}
                                       };
 

@@ -47,7 +47,7 @@ void CANTransmissionReception::CANInitialization()
         addSharedObject("gps_data", &gps_data);*/
 
     //Any message with 0xffff would disable the message
-    CAN_setup_filter(canMessagesFilterList , 15, NULL, 0, NULL, 0, NULL, 0);
+    CAN_setup_filter(canMessagesFilterList , 7, groupList, 2, NULL, 0, NULL, 0);
 }
 
 void CANTransmissionReception::CANTransmission(/*can_msg_t canMessageBlock*/)
