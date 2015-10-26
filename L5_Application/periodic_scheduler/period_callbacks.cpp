@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include "io.hpp"
 #include "periodic_callback.h"
+#include "Motor.hpp"
 
 
 
@@ -46,7 +47,10 @@ void period_1Hz(void)
 
 void period_10Hz(void)
 {
-    LE.toggle(2);
+	/*Calling the Motor control */
+	Motor_PWM_control();
+
+	LE.toggle(2);
 }
 
 void period_100Hz(void)

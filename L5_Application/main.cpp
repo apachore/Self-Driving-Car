@@ -28,6 +28,7 @@
 #include "utilities.h"
 #include "lpc_pwm.hpp"
 #include "Motor.hpp"
+#include "can.h"
 
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
@@ -61,7 +62,7 @@ int main(void)
 //    scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
 
     /* Change "#if 0" to "#if 1" to run period tasks; @see period_callbacks.cpp */
-    #if 0
+    #if 1
     scheduler_add_task(new periodicSchedulerTask());
     #endif
 
@@ -126,7 +127,16 @@ int main(void)
         scheduler_add_task(new wifiTask(Uart3::getInstance(), PRIORITY_LOW));
     #endif
 
+//        CAN_init(can1,500,100,100,NULL,NULL);
+//        CAN_bypass_filter_accept_all_msgs();
+//        CAN_reset_bus(can1);
+
+//        CAN Receive task for Motor. Will be modified/merged to include IO also
+        scheduler_add_task(new Motor_CAN_RX(PRIORITY_HIGH));
+
+	#if 0
         scheduler_add_task(new MotorTask(PRIORITY_MEDIUM));
+	#endif
 
     scheduler_start(); ///< This shouldn't return
     return -1;
