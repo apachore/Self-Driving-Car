@@ -34,62 +34,47 @@
 #include "utilities.h"
 #include "lpc_pwm.hpp"
 #include "adc0.h"
-volatile int sensor1_start_time = 0,sensor1_echo_width = 0, distance1 = 0, sum1 = 0, avg1 = 0,count=1;
+volatile int sensor_start_time = 0,sensor1_echo_width = 0, distance1 = 0, sum1 = 0, avg1 = 0,count=1;
 volatile int sensor2_start_time = 0,sensor2_echo_width = 0, distance2 = 0, sum2 = 0, avg2 = 0;
 volatile int sensor3_start_time = 0,sensor3_echo_width = 0, distance3 = 0, sum3 = 0, avg3 = 0;
 int reading = 0,sum4 = 0, avg4= 0;
-
-void sensor_trig(int sensor)
+#define mydel 250000
+void sensor_trig(int pin_number)
 {
-    if(sensor ==1)
-    { GPIO trig1(P2_0);
-        trig1.setAsOutput();
-        trig1.setLow();
-        trig1.setHigh();
-        delay_us(10);
-        trig1.setLow();
-        sensor1_start_time = lpc_timer_get_value(lpc_timer0);
-    }
-    else if(sensor ==2)
-    {
-        GPIO trig2(P2_2);
-        trig2.setAsOutput();
-        trig2.setHigh();
-        delay_us(10);
-        trig2.setLow();
-        sensor2_start_time = lpc_timer_get_value(lpc_timer0);
-
-    }
-    else if(sensor == 3)
-    {
-        GPIO trig3(P2_4);
-        trig3.setAsOutput();
-        trig3.setLow();
-        trig3.setHigh();
-        delay_us(10);
-        trig3.setLow();
-        sensor3_start_time = lpc_timer_get_value(lpc_timer0);
-    }
+    LPC_GPIO2->FIOPIN &= ~(1 << pin_number);
+      LPC_GPIO2->FIOPIN |= (1 << pin_number);
+      delay_us(10);
+      LPC_GPIO2->FIOPIN &= ~(1 << pin_number);
+      sensor_start_time = lpc_timer_get_value(lpc_timer0);
 }
 
+void Back_IR_read()
+{
+    reading = adc0_get_reading(4);
+    printf("IR reading:%d\n",reading);
+}
 void sensor1_fall_edge()
 {
-        sensor1_echo_width = lpc_timer_get_value(lpc_timer0)-sensor1_start_time;
+        sensor1_echo_width = lpc_timer_get_value(lpc_timer0)-sensor_start_time;
         distance1 =  (sensor1_echo_width* 0.017) - 7;
         sensor_trig(2);
 }
+
 void sensor2_fall_edge()
 {
-    sensor2_echo_width = lpc_timer_get_value(lpc_timer0)-sensor2_start_time;
+    sensor2_echo_width = lpc_timer_get_value(lpc_timer0)-sensor_start_time;
         distance2 =  (sensor2_echo_width* 0.017) - 7;
-        sensor_trig(3);
+        sensor_trig(4);
 }
 void sensor3_fall_edge()
 {
-    sensor3_echo_width = lpc_timer_get_value(lpc_timer0)-sensor3_start_time;
+    sensor3_echo_width = lpc_timer_get_value(lpc_timer0)-sensor_start_time;
         distance3 =  (sensor3_echo_width* 0.017) - 7;
-        sensor_trig(1);
+        sensor_trig(0);
 }
+
+
+
 class sensorTask : public scheduler_task
 {
     private:
@@ -100,7 +85,7 @@ class sensorTask : public scheduler_task
 
     }
     bool init(void)
-    {void sensor_trig(int sensor);
+    {
         const uint8_t port2_1 = 1,port2_3 =3,port2_5 = 5;
         eint3_enable_port2(port2_1, eint_falling_edge, sensor1_fall_edge);
         eint3_enable_port2(port2_3, eint_falling_edge, sensor2_fall_edge);
@@ -108,38 +93,42 @@ class sensorTask : public scheduler_task
         LPC_PINCON->PINSEL3 |=  (3 << 28); // ADC-4 is on P1.30, select this as ADC0.4
 
         lpc_timer_enable(lpc_timer0,1);
+        LPC_GPIO2->FIODIR |=(1<<0);
+        LPC_GPIO2->FIODIR |=(1<<2);
+        LPC_GPIO2->FIODIR |=(1<<4);
+       // Back_IR_read();
         sensor_trig(1);
-
         return true;
     }
     bool run(void *p)
     {
 
-    printf("\nsensor1 distance = %d\n",distance1);
+    printf("sensor1 distance = %d\n",distance1);
 
-        delay_us(500000);
+        delay_us(mydel);
 
-       printf("\nsensor2 distance = %d\n",distance2);
+       printf("sensor2 distance = %d\n",distance2);
 
-        delay_us(500000);
-                printf("\nsensor3 distance = %d\n",distance3);
-                delay_us(500000);
-        sum1= sum1+distance1;
-        sum2= sum2+distance2;
-        sum3= sum3+distance3;
-       // reading = adc0_get_reading(4);
+        delay_us(mydel);
+                printf("sensor3 distance = %d\n",distance3);
+                delay_us(mydel);
+//        sum1= sum1+distance1;
+//        sum2= sum2+distance2;
+//        sum3= sum3+distance3;
+                reading = adc0_get_reading(4);
+            //    printf("IR reading:%d\n",reading);
 
-        count++;
-        if (count == 10)
-            {avg1= sum1/10;
-            avg2= sum2/10;
-            avg3= sum3/10;
-            printf("sensor1 distance = %d\n",avg1);
-            printf("sensor2 distance = %d\n",avg2);
-            printf("sensor3 Reading: %d\n", avg3);
-            count=0;
-            sum1 = sum2 = sum3=0;
-            }
+//        count++;
+//        if (count == 10)
+//            {avg1= sum1/10;
+//            avg2= sum2/10;
+//            avg3= sum3/10;
+//            printf("sensor1 distance = %d\n",avg1);
+//            printf("sensor2 distance = %d\n",avg2);
+//            printf("sensor3 Reading: %d\n", avg3);
+//            count=0;
+//            sum1 = sum2 = sum3=0;
+//            }
         return true;
     }
 };
