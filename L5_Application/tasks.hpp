@@ -179,4 +179,5 @@ class CANTask : public scheduler_task
            return true;
         }
 };
+
 #endif /* TASKS_HPP_ */
