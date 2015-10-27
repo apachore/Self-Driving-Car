@@ -35,8 +35,6 @@
 
 #include "gps.hpp"
 
-
-
 /// This is the stack size used for each of the period tasks
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 
@@ -44,7 +42,7 @@ const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 
 void period_1Hz(void)
 {
-    LE.toggle(1);
+    //LE.toggle(1);
 }
 
 void period_10Hz(void)
@@ -61,6 +59,7 @@ void period_10Hz(void)
         LE.toggle(2);
         printf("Latitude: %f\n",current_gps_data.latitude);
         printf("Longitude: %f\n",current_gps_data.longitude);
+
     }
 
 }

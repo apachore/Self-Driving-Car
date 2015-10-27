@@ -12,8 +12,6 @@
 #include "scheduler_task.hpp"
 #include "Uart3.hpp"
 
-
-
 typedef struct
 {
         float latitude;
@@ -28,8 +26,10 @@ class gpsTask : public scheduler_task
         gpsTask(uint8_t priority);
         bool init(void);
         //void parse_gps_string(void);
-        float calculateBearing();
-        float calculateDistance();
+        uint16_t calculateBearing(coordinates,coordinates);
+        uint16_t calculateDistance(coordinates,coordinates);
+        float ToRadians(float);
+        float ToDegrees(float);
         bool run(void *p);
 
     private:

@@ -20,7 +20,7 @@
 
 //Commented printf statements are added for testing purpose
 
-
+#define Radius 6371000 //meters
 #define gps_uart_BaudRate 38400
 
 gpsTask::gpsTask(uint8_t priority) : scheduler_task("gps", 4*512, priority),
@@ -51,13 +51,34 @@ bool gpsTask::init(void)
 ////        }
 //}
 
-float calculateBearing()
+float gpsTask::ToRadians(float InDegrees)
 {
+    return(InDegrees*(M_PI/180));
+}
+
+float gpsTask::ToDegrees(float InRadians)
+{
+    return(InRadians*(180/M_PI));
+}
+
+uint16_t gpsTask::calculateBearing(coordinates point_2,coordinates point_1)
+{
+    float x,y;
+    uint16_t bearing;
+    y = sin(ToRadians(point_2.longitude-point_1.longitude))*cos(ToRadians(point_2.latitude));
+    x = (cos(ToRadians(point_1.latitude))*sin(ToRadians(point_2.latitude))) - (sin(ToRadians(point_1.latitude))*cos(ToRadians(point_2.latitude))*cos(ToRadians(point_2.longitude-point_1.longitude)));
+    bearing = (int)(ToDegrees(atan2(y,x))+360)%360;
+    return(bearing);
 
 }
-float calculateDistance()
+uint16_t gpsTask::calculateDistance(coordinates point_2,coordinates point_1)
 {
-
+    float a,c;
+    uint16_t distance;
+    a = pow(sin(ToRadians(point_2.latitude-point_1.latitude)/2),2) + (cos(ToRadians(point_1.latitude))*cos(ToRadians(point_2.latitude))*pow(sin(ToRadians(point_2.latitude-point_1.latitude)/2),2));
+    c = 2 * atan2(sqrt(a),sqrt(1-a));
+    distance = Radius * c;
+    return(distance);
 }
 
 bool gpsTask::run(void *p)
@@ -110,6 +131,13 @@ bool gpsTask::run(void *p)
                 //printf("GPS reading Latitude: %f\n",gps_readings.latitude);
                 //printf("GPS reading Longitude: %f\n",gps_readings.longitude);
 
+                /*Readings are in 3721.1831,N,12153.5919,W format in which
+                 *3721.1831 = 37 degrees and 21.1831 minutes
+                 *To convert degree minute format to degrees below calculations are programmed
+                 *e.g gps_readings = 3721.1831/100 = 37.211831
+                 *floor will give 37 degrees
+                 *current_gps_data.latitude = degrees.latitude + (((gps_readings.latitude-degrees.latitude)*100)/60);
+                 *current_gps_data.latitude = 37 + (((37.211831 - 37)*100)/60) = 37.353050*/
                 gps_readings.latitude /=100;
                 gps_readings.longitude /=100;
                 degrees.latitude = floor(gps_readings.latitude);
