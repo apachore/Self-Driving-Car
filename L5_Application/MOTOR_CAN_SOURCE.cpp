@@ -13,6 +13,15 @@
 #include "can.h"
 #include "file_logger.h"
 
+void BusOffCb(uint32_t param)
+{
+    printf("BusOffCb : Error");
+}
+
+void DataOverCanBuffer(uint32_t param)
+{
+    printf("DataOverCanBuffer : Error");
+}
 
 void Transmit_init()
 {
@@ -88,7 +97,7 @@ void canTransmitReceiver::Receiver_message(void)
     {
     if(rx_msg.msg_id == 0x220)
     {
-
+          printf("received 0x220\n");
           if(! xQueueSend(Master_Motor_q, &rx_msg.data, 0)) {
               printf("Queue Full\n");
 
@@ -111,15 +120,7 @@ printf("This is Motor RX function\n");
 
 }
 
-void canTransmitReceiver::BusOffCb(uint32_t param)
-{
-    printf("BusOffCb : Error");
-}
 
-void canTransmitReceiver::DataOverCanBuffer(uint32_t param)
-{
-    printf("DataOverCanBuffer : Error");
-}
 
 canTransmitReceiver::canTransmitReceiver(uint8_t priority):scheduler_task("canTransmitReceive",2000,priority)
 {

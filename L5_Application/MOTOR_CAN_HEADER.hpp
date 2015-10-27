@@ -21,8 +21,8 @@ class canTransmitReceiver : public scheduler_task
         bool init(void);
         void Receiver_message(void);
         void Receive_init();
-        void BusOffCb(uint32_t param);
-        void DataOverCanBuffer(uint32_t param);
+//        void BusOffCb(uint32_t param);
+//        void DataOverCanBuffer(uint32_t param);
 
     private:
         QueueHandle_t Master_Motor_q;

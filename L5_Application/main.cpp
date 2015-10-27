@@ -137,7 +137,7 @@ int main(void)
         scheduler_add_task(new Motor_CAN_RX(PRIORITY_HIGH));
     #endif
 
-#if 0
+#if 1
     scheduler_add_task(new canTransmitReceiver(PRIORITY_HIGH));
 #endif
 

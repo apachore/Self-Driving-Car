@@ -27,17 +27,6 @@ IOTask::IOTask(uint8_t priority) :
 bool IOTask::init(void)
 {
         CAN_init(can1,100,64,64,NULL,NULL);              /*initialize can1 */
-        can_std_id_t msg1_std[5];
-        msg1_std[0].id = 0x010;                         /* kill message */
-        msg1_std[0].can_num = 0;
-        msg1_std[0].disable = 0;
-        msg1_std[1].id = 0x210;              /* sensor data */
-        msg1_std[2].id = 0x260;              /* gps data */
-        msg1_std[3].id = 0x410;              /* destination reached */
-        msg1_std[4].id = 0x610;              /* boot request  */
-        msg1_std[5].id = 0x630;              /* start controller operation */
-
-        ack_msg1.msg_id=0x620;                  /* boot reply */
         ack_msg1.frame_fields.is_29bit = 0;
         ack_msg1.frame_fields.data_len = 0;
         ack_msg1.data.bytes[1]=01;
@@ -46,7 +35,7 @@ bool IOTask::init(void)
         can_ext_id_t *ext=NULL;
         can_ext_grp_id_t *extgrp=NULL;
 
-         CAN_setup_filter(msg1_std,5,grplist,0,ext,0,extgrp,0);
+         CAN_setup_filter(CANmsglist,5,grplist,0,ext,0,extgrp,0);
          CAN_reset_bus(can1);              /* reset can1 */
          vTaskDelay(100);                 /* Wait for 100 ms*/
          IO_uart.putline("FO");           /* initialize LCD */

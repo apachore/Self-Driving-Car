@@ -12,6 +12,8 @@
 #include "char_dev.hpp"
 #include "tasks.hpp"
 #include "file_logger.h"
+#include "can_comms.hpp"
+#include "uart2.hpp"
 
 class IOTask : public scheduler_task
 {
