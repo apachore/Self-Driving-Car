@@ -123,19 +123,19 @@ bool gpsTask::run(void *p)
                     current_gps_data.latitude *= -1;
                 if (*GPS_parsed_data[5] == 'W')
                     current_gps_data.longitude *= -1;
-                printf("Latitude: %f\n",current_gps_data.latitude);
-                printf("Longitude: %f\n",current_gps_data.longitude);
+//                printf("Latitude: %f\n",current_gps_data.latitude);
+//                printf("Longitude: %f\n",current_gps_data.longitude);
                 //if (North_South_Hemisphere == 'S')
                 //    current_gps_data.latitude *=-1;
                 //if (East_West_Hemisphere == 'W')
                 //    current_gps_data.longitude *=-1;
 
 
-                //if (!xQueueSend(gps_data_q, &current_gps_data, 0))
-                //{
-                //// unexpected led
-                //   LOG_ERROR("Error in Writing current GPS data to queue\n");
-                //}
+                if (!xQueueSend(gps_data_q, &current_gps_data, 0))
+                {
+                // unexpected led
+                   LOG_ERROR("Error in Writing current GPS data to queue\n");
+                }
 
 //            }
 //            else

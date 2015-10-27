@@ -29,6 +29,7 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include "io.hpp"
 #include "periodic_callback.h"
 
@@ -57,9 +58,11 @@ void period_10Hz(void)
     }
     else if (xQueueReceive(gps_data_q, &current_gps_data, 0))
     {
-
+        LE.toggle(2);
+        printf("Latitude: %f\n",current_gps_data.latitude);
+        printf("Longitude: %f\n",current_gps_data.longitude);
     }
-    LE.toggle(2);
+
 }
 
 void period_100Hz(void)

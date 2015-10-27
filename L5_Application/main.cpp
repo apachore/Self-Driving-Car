@@ -27,6 +27,8 @@
 #include "examples/examples.hpp"
 
 #include "gps.hpp"
+#include "source/can_base_communication.hpp"
+#include "source/can_transmission_reception.h"
 
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
@@ -44,6 +46,8 @@
  */
 int main(void)
 {
+    CANTransmissionReception canMessageBus;
+    canMessageBus.CANInitialization();
     /**
      * A few basic tasks for this bare-bone system :
      *      1.  Terminal task provides gateway to interact with the board through UART terminal.
@@ -56,11 +60,13 @@ int main(void)
      */
     scheduler_add_task(new terminalTask(PRIORITY_HIGH));
 
+#if 0
     /* Consumes very little CPU, but need highest priority to handle mesh network ACKs */
     scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
+#endif
 
     /* Change "#if 0" to "#if 1" to run period tasks; @see period_callbacks.cpp */
-    #if 0
+    #if 1
     scheduler_add_task(new periodicSchedulerTask());
     #endif
 
