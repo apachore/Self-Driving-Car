@@ -27,7 +27,7 @@
  * For example, the 1000Hz take slot runs periodically every 1ms, and whatever you
  * do must be completed within 1ms.  Running over the time slot will reset the system.
  */
-
+#include <stdio.h>
 #include <stdint.h>
 #include "io.hpp"
 #include "periodic_callback.h"
@@ -48,6 +48,7 @@ void period_1Hz(void)
 void period_10Hz(void)
 {
 	/*Calling the Motor control */
+    printf("in periodic : before Motor control\n");
 	Motor_PWM_control();
 
 	LE.toggle(2);

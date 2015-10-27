@@ -29,6 +29,7 @@
 #include "lpc_pwm.hpp"
 #include "Motor.hpp"
 #include "can.h"
+#include "MOTOR_CAN_HEADER.hpp"
 
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
@@ -62,7 +63,7 @@ int main(void)
 //    scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
 
     /* Change "#if 0" to "#if 1" to run period tasks; @see period_callbacks.cpp */
-    #if 1
+    #if 0
     scheduler_add_task(new periodicSchedulerTask());
     #endif
 
@@ -132,9 +133,16 @@ int main(void)
 //        CAN_reset_bus(can1);
 
 //        CAN Receive task for Motor. Will be modified/merged to include IO also
+    #if 0
         scheduler_add_task(new Motor_CAN_RX(PRIORITY_HIGH));
+    #endif
 
-	#if 0
+#if 0
+    scheduler_add_task(new canTransmitReceiver(PRIORITY_HIGH));
+#endif
+
+
+	#if 1
         scheduler_add_task(new MotorTask(PRIORITY_MEDIUM));
 	#endif
 

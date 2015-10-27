@@ -11,6 +11,7 @@
 #include "scheduler_task.hpp"
 #include "lpc_pwm.hpp"
 #include "utilities.h"
+#include "can.h"
 
 
 void Motor_PWM_control();
@@ -23,7 +24,6 @@ void Data_Over_Run();
 class Motor_CAN_RX : public scheduler_task
 {
     public:
-	q_can_rx;
 	Motor_CAN_RX(uint8_t priority):
 scheduler_task("MotorTask", 512*4, priority)
 {
@@ -39,8 +39,8 @@ scheduler_task("MotorTask", 512*4, priority)
     {
 
     		      can_msg_t rx_msg;
-    		      rx_msg.frame_fields.is_29bit = 1;
-    		      rx_msg.frame_fields.data_len = 8;
+//    		      rx_msg.frame_fields.is_29bit = 1;
+//    		      rx_msg.frame_fields.data_len = 8;
 
     		      if(CAN_rx(can1, &rx_msg, 1000))
     		      {
@@ -89,66 +89,76 @@ scheduler_task("MotorTask", 512*4, priority)
 }
     bool run(void *p)
     {
-
+        static int count = 0;
         PWM pwm2(PWM::pwm2, 100); /* set pw2 for dc motor */
         PWM pwm1(PWM::pwm1, 100); /* set pw1 for servo motor */
+        if(count == 0)
+        {
+
+
         pwm2.set(15);  /* initialization pulse for dc motor */
         pwm1.set(15);  /* initialization pulse for servo motor*/
+        count++;
+        }
+
+        else
+        {
 
         while(1)
             {
-                pwm2.set(15);
-                delay_ms(500);
+//                pwm2.set(15);
+//                delay_ms(50);
 
-                pwm2.set(15.5);
-                delay_ms(1000);
+//                pwm2.set(15.5);
+//                delay_ms(1000);
+//
+//                pwm2.set(16);
+//                delay_ms(1500);
+//
+//                pwm2.set(16.5);
+//                delay_ms(1500);
 
-                pwm2.set(16);
-                delay_ms(1500);
+                pwm2.set(18);
+                delay_ms(50);
 
-                pwm2.set(16.5);
-                delay_ms(1500);
-
-                pwm2.set(16);
-                delay_ms(1500);
-
-                pwm2.set(15.5);
-                delay_ms(1000);
-
-                pwm2.set(15);
-                delay_ms(1000);
-
-                delay_ms(2000);
-
-
-
-                pwm2.set(14.8);
-                delay_ms(28);
-
-                pwm2.set(15); /*Correction for Forward to Reverse transition*/
-                delay_ms(28);
-
-                pwm2.set(14.5);
-                delay_ms(1000);
-
-                pwm2.set(14);
-                delay_ms(1500);
-
-                pwm2.set(13.5);
-                delay_ms(1500);
-
-                pwm2.set(14);
-                delay_ms(1500);
-
-                pwm2.set(14.5);
-                delay_ms(1000);
-
-                pwm2.set(14.8);
-                delay_ms(500);
-
-                delay_ms(500);
+//                pwm2.set(15.5);
+//                delay_ms(1000);
+//
+//                pwm2.set(15);
+//                delay_ms(1000);
+//
+//                delay_ms(2000);
+//
+//
+//printf("in Motor test task\n");
+//                pwm2.set(14.8);
+//                delay_ms(28);
+//
+//                pwm2.set(15); /*Correction for Forward to Reverse transition*/
+//                delay_ms(28);
+//
+//                pwm2.set(14.5);
+//                delay_ms(1000);
+//
+//                pwm2.set(14);
+//                delay_ms(1500);
+//
+//                pwm2.set(13.5);
+//                delay_ms(1500);
+//
+//                pwm2.set(14);
+//                delay_ms(1500);
+//
+//                pwm2.set(14.5);
+//                delay_ms(1000);
+//
+//                pwm2.set(14.8);
+//                delay_ms(500);
+//
+//                delay_ms(500);
 
             }
+        }
         return true;
 
     }
