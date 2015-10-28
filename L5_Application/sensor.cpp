@@ -7,30 +7,32 @@
 +=============================================================================================
  */
 #include "tasks.hpp"
-#include "examples/examples.hpp"
 #include "shared_handles.h"
 #include "scheduler_task.hpp"
 //RC
 #include "sensor.hpp"
 #include "eint.h"
-#include "GPIO.hpp"
+//#include "GPIO.hpp"
 #include "LED.hpp"
 #include "lpc_timers.h"
 #include "utilities.h"
 #include "lpc_pwm.hpp"
 #include "adc0.h"
 #include "scheduler_task.hpp"
+#include "can.h"
+#include "can_Tx_Rx.hpp"
 
 volatile int sensor_start_time = 0,sensor1_echo_width = 0, distance1 = 0, sum1 = 0, avg1 = 0,count=1;
 volatile int sensor2_start_time = 0,sensor2_echo_width = 0, distance2 = 0, sum2 = 0, avg2 = 0;
 volatile int sensor3_start_time = 0,sensor3_echo_width = 0, distance3 = 0, sum3 = 0, avg3 = 0;
 int reading = 0,sum4 = 0, avg4= 0,pin_number;
-#define mydel 250000
+#define mydel 500
 
 void sensor_trig(int pin)
 {
 
       LPC_GPIO2->FIOPIN &= ~(1 << pin);
+      delay_us(2);
       LPC_GPIO2->FIOPIN |= (1 << pin);
       delay_us(10);
       LPC_GPIO2->FIOPIN &= ~(1 << pin);
@@ -39,7 +41,14 @@ void sensor_trig(int pin)
 
 void Back_IR_read()
 {
+    static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
     reading = adc0_get_reading(4);
+    reading = (4800*2.54)/(reading-20);
+    pin_number =0;
+            if(!xQueueSend(sensor_data_q,&pin_number, 0))
+            {
+                LE.on(4);//         puts("Failed to send item to queue");
+            }
 
 }
 void sensor1_fall_edge()
@@ -47,13 +56,10 @@ void sensor1_fall_edge()
         static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
         sensor1_echo_width = lpc_timer_get_value(lpc_timer0)-sensor_start_time;
         distance1 =  (sensor1_echo_width* 0.017) - 7;
-        //sensor_trig(2);
-        LE.on(1);
-        LE.off(3);
         pin_number =2;
         if(!xQueueSend(sensor_data_q,&pin_number, 0))
         {
-            LE.toggle(4);//   puts("Failed to send item to queue");
+            LE.on(1);//   puts("Failed to send item to queue");
          }
 }
 
@@ -62,13 +68,10 @@ void sensor2_fall_edge()
         static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
         sensor2_echo_width = lpc_timer_get_value(lpc_timer0)-sensor_start_time;
         distance2 =  (sensor2_echo_width* 0.017) - 7;
-        //sensor_trig(4);
-        LE.on(2);
-        LE.off(1);
         pin_number =4;
         if(!xQueueSend(sensor_data_q,&pin_number, 0))
         {
-            LE.toggle(4);//       puts("Failed to send item to queue");
+            LE.on(2);//       puts("Failed to send item to queue");
         }
 }
 void sensor3_fall_edge()
@@ -76,17 +79,60 @@ void sensor3_fall_edge()
         static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
         sensor3_echo_width = lpc_timer_get_value(lpc_timer0)-sensor_start_time;
         distance3 =  (sensor3_echo_width* 0.017) - 7;
-     //   sensor_trig(0);
-        LE.on(3);
-        LE.off(2);
-        pin_number =0;
+        pin_number =9;
         if(!xQueueSend(sensor_data_q,&pin_number, 0))
         {
-            LE.toggle(4);//         puts("Failed to send item to queue");
+            LE.on(3);//         puts("Failed to send item to queue");
         }
 }
 
+void can_Tx_Rx_init()
+{
+    CAN_init(can1, 100, 20, 20, NULL,NULL);
+            CAN_bypass_filter_accept_all_msgs();//Receive all can message
+            CAN_reset_bus(can1); //enble the can bus
+}
 
+void can_Tx_Sensor_data()
+{
+    can_msg_t msgTx;
+   msgTx.msg_id = TDirectionSensorData;
+   msgTx.frame_fields.is_29bit = 0;
+   msgTx.frame_fields.data_len = 8;       // Send 8 bytes
+   msgTx.data.bytes[1] =distance1;
+   msgTx.data.bytes[0] =distance2;
+   msgTx.data.bytes[2] =distance3;
+   msgTx.data.bytes[3] =reading;
+   if((! CAN_tx(can1, &msgTx, 0)))
+   {
+          printf("Sensor data not sent");
+   }
+}
+void can_Heart_beat()
+{
+    can_msg_t msgTx;
+   msgTx.msg_id = HeartbeatToMaster;
+   msgTx.frame_fields.is_29bit = 0;
+   msgTx.frame_fields.data_len = 1;       // Send bytes
+   msgTx.data.qword = 0x00;
+   if( !(CAN_tx(can1, &msgTx, 0)))
+   {
+       printf("Heart beat not sent");
+   }
+}
+
+void can_Boot_stat()
+{
+    can_msg_t msgTx;
+   msgTx.msg_id = TBootStatToMaster;
+   msgTx.frame_fields.is_29bit = 0;
+   msgTx.frame_fields.data_len = 1;       // Send bytes
+   msgTx.data.qword = 0x00;
+   if( !(CAN_tx(can1, &msgTx, 0)))
+   {
+       printf("Boot status not sent");
+   }
+}
 sensorTask::sensorTask(uint8_t priority) : scheduler_task("sensorTask", 4*512, priority),
 sensor_data_q(NULL)
         {
@@ -103,7 +149,8 @@ bool sensorTask::init(void)
         LPC_GPIO2->FIODIR |=(1<<0);
         LPC_GPIO2->FIODIR |=(1<<2);
         LPC_GPIO2->FIODIR |=(1<<4);
-        //create queue
+        can_Tx_Rx_init();
+       //create queue
         sensor_data_q = xQueueCreate(3, sizeof(int));
         addSharedObject("sensor_queue", sensor_data_q);
         sensor_trig(1);
@@ -115,33 +162,55 @@ bool sensorTask::run(void *p)
     if( xQueueReceive(sensor_data_q, &pin_number,1))
         {
         delay_us(mydel);
-        sensor_trig(pin_number);
+        if(pin_number !=9 )
+            {
+                sensor_trig(pin_number);
+            }
+        else
+            {
+                Back_IR_read();
+            }
         }
     else{
-        printf("trigger fail:%d\n",pin_number);
-    }
-   // if(distance1<100)
+            LE.setAll(4);
+        }
+    if(distance1>90)
     {
+
+            distance1 = 90;
+    }
+    if(distance2>90)
+    {
+            distance2 = 90;
+    }
+    if(distance3>90)
+    {
+            distance3 = 90;
+    }
+    if(reading>40)
+    {
+            reading = 40;
+    }
     printf("sensor1 distance = %d\n",distance1);
-    }
-    //if(distance2<100)
-    {
-        printf("sensor2 distance = %d\n",distance2);
-    }
-   // if(distance3<100)
-    {
-        printf("sensor3 distance = %d\n",distance3);
-    }
-               //        sum1= sum1+distance1;
+    printf("sensor2 distance = %d\n",distance2);
+    printf("sensor3 distance = %d\n",distance3);
+    printf("Back Sensor = %d\n",reading);
+    can_msg_t msgRx;
+    CAN_rx(can1,&msgRx, 10);      //Receive msg over CAN Bus
+
+    if(msgRx.msg_id == 0x610)
+               {
+                   can_Boot_stat();
+               }
+    can_Heart_beat();
+
+    can_Tx_Sensor_data();
+
+    //        sum1= sum1+distance1;
 //        sum2= sum2+distance2;
 //        sum3= sum3+distance3;
-                Back_IR_read();
-                reading = (6787 / (reading - 3)) - 4;
-               // reading= reading/2.54;
-               // if(reading>500)
-//                {
-//                printf("IR reading:%d\n",reading);
-//                }
+
+
 //        count++;
 //        if (count == 10)
 //            {avg1= sum1/10;
