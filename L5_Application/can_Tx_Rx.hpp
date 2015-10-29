@@ -14,7 +14,7 @@
 
 typedef enum
 {
-    HeartbeatToMaster     = 0x283, // Heart beat message to Master
+    THeartbeatToMaster     = 0x283, // Heart beat message to Master
     TBootStatToMaster     = 0x621, // Boot status to Master
     TDirectionSensorData  = 0x210, // Sensor data to IO and Master
     TBatteryStatus        = 0x420, // Battery status to IO and Master
@@ -24,6 +24,11 @@ typedef enum
     RKillMessage          = 0x020  // Kill Message
 }CANMessageIds;
 
+void can_Tx_Rx_init();
+void can_Boot_stat();
+void can_Heart_beat();
+
+void can_Tx_Sensor_data();
 //
 //class can_Tx_Rx
 //{

@@ -23,10 +23,10 @@
  *             @see L0_LowLevel/lpc_sys.h if you wish to override printf/scanf functions.
  *
  */
+
 #include "tasks.hpp"
 #include "examples/examples.hpp"
 #include "sensor.hpp"
-
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
  * for details.  There is a very simple example towards the beginning of this class's declaration.
@@ -43,8 +43,14 @@
  */
 int main(void)
 {
+    int flag_init =0;
+    if(flag_init ==0)
+    {
+        sensorTask_init();
+        flag_init =1;
+    }
 
-    /**
+     /**
      * A few basic tasks for this bare-bone system :
      *      1.  Terminal task provides gateway to interact with the board through UART terminal.
      *      2.  Remote task allows you to use remote control to interact with the board.
@@ -63,16 +69,16 @@ int main(void)
 
     /* Consumes very little CPU, but need highest priority to handle mesh network ACKs */
     scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
-
-    #if 1
-    scheduler_add_task(new sensorTask(PRIORITY_CRITICAL));
-    #endif
+//
+//    #if 1
+//    scheduler_add_task(new sensorTask(PRIORITY_CRITICAL));
+//    #endif
     /* Change "#if 0" t "#if 1" to runCAN msg task*/
     #if 0
     scheduler_add_task(new CANTask(PRIORITY_CRITICAL));
     #endif
     /* Change "#if 0" t "#if 1" to run period tasks; @see period_callbacks.cpp */
-    #if 0
+    #if 1
     scheduler_add_task(new periodicSchedulerTask());
     #endif
 

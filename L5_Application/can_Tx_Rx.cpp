@@ -7,6 +7,57 @@
 #include "tasks.hpp"
 #include "scheduler_task.hpp"
 #include "can_Tx_Rx.hpp"
+#include "sensor.hpp"
+
+
+extern int distance1, distance2, distance3,reading;
+void can_Tx_Rx_init()
+{
+    CAN_init(can1, 100, 20, 20, NULL,NULL);
+            CAN_bypass_filter_accept_all_msgs();//Receive all can message
+            CAN_reset_bus(can1); //enable the can bus
+}
+
+void can_Tx_Sensor_data()
+{
+    can_msg_t msgTx;
+   msgTx.msg_id = TDirectionSensorData;
+   msgTx.frame_fields.is_29bit = 0;
+   msgTx.frame_fields.data_len = 8;       // Send 8 bytes
+   msgTx.data.bytes[1] =distance1;
+   msgTx.data.bytes[0] =distance2;
+   msgTx.data.bytes[2] =distance3;
+   msgTx.data.bytes[3] =reading;
+   if((! CAN_tx(can1, &msgTx, 0)))
+   {
+        LE.toggle(1) ; //printf("Sensor data not sent");
+   }
+}
+void can_Heart_beat()
+{
+    can_msg_t msgTx;
+   msgTx.msg_id = THeartbeatToMaster;
+   msgTx.frame_fields.is_29bit = 0;
+   msgTx.frame_fields.data_len = 1;       // Send bytes
+   msgTx.data.qword = 0x00;
+   if( !(CAN_tx(can1, &msgTx, 0)))
+   {
+       LE.toggle(1) ;// printf("Heart beat not sent");
+   }
+}
+
+void can_Boot_stat()
+{
+    can_msg_t msgTx;
+   msgTx.msg_id = TBootStatToMaster;
+   msgTx.frame_fields.is_29bit = 0;
+   msgTx.frame_fields.data_len = 1;       // Send bytes
+   msgTx.data.qword = 0x00;
+   if( !(CAN_tx(can1, &msgTx, 0)))
+   {
+       LE.toggle(1) ;// printf("Boot status not sent");
+   }
+}
 
 //can_Tx_Rx::can_Tx_Rx(uint8_t priority) : scheduler_task("canTxTask", 4*512, priority),
 //canTxData_q(NULL)
