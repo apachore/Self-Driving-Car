@@ -15,7 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-    public final static String EXTRA_MESSAGE="com.example.akshay.myfirstapp.MESSAGE";
+    public final static String EXTRA_MESSAGE="minion.autodrive.MESSAGE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +102,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openCarConnect(){
-        Toast.makeText(this, "Car Connect button pressed", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Car Connect button pressed", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, BluetoothActivity.class);
+        startActivity(intent);
+
     }
 
     private void openDriveModes(View view){
