@@ -45,11 +45,7 @@
 int main(void)
 {
     //Setting up the CAN bus.
-    CANTransmissionReception canMessageBus;
-    canMessageBus.CANInitialization();
-
-/*    CANTransmissionReception
-    scheduler_add_task(new canReceiver(PRIORITY_HIGH));*/
+    CANInitialization();
 
     /**
      * A few basic tasks for this bare-bone system :
@@ -67,7 +63,7 @@ int main(void)
     scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
 
     /* Change "#if 0" to "#if 1" to run period tasks; @see period_callbacks.cpp */
-    #if 0
+    #if 1
     scheduler_add_task(new periodicSchedulerTask());
     #endif
 

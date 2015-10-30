@@ -80,10 +80,12 @@ const can_std_id_t canMessagesFilterList[] =
         CAN_gen_sid(can1, RRunAndPauseCommandFromAndroid), CAN_gen_sid(can1, RBatteryStatusFromSensor)
 };
 
+const can_std_grp_id_t groupList[] =
+{
+        {CAN_gen_sid(can1, RHeartbeatMessageFomMotor), CAN_gen_sid(can1, RHeartbeatFromSensor)},
+        {CAN_gen_sid(can1, RBootReplyFromMotor), CAN_gen_sid(can1, RBootReplyFromAndroid)}
+};
 
-const can_std_grp_id_t groupList[] = { {CAN_gen_sid(can1, RHeartbeatMessageFomMotor), CAN_gen_sid(can1, RHeartbeatFromSensor)},
-                                        {CAN_gen_sid(can1, RBootReplyFromMotor), CAN_gen_sid(can1, RBootReplyFromAndroid)}
-                                      };
 
 // Struct for Motor Data
 typedef struct

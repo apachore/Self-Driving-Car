@@ -12,57 +12,55 @@ implementation.
 */
 
 
-#include "MainMasterAlgorithm.cpp"
+#include "MainMasterAlgorithm.h"
 #include "can_communication_ids.h"
-#include "scheduler_task.hpp"
 #include "tasks.hpp"
 #include "io.hpp"
 #include "utilities.h"
+#include "can_transmission_reception.h"
 #include "can.h"
 #include "stdio.h"
 
 
- can_msg_t canmsg;
-
-void MotorDriveFromSensor(bool motorStraight, bool motorReverse, bool motorLeft, bool motorRight,uint8_t levelofspeed,uint8_t levelofdirection)
+/*
+ * The use of this function would be decided later. For now keeping this function and not removing.
+ */
+void MotorDriveFromSensor(bool motorStraight, bool motorReverse, bool motorLeft, bool motorRight, uint8_t levelofspeed, uint8_t levelofdirection)
 {
-    canmsg.msg_id=TMotorControlToMotor;
-     canmsg.frame_fields.is_29bit=0;
-     canmsg.frame_fields.data_len=4;
+    can_msg_t canMessage;
+    canMessage.msg_id = TMotorControlToMotor;
+    canMessage.frame_fields.is_29bit = 0;
+    canMessage.frame_fields.data_len = 4;
 
     if(motorStraight)
-      {
-        canmsg.data.bytes[0]=0x0;
-        canmsg.data.bytes[1]=0x0;
-        canmsg.data.bytes[2]=0x1;
-        canmsg.data.bytes[3]=levelofspeed;
+    {
+        canMessage.data.bytes[0]=0x0;
+        canMessage.data.bytes[1]=0x0;
+        canMessage.data.bytes[2]=0x1;
+        canMessage.data.bytes[3]=levelofspeed;
+    }
 
-      }
     if(motorReverse)
-          {
-           canmsg.data.bytes[0]=0x0;
-           canmsg.data.bytes[1]=0x0;
-           canmsg.data.bytes[2]=0x2;
-           canmsg.data.bytes[3]=levelofspeed;
+    {
+        canMessage.data.bytes[0]=0x0;
+        canMessage.data.bytes[1]=0x0;
+        canMessage.data.bytes[2]=0x2;
+        canMessage.data.bytes[3]=levelofspeed;
+    }
 
-          }
     if(motorLeft)
-       {
-        canmsg.data.bytes[0]=0x1;
-        canmsg.data.bytes[1]=levelofdirection;
-
-       }
+    {
+        canMessage.data.bytes[0]=0x1;
+        canMessage.data.bytes[1]=levelofdirection;
+    }
 
     if(motorRight)
-      {
-       canmsg.data.bytes[0]=0x2;
-       canmsg.data.bytes[1]=levelofdirection;
+    {
+        canMessage.data.bytes[0]=0x2;
+        canMessage.data.bytes[1]=levelofdirection;
+    }
 
-      }
-
-
-    CANTransmissionReception::CANTransmission(canmsg);
-
-
+    canMessage.msg_id = TMotorControlToMotor;
+    CANTransmission(canMessage);
 }
 

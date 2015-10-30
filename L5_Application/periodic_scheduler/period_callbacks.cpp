@@ -32,33 +32,37 @@
 #include "io.hpp"
 #include "periodic_callback.h"
 #include "source/can_transmission_reception.h"
-
+#include "source/can_communication_ids.h"
+#include "can.h"
+#include "source/MainMasterAlgorithm.h"
 
 
 /// This is the stack size used for each of the period tasks
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 
 
-
 void period_1Hz(void)
 {
-    LE.toggle(1);
+
 }
 
 void period_10Hz(void)
 {
-    LE.toggle(2);
+    //Recover from CAN Bus off at 10Hz
+    if (CAN_is_bus_off(can1))
+    {
+        CAN_reset_bus(can1);
+    }
 }
 
 void period_100Hz(void)
 {
-    LE.toggle(3);
+    can_msg_t canMessage;
+    CANReception(canMessage);
+    DecisionAlgorithm(canMessage);
 }
 
 void period_1000Hz(void)
 {
-    CANTransmissionReception canReceivedMessage;
-    canReceivedMessage.CANReception();
 
-    LE.toggle(4);
 }

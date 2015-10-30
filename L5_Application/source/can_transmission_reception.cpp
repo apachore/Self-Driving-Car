@@ -16,70 +16,65 @@
 #include "queue.h"
 #include "file_logger.h"
 
+QueueHandle_t receivedDataQueue;
 
-CANTransmissionReception::CANTransmissionReception()
-{
-    if(receivedDataQueue == NULL)
-        receivedDataQueue = xQueueCreate(50, sizeof(can_msg_t));
-}
+// XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
+// XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
 
 void BusOffCb(uint32_t param)
 {
-    printf("BusOffCb : Error");
-    CAN_reset_bus(can1);
+    LOG_ERROR("CAN Bus off");
+    /*CAN_reset_bus(can1);*/
 }
 
 void DataOverCanBuffer(uint32_t param)
 {
-    printf("DataOverCanBuffer : Error");
-    CAN_reset_bus(can1);
+    LOG_ERROR("Data over CAN buffer");
+    /*CAN_reset_bus(can1);*/
 }
 
-void CANTransmissionReception::CANInitialization()
+void CANInitialization()
 {
-    CAN_init(can1, 100, 20, 20, *BusOffCb, *DataOverCanBuffer);
+    CAN_init(can1, 500, 500, 500, *BusOffCb, *DataOverCanBuffer);
+    CAN_reset_bus(can1);
 
     // Create a queue which would send the data to wherever received
-    QueueHandle_t receivedDataQueue = xQueueCreate(50, sizeof(can_msg_t));
+    receivedDataQueue = xQueueCreate(10, sizeof(can_msg_t));
     scheduler_task::addSharedObject("receivedMessagesQueue", receivedDataQueue);
 
-    /* HACK:
-        addSharedObject("gps_data", &gps_data);*/
-
     //Any message with 0xffff would disable the message
-    CAN_setup_filter(canMessagesFilterList , 7, groupList, 2, NULL, 0, NULL, 0);
+    CAN_bypass_filter_accept_all_msgs();
+    //CAN_setup_filter(canMessagesFilterList, 7, groupList, 2, NULL, 0, NULL, 0);
 }
 
-void CANTransmissionReception::CANTransmission(/*can_msg_t canMessageBlock*/)
+void CANTransmission(can_msg_t canMessageBlock)
 {
-/*    canMessageBlock.msg_id = 0x2;
-    canMessageBlock.frame_fields.data_len = 8;
-    canMessageBlock.data.qword = 0x222;*/
-
-    bool flag = CAN_tx(can1,&canMessageTransmittedBlock, 0);
-}
-
-void CANTransmissionReception::CANReception()
-{
-    if(CAN_rx(can1, &canMessageReceivedBlock, 0))
+    if(CAN_tx(can1, &canMessageBlock, 0))
     {
-        LE.on(1);
-        if (!xQueueSend(receivedDataQueue, &canMessageReceivedBlock, 0))
-        {
-            // unexpected led
-            LE.on(2);
-            LOG_ERROR("This should never happen");
-        }
-        printf("%x\n", canMessageReceivedBlock.msg_id);
+        LE.toggle(3);
     }
     else
     {
-        LE.on(3);
+        //LOG_ERROR("Message %d not transmitted", canMessageBlock.msg_id);
+        LE.toggle(4);
     }
-
 }
 
-void CANTransmissionReception::CANSetupFilter()
+void CANReception(can_msg_t canMessageBlock)
 {
+    // XXX: Cannot block from the periodic function
+    if(CAN_rx(can1, &canMessageBlock, 0))
+    {
+        LE.toggle(1);
+        if (!xQueueSend(receivedDataQueue, &canMessageBlock, 0))
+        {
+            //LOG_ERROR("receivedDataQueue: Queue is not sending data.");
+        }
+    }
+    else
+    {
+        LE.toggle(2);
+        /*LOG_ERROR*/("CAN not receiving messages");
+    }
 
 }
