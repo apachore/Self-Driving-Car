@@ -27,7 +27,7 @@
 #include "examples/examples.hpp"
 
 #include "gps.hpp"
-#include "source/can_base_communication.hpp"
+
 #include "source/can_transmission_reception.h"
 
 /**
@@ -46,8 +46,9 @@
  */
 int main(void)
 {
-    CANTransmissionReception canMessageBus;
-    canMessageBus.CANInitialization();
+    //CANTransmissionReception canMessageBus;
+    //canMessageBus.
+    CANInitialization();
     /**
      * A few basic tasks for this bare-bone system :
      *      1.  Terminal task provides gateway to interact with the board through UART terminal.

@@ -33,11 +33,10 @@ typedef enum
 
     //In Geo Module this message can be looked to transmit coordinates to Android
     //As soon as this message is received transmit coordinates(Initial Logic on 25 Oct 15)
-    RBootStatusFromMaster             = 0x630,            // To all
-
+    RBootStatusFromMaster             = 0x630,
     // Messages between Master and Geo
     // From Geo
-    TFinalDistanceAndNextCheckpoint   = 0x250,          // distance to go.
+    TFinalDistanceAndNextCheckpoint   = 0x250,
     THeadingAndBearingToMaster        = 0x260,
 
     // Messages between Geo and Android
@@ -51,6 +50,9 @@ typedef enum
 
     // Other Messages
     RKillMessageFromMaster            = 0x020,
+
+    //DIsabled Filter ID - Used to make Standard ID count even
+    FilterDisabledCANmsgID               = 0xFFFF
 } CANMessageIds;
 
 
@@ -62,7 +64,7 @@ const can_std_id_t canMessagesFilterList[] =
 {
         CAN_gen_sid(can1, RBootRequestFromMaster) , CAN_gen_sid(can1,RBootStatusFromMaster),
         CAN_gen_sid(can1, RCheckpointsFromAndroid), CAN_gen_sid(can1, RTotalTravelDistanceFromAndroid),
-        CAN_gen_sid(can1, RKillMessageFromMaster)
+        CAN_gen_sid(can1, RKillMessageFromMaster),CAN_gen_sid(can1,FilterDisabledCANmsgID)
 };
 
 

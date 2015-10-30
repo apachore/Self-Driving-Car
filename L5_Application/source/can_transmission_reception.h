@@ -13,10 +13,10 @@
 #include "can.h"
 #include "io.hpp"
 
-class CANTransmissionReception
-{
-    public:
-        CANTransmissionReception(/*can_msg_t canMessageBlock*/);
+//class CANTransmissionReception
+//{
+//    public:
+//        CANTransmissionReception(/*can_msg_t canMessageBlock*/);
 
         /* This function would initialize the CAN bus. It will setup the filter that is to be used for receiving
            messages. */
@@ -27,13 +27,13 @@ class CANTransmissionReception
         // This function would be needed later in development
         void CANSetupFilter();
 
-    private:
-        can_msg_t canMessageReceivedBlock;
-        can_msg_t canMessageTransmittedBlock;
-        QueueHandle_t receivedDataQueue;
+//    private:
+        //extern can_msg_t canMessageReceivedBlock;
+        //extern can_msg_t canMessageTransmittedBlock;
+        //extern QueueHandle_t CAN_received_Data_Queue;
         /*bool firstTime;*/
         // Define a Filter List;
-};
+//};
 
 
 

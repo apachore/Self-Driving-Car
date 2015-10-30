@@ -34,6 +34,7 @@
 #include "periodic_callback.h"
 
 #include "gps.hpp"
+#include "source/can_transmission_reception.h"
 
 /// This is the stack size used for each of the period tasks
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
@@ -47,6 +48,7 @@ void period_1Hz(void)
 
 void period_10Hz(void)
 {
+    //gpsTask gpsTaskInstance()
     QueueHandle_t gps_data_q = scheduler_task::getSharedObject("gps_queue");
     coordinates current_gps_data;
 
@@ -56,20 +58,32 @@ void period_10Hz(void)
     }
     else if (xQueueReceive(gps_data_q, &current_gps_data, 0))
     {
-        LE.toggle(2);
+        //LE.toggle(2);
         printf("Latitude: %f\n",current_gps_data.latitude);
         printf("Longitude: %f\n",current_gps_data.longitude);
 
     }
+    can_msg_t canMessageReceivedBlock;
+    QueueHandle_t CAN_received_Data_Queue = scheduler_task::getSharedObject("CANreceivedMessagesQueue");
+    if (xQueueReceive(CAN_received_Data_Queue, &canMessageReceivedBlock, 0))
+        printf("%x\n", canMessageReceivedBlock.msg_id);
+
+
+
+    //Check if CAN bus is off... if yes then reset CAN bus
+    if(CAN_is_bus_off(can1))
+        CAN_reset_bus(can1);
 
 }
 
 void period_100Hz(void)
 {
-    LE.toggle(3);
+    CANReception(/*can_msg_t canMessageBlock*/);
+    //LE.toggle(4);
 }
 
 void period_1000Hz(void)
 {
-    LE.toggle(4);
+    //LE.toggle(4);
+//    void CANReception(/*can_msg_t canMessageBlock*/);
 }

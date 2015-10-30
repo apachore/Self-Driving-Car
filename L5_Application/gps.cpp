@@ -87,7 +87,7 @@ bool gpsTask::run(void *p)
     if( gps_uart.gets(GPS_Data_Receive, sizeof(GPS_Data_Receive),1000))
     {
         //printf("Inside Receive IF Statement\n");
-        printf("Data from GPS: %s\n",GPS_Data_Receive);
+        //printf("Data from GPS: %s\n",GPS_Data_Receive);
 
         uint8_t i=0;
         coordinates degrees;
@@ -122,7 +122,7 @@ bool gpsTask::run(void *p)
             // Condition inserted before setting up module to Only GGA messages
             //if (!strcmp(GPS_parsed_data[0],"$GPGGA"))
             //{
-                LE.toggle(1);
+                //LE.toggle(1);
                 //printf("GPS data:%s\n",GPS_Data_Receive);
                 //printf("GPS Message type: %s\n",GPS_parsed_data[0]);
 
