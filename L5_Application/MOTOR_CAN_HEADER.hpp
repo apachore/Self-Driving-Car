@@ -13,21 +13,21 @@
 
 /*CAN Task receiver class.
 This task will receive all the CAN messages from the CAN bus.*/
-class canTransmitReceiver : public scheduler_task
+/*class canTransmitReceiver : public scheduler_task
 {
     public:
-        canTransmitReceiver(uint8_t priority);
+        canTransmitReceiver(uint8_t priority);*/
         bool run(void *p);
-        bool init(void);
+        bool CANInitialization();
         void Receiver_message(void);
         void Receive_init();
 //        void BusOffCb(uint32_t param);
 //        void DataOverCanBuffer(uint32_t param);
 
-    private:
+/*    private:
         QueueHandle_t Master_Motor_q;
 
-};
+};*/
 
 
 #endif /* L5_APPLICATION_MOTOR_CAN_HEADER_HPP_ */

@@ -32,6 +32,7 @@
 #include "io.hpp"
 #include "periodic_callback.h"
 #include "Motor.hpp"
+#include "MOTOR_CAN_HEADER.hpp"
 
 
 
@@ -42,24 +43,25 @@ const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 
 void period_1Hz(void)
 {
-    LE.toggle(1);
+    //LE.toggle(1);
 }
 
 void period_10Hz(void)
 {
 	/*Calling the Motor control */
+    Receiver_message();
     printf("in periodic : before Motor control\n");
-	Motor_PWM_control();
-
-	LE.toggle(2);
+	//LE.toggle(2);
 }
 
 void period_100Hz(void)
 {
-    LE.toggle(3);
+
+    //Motor_PWM_control();
+    //LE.toggle(3);
 }
 
 void period_1000Hz(void)
 {
-    LE.toggle(4);
+    //LE.toggle(4);
 }

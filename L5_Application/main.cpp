@@ -62,8 +62,9 @@ int main(void)
     /* Consumes very little CPU, but need highest priority to handle mesh network ACKs */
 //    scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
 
+    CANInitialization();
     /* Change "#if 0" to "#if 1" to run period tasks; @see period_callbacks.cpp */
-    #if 0
+    #if 1
     scheduler_add_task(new periodicSchedulerTask());
     #endif
 
@@ -137,7 +138,7 @@ int main(void)
         scheduler_add_task(new Motor_CAN_RX(PRIORITY_HIGH));
     #endif
 
-#if 1
+#if 0
     scheduler_add_task(new canTransmitReceiver(PRIORITY_HIGH));
 #endif
 

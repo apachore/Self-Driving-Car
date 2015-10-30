@@ -12,6 +12,7 @@
 #include "lpc_pwm.hpp"
 #include "utilities.h"
 #include "can.h"
+#include "io.hpp"
 
 
 void Motor_PWM_control();
@@ -46,7 +47,6 @@ scheduler_task("MotorTask", 512*4, priority)
     		      {
     		      if(rx_msg.msg_id == 0x220)
     		      {
-
     		    	    if(! xQueueSend(Master_Motor_q, &rx_msg.data, 0)) {
     		    	    	printf("Queue Full\n");
 
@@ -80,88 +80,106 @@ scheduler_task("MotorTask", 512*4, priority)
 class MotorTask : public scheduler_task
 {
     public:
-    MotorTask(uint8_t priority):
-scheduler_task("MotorTask", 512*4, priority)
+    MotorTask(uint8_t priority):scheduler_task("MotorTask", 512*4, priority), pwm2(PWM::pwm2, 100), pwm1(PWM::pwm1, 100)
 {
-
+        setRunDuration(100);
 /*Nothing to init*/
 
 }
+    bool init(void)
+    {
+
+      return true;
+    }
     bool run(void *p)
     {
+        int servo_control,servo_level,DC_control,DC_level;
+        float speed_factor, speed_offset, PWM_value_DC,PWM_value_servo;
         static int count = 0;
-        PWM pwm2(PWM::pwm2, 100); /* set pw2 for dc motor */
-        PWM pwm1(PWM::pwm1, 100); /* set pw1 for servo motor */
-        if(count == 0)
+        static QueueHandle_t receivedDataQueue = scheduler_task::getSharedObject("MasterMotorQueue");
+        can_msg_t canReceivedData;
+
+        if (xQueueReceive(receivedDataQueue, &canReceivedData, 0))
         {
+            LE.toggle(4);
+//            for(i=0;i<4;i++)
+//            {
+            printf("\nReceived data : %x,%x\n", canReceivedData.data.bytes[1],canReceivedData.data.bytes[3]);
+//            }
+            servo_control = canReceivedData.data.bytes[0];
+            servo_level = canReceivedData.data.bytes[1];
+            DC_control = canReceivedData.data.bytes[2];
+            DC_level = canReceivedData.data.bytes[3];
 
+            if(count==0)
+            {
+                pwm2.set(15);
+                count++;
+            }
 
-        pwm2.set(15);  /* initialization pulse for dc motor */
-        pwm1.set(15);  /* initialization pulse for servo motor*/
-        count++;
+            else
+            {
+                switch(canReceivedData.data.bytes[2])
+                {
+                    case 0:
+                        speed_offset = 0;
+                        speed_factor =0;
+                        break;
+                    case 1:
+                        speed_offset = 1;
+                        speed_factor = 0.5;
+                        break;
+                    case 2:
+                        speed_offset = -1;
+                        speed_factor = -0.5;
+                        break;
+                    default:
+                        speed_offset = 0;
+                        speed_factor =0;
+                        printf("undefined value for PWM level\n");
+                        break;
+                }
+                PWM_value_DC = 15.0 + (speed_factor)*(DC_level) +speed_offset;/*1.0;*/
+            }
+
+            switch(canReceivedData.data.bytes[0])
+            {
+                case 0:
+                    speed_offset = 0;
+                    speed_factor =0;
+                    break;
+                case 1:
+                    speed_offset = 1;
+                    speed_factor = 0.5;
+                    break;
+                case 2:
+                    speed_offset = -1;
+                    speed_factor = -0.5;
+                    break;
+                default:
+                    speed_offset = 0;
+                    speed_factor =0;
+                    printf("undefined value for PWM level\n");
+                    break;
+            }
+            PWM_value_servo = 15.0 + (speed_factor)*(servo_level) +speed_offset; /*2.0;*/
+
+            pwm2.set(PWM_value_DC);
+            pwm1.set(PWM_value_servo);
+            //printf("DC value: %f\nServo value: %f\n",PWM_value_DC,PWM_value_servo);
+            //printf("Queue Received\n");
         }
-
         else
         {
-
-        while(1)
-            {
-//                pwm2.set(15);
-//                delay_ms(50);
-
-//                pwm2.set(15.5);
-//                delay_ms(1000);
-//
-//                pwm2.set(16);
-//                delay_ms(1500);
-//
-//                pwm2.set(16.5);
-//                delay_ms(1500);
-
-                pwm2.set(18);
-                delay_ms(50);
-
-//                pwm2.set(15.5);
-//                delay_ms(1000);
-//
-//                pwm2.set(15);
-//                delay_ms(1000);
-//
-//                delay_ms(2000);
-//
-//
-//printf("in Motor test task\n");
-//                pwm2.set(14.8);
-//                delay_ms(28);
-//
-//                pwm2.set(15); /*Correction for Forward to Reverse transition*/
-//                delay_ms(28);
-//
-//                pwm2.set(14.5);
-//                delay_ms(1000);
-//
-//                pwm2.set(14);
-//                delay_ms(1500);
-//
-//                pwm2.set(13.5);
-//                delay_ms(1500);
-//
-//                pwm2.set(14);
-//                delay_ms(1500);
-//
-//                pwm2.set(14.5);
-//                delay_ms(1000);
-//
-//                pwm2.set(14.8);
-//                delay_ms(500);
-//
-//                delay_ms(500);
-
-            }
+            LE.toggle(1);
         }
         return true;
-
     }
+
+    private:
+    //QueueHandle_t receivedDataQueue;
+    PWM pwm2; /* set pw2 for dc motor */
+    PWM pwm1; /* set pw2 for dc motor */
 };
 
 
