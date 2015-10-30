@@ -62,9 +62,12 @@ typedef enum
  */
 const can_std_id_t canMessagesFilterList[] =
 {
-        CAN_gen_sid(can1, RBootRequestFromMaster) , CAN_gen_sid(can1,RBootStatusFromMaster),
-        CAN_gen_sid(can1, RCheckpointsFromAndroid), CAN_gen_sid(can1, RTotalTravelDistanceFromAndroid),
-        CAN_gen_sid(can1, RKillMessageFromMaster),CAN_gen_sid(can1,FilterDisabledCANmsgID)
+        CAN_gen_sid(can1, RKillMessageFromMaster),         /*MSG ID = 0x020*/
+        CAN_gen_sid(can1, RTotalTravelDistanceFromAndroid),/*MSG ID = 0x230*/
+        CAN_gen_sid(can1, RCheckpointsFromAndroid),        /*MSG ID = 0x240*/
+        CAN_gen_sid(can1, RBootRequestFromMaster),         /*MSG ID = 0x610*/
+        CAN_gen_sid(can1, RBootStatusFromMaster),          /*MSG ID = 0x630*/
+        CAN_gen_sid(can1, FilterDisabledCANmsgID)          /*MSG ID = 0xFFFF*/
 };
 
 
