@@ -90,7 +90,7 @@ void Transmitter_message()
 
 
 
-void /*canTransmitReceiver::*/Receiver_message()
+void Receiver_message()
 {
     can_msg_t rx_msg;
 
@@ -99,15 +99,18 @@ void /*canTransmitReceiver::*/Receiver_message()
 
         if(rx_msg.msg_id == 0x220)
         {
-            printf("%x", rx_msg.msg_id);
+            //printf("%x", rx_msg.msg_id);
             //printf("%x", rx_msg.data.bytes[1]);
             if(!xQueueSend(Master_Motor_q, &rx_msg, 0))
             {
                 LE.toggle(2);
-              printf("Queue Full\n");
+              //printf("Queue Full\n");
             }
             else
-                printf("CAN Sent");
+            {
+
+            }
+                //printf("CAN Sent");
         }
         else
         {
@@ -116,34 +119,18 @@ void /*canTransmitReceiver::*/Receiver_message()
     }
     else
     {
-        printf("No message received\n");
+        //printf("No message received\n");
     }
-    printf("This is Motor RX function\n");
+    //printf("This is Motor RX function\n");
 }
 
 
-
-/*canTransmitReceiver::canTransmitReceiver(uint8_t priority):scheduler_task("canTransmitReceive",2000,priority)
+bool CANInitialization()
 {
-
-    Master_Motor_q = xQueueCreate(1,sizeof(can_data_t));
-    addSharedObject("Motor_Control_q",Master_Motor_q);
-
-}*/
-
-bool /*canTransmitReceiver::*/CANInitialization()
-{
-    //Transmit_init();
     Receive_init();
     return true;
 }
 
-bool /*canTransmitReceiver::*/run(void* p)
-{
-    Transmitter_message();
-    Receiver_message();
 
-    return true;
-}
 
 

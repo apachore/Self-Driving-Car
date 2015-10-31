@@ -49,7 +49,6 @@ void period_1Hz(void)
 void period_10Hz(void)
 {
 	/*Calling the Motor control */
-    Receiver_message();
     printf("in periodic : before Motor control\n");
 	//LE.toggle(2);
 }
@@ -57,7 +56,7 @@ void period_10Hz(void)
 void period_100Hz(void)
 {
 
-    //Motor_PWM_control();
+    Receiver_message();
     //LE.toggle(3);
 }
 

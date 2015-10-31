@@ -13,6 +13,7 @@
 #include "utilities.h"
 #include "can.h"
 #include "io.hpp"
+#include "can_comms.hpp"
 
 
 void Motor_PWM_control();
@@ -22,59 +23,7 @@ void Bus_Off();
 void Data_Over_Run();
 
 
-class Motor_CAN_RX : public scheduler_task
-{
-    public:
-	Motor_CAN_RX(uint8_t priority):
-scheduler_task("MotorTask", 512*4, priority)
-{
 
-		        CAN_init(can1,500,100,100,NULL,NULL);
-		        CAN_bypass_filter_accept_all_msgs();
-		        CAN_reset_bus(can1);
-		        Master_Motor_q = xQueueCreate(1,sizeof(can_data_t));
-		        addSharedObject("Motor_Control_q",Master_Motor_q);
-
-}
-    bool run(void *p)
-    {
-
-    		      can_msg_t rx_msg;
-//    		      rx_msg.frame_fields.is_29bit = 1;
-//    		      rx_msg.frame_fields.data_len = 8;
-
-    		      if(CAN_rx(can1, &rx_msg, 1000))
-    		      {
-    		      if(rx_msg.msg_id == 0x220)
-    		      {
-    		    	    if(! xQueueSend(Master_Motor_q, &rx_msg.data, 0)) {
-    		    	    	printf("Queue Full\n");
-
-    		    	    }
-
-
-    		      }
-    		      else
-    		      {
-                     /*Will be updated with other IO related messages */
-    		      }
-    		      }
-    		      else
-    			  {
-    		    	  printf("No message received\n");
-    			  }
-
-    		printf("This is Motor RX function\n");
-
-
-        return true;
-
-    }
-
-    private:
-    QueueHandle_t Master_Motor_q;
-
-};
 
 
 class MotorTask : public scheduler_task
@@ -82,7 +31,7 @@ class MotorTask : public scheduler_task
     public:
     MotorTask(uint8_t priority):scheduler_task("MotorTask", 512*4, priority), pwm2(PWM::pwm2, 100), pwm1(PWM::pwm1, 100)
 {
-        setRunDuration(100);
+        setRunDuration(1);
 /*Nothing to init*/
 
 }
@@ -94,7 +43,7 @@ class MotorTask : public scheduler_task
     bool run(void *p)
     {
         int servo_control,servo_level,DC_control,DC_level;
-        float speed_factor, speed_offset, PWM_value_DC,PWM_value_servo;
+        float speed_factor, speed_offset, PWM_value_DC,PWM_value_servo,neutral=15.0;
         static int count = 0;
         static QueueHandle_t receivedDataQueue = scheduler_task::getSharedObject("MasterMotorQueue");
         can_msg_t canReceivedData;
@@ -102,10 +51,6 @@ class MotorTask : public scheduler_task
         if (xQueueReceive(receivedDataQueue, &canReceivedData, 0))
         {
             LE.toggle(4);
-//            for(i=0;i<4;i++)
-//            {
-            printf("\nReceived data : %x,%x\n", canReceivedData.data.bytes[1],canReceivedData.data.bytes[3]);
-//            }
             servo_control = canReceivedData.data.bytes[0];
             servo_level = canReceivedData.data.bytes[1];
             DC_control = canReceivedData.data.bytes[2];
@@ -166,20 +111,20 @@ class MotorTask : public scheduler_task
 
             pwm2.set(PWM_value_DC);
             pwm1.set(PWM_value_servo);
-            //printf("DC value: %f\nServo value: %f\n",PWM_value_DC,PWM_value_servo);
-            //printf("Queue Received\n");
         }
         else
         {
+            pwm2.set(neutral);
+            pwm1.set(neutral);
             LE.toggle(1);
         }
         return true;
     }
 
     private:
-    //QueueHandle_t receivedDataQueue;
     PWM pwm2; /* set pw2 for dc motor */
     PWM pwm1; /* set pw2 for dc motor */
+
 };
 
 
