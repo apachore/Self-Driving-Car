@@ -26,7 +26,7 @@
 int front_start_time =0,back_start_time=0, right_start_time=0,left_start_time=0;
 int front_echo_width = 0,back_echo_width = 0, right_echo_width = 0,left_echo_width = 0;
 int front=0, back = 0, right =0, left = 0,start =0;
-int start_flag, pin_number;
+int start_flag, pin_number,count;
 void sensor_trig_MB1010(int pin)
 {
     LPC_GPIO2->FIOPIN &= ~(1 << pin);
@@ -73,7 +73,7 @@ void back_fall_edge()
     pin_number = 4;
     if (!xQueueSend(sensor_data_q, &pin_number, 0))
     {
-        LE.on(2); //         puts("Failed to send item to queue");
+        LE.on(1); //         puts("Failed to send item to queue");
     }
 }
 void left_fall_edge()
@@ -84,7 +84,7 @@ void left_fall_edge()
     pin_number = 6;
     if (!xQueueSend(sensor_data_q, &pin_number, 0))
     {
-        LE.on(3); //         puts("Failed to send item to queue");
+        LE.on(1); //         puts("Failed to send item to queue");
     }
 }
 void right_fall_edge()
@@ -95,14 +95,14 @@ void right_fall_edge()
     pin_number = 0;
     if (!xQueueSend(sensor_data_q, &pin_number, 0))
     {
-        LE.on(4); //       puts("Failed to send item to queue");
+        LE.on(1); //       puts("Failed to send item to queue");
     }
 }
 
 
 bool sensor_init(void)
 {
-    QueueHandle_t sensor_data_q = xQueueCreate(15, sizeof(int));
+    QueueHandle_t sensor_data_q = xQueueCreate(50, sizeof(int));
     scheduler_task::addSharedObject("sensor_queue", sensor_data_q);
     const uint8_t port2_1 = 1, port2_3 = 3, port2_5 = 5,port2_7 = 7;
 
@@ -140,6 +140,7 @@ bool sensor_compute()
            // LE.on(4); //         puts("Failed to send item to queue");
         }
     }
+
     if (xQueueReceive(sensor_data_q, &pin_number, 0))
     {
         if(pin_number ==2)
@@ -151,6 +152,10 @@ bool sensor_compute()
         sensor_trig_MB1010(pin_number);
         }
     }
+    else
+    {
+        sensor_trig_MB1010(0);// LE.on(2);
+    }
   //printf("%d\n",front);
 
     //can_msg_t msgRx;
@@ -161,7 +166,8 @@ bool sensor_compute()
 //        can_Boot_stat();
 //    }
 //    can_Heart_beat();
-    if((front<300)||(left<300)||(right<300)||(back<150))
+    printf("%d %d %d\n",front, right,left);
+    if((front<200)||(left<200)||(right<200)||(back<100))
     {
         can_Tx_Sensor_data();
     }
