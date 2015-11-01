@@ -10,10 +10,10 @@
 #include "sensor.hpp"
 
 
-extern int distance1, distance2, distance3,reading;
+extern int front, back, right, left;
 void can_Tx_Rx_init()
 {
-    CAN_init(can1, 100, 20, 20, NULL,NULL);
+    CAN_init(can1, 100, 100, 100, NULL,NULL);
             CAN_bypass_filter_accept_all_msgs();//Receive all can message
             CAN_reset_bus(can1); //enable the can bus
 }
@@ -23,14 +23,22 @@ void can_Tx_Sensor_data()
     can_msg_t msgTx;
    msgTx.msg_id = TDirectionSensorData;
    msgTx.frame_fields.is_29bit = 0;
-   msgTx.frame_fields.data_len = 8;       // Send 8 bytes
-   msgTx.data.bytes[1] =distance1;
-   msgTx.data.bytes[0] =distance2;
-   msgTx.data.bytes[2] =distance3;
-   msgTx.data.bytes[3] =reading;
-   if((! CAN_tx(can1, &msgTx, 0)))
+   msgTx.frame_fields.data_len = 4;       // Send 8 bytes
+//   sensor_data_t *p (sensor_data_t*)&msgTx.data.bytes[0];
+//   sensor_data_t *p (sensor_data_t*)&msgTx.data.bytes[1];
+//   sensor_data_t *p (sensor_data_t*)&msgTx.data.bytes[2];
+//   sensor_data_t *p (sensor_data_t*)&msgTx.data.bytes[3];
+   msgTx.data.bytes[0] =front;
+   msgTx.data.bytes[1] =left;
+   msgTx.data.bytes[2] =right;
+   msgTx.data.bytes[3] =back;
+   if(!CAN_tx(can1, &msgTx, 0))
    {
         LE.toggle(1) ; //printf("Sensor data not sent");
+   }
+   else
+   {
+       LE.toggle(4);
    }
 }
 void can_Heart_beat()

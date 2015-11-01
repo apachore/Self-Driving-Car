@@ -46,12 +46,13 @@ void period_1Hz(void)
 
 void period_10Hz(void)
 {
-    //LE.on(1);//sensorTask_run();
+    sensor_compute();  //LE.on(1);//sensorTask_run();
 }
 
 void period_100Hz(void)
 {
-    sensorTask_run(); //LE.toggle(3);
+   // sensor_compute();
+    //LE.toggle(3);
 }
 
 void period_1000Hz(void)

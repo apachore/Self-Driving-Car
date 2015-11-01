@@ -46,7 +46,7 @@ int main(void)
     int flag_init =0;
     if(flag_init ==0)
     {
-        sensorTask_init();
+        sensor_init();
         flag_init =1;
     }
 
