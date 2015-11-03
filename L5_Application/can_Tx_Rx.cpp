@@ -67,12 +67,4 @@ void can_Boot_stat()
    }
 }
 
-//can_Tx_Rx::can_Tx_Rx(uint8_t priority) : scheduler_task("canTxTask", 4*512, priority),
-//canTxData_q(NULL)
-//        {
-//        }
-//bool can_Tx_Rx::CANInit()
-//{
-//
-//   }
 

@@ -73,7 +73,7 @@ void back_fall_edge()
     pin_number = 4;
     if (!xQueueSend(sensor_data_q, &pin_number, 0))
     {
-        LE.on(1); //         puts("Failed to send item to queue");
+        LE.on(2); //         puts("Failed to send item to queue");
     }
 }
 void left_fall_edge()
@@ -84,7 +84,7 @@ void left_fall_edge()
     pin_number = 6;
     if (!xQueueSend(sensor_data_q, &pin_number, 0))
     {
-        LE.on(1); //         puts("Failed to send item to queue");
+        LE.on(3); //         puts("Failed to send item to queue");
     }
 }
 void right_fall_edge()
@@ -95,7 +95,7 @@ void right_fall_edge()
     pin_number = 0;
     if (!xQueueSend(sensor_data_q, &pin_number, 0))
     {
-        LE.on(1); //       puts("Failed to send item to queue");
+        LE.toggle(1); //       puts("Failed to send item to queue");
     }
 }
 
@@ -141,7 +141,7 @@ bool sensor_compute()
         }
     }
 
-    if (xQueueReceive(sensor_data_q, &pin_number, 0))
+    if (xQueueReceive(sensor_data_q, &pin_number, 10))
     {
         if(pin_number ==2)
         {
@@ -154,7 +154,14 @@ bool sensor_compute()
     }
     else
     {
-        sensor_trig_MB1010(0);// LE.on(2);
+        if(pin_number ==2)
+                {
+                    sensor_trig_HCSR04(pin_number);
+                }
+                else
+                {
+                sensor_trig_MB1010(pin_number);
+                }
     }
   //printf("%d\n",front);
 
@@ -166,7 +173,8 @@ bool sensor_compute()
 //        can_Boot_stat();
 //    }
 //    can_Heart_beat();
-    printf("%d %d %d\n",front, right,left);
+//    printf("%d %d %d\n",front, right,left);
+    printf("%d\n",front);
     if((front<200)||(left<200)||(right<200)||(back<100))
     {
         can_Tx_Sensor_data();
@@ -174,7 +182,7 @@ bool sensor_compute()
   if(CAN_is_bus_off(can1))
   {
       CAN_reset_bus(can1);
-      LE.toggle(2);
+    //  LE.toggle(2);
   }
     return true;
 }
