@@ -18,6 +18,19 @@ typedef struct
         float longitude;
 }coordinates;
 
+typedef struct
+{
+        uint16_t TotalDistance;
+        uint16_t ChekpointDistance;
+        uint8_t TurnAngle;
+        uint8_t Direction;
+}Sendmessage;
+
+uint16_t calculateBearing(coordinates,coordinates);
+uint16_t calculateCheckpointDistance(coordinates,coordinates);
+float ToRadians(float);
+float ToDegrees(float);
+
 class gpsTask : public scheduler_task
 {
 
@@ -26,10 +39,6 @@ class gpsTask : public scheduler_task
         gpsTask(uint8_t priority);
         bool init(void);
         //void parse_gps_string(void);
-        uint16_t calculateBearing(coordinates,coordinates);
-        uint16_t calculateDistance(coordinates,coordinates);
-        float ToRadians(float);
-        float ToDegrees(float);
         bool run(void *p);
 
     private:

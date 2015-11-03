@@ -36,12 +36,12 @@ typedef enum
     RBootStatusFromMaster             = 0x630,
     // Messages between Master and Geo
     // From Geo
-    TFinalDistanceAndNextCheckpoint   = 0x250,
+    TFinalAndNextCheckpointDistance   = 0x250,
     THeadingAndBearingToMaster        = 0x260,
 
     // Messages between Geo and Android
     // From Android
-    TSourceCoordinatesToAndroid       = 0x650,
+    TSourceCoordinates                = 0x650,
     RCheckpointsFromAndroid           = 0x240,
     RTotalTravelDistanceFromAndroid   = 0x230,
 

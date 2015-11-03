@@ -20,7 +20,7 @@
 
 //Commented printf statements are added for testing purpose
 
-#define Radius 6371000 //meters
+#define Radius 20902231.64 //feet
 #define gps_uart_BaudRate 38400
 
 gpsTask::gpsTask(uint8_t priority) : scheduler_task("gps", 4*512, priority),
@@ -51,17 +51,17 @@ bool gpsTask::init(void)
 ////        }
 //}
 
-float gpsTask::ToRadians(float InDegrees)
+float /*gpsTask::*/ToRadians(float InDegrees)
 {
     return(InDegrees*(M_PI/180));
 }
 
-float gpsTask::ToDegrees(float InRadians)
+float /*gpsTask::*/ToDegrees(float InRadians)
 {
     return(InRadians*(180/M_PI));
 }
 
-uint16_t gpsTask::calculateBearing(coordinates point_2,coordinates point_1)
+uint16_t /*gpsTask::*/calculateBearing(coordinates point_2,coordinates point_1)
 {
     float x,y;
     uint16_t bearing;
@@ -71,7 +71,7 @@ uint16_t gpsTask::calculateBearing(coordinates point_2,coordinates point_1)
     return(bearing);
 
 }
-uint16_t gpsTask::calculateDistance(coordinates point_2,coordinates point_1)
+uint16_t /*gpsTask::*/calculateCheckpointDistance(coordinates point_2,coordinates point_1)
 {
     float a,c;
     uint16_t distance;

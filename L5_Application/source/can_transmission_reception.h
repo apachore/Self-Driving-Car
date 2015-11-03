@@ -12,6 +12,9 @@
 #include "stdlib.h"
 #include "can.h"
 #include "io.hpp"
+#include "gps.hpp"
+
+//bool BootReplySent; //Used as indication of system startup flag
 
 //class CANTransmissionReception
 //{
@@ -26,6 +29,10 @@
 
         // This function would be needed later in development
         void CANSetupFilter();
+
+        void CANMessageProcessing();
+        void CANTransmitBootReply();
+        void CANTransmitCoordinates(coordinates);
 
 //    private:
         //extern can_msg_t canMessageReceivedBlock;
