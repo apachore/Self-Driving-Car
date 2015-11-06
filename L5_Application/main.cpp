@@ -23,11 +23,11 @@
  * 			@see L0_LowLevel/lpc_sys.h if you wish to override printf/scanf functions.
  *
  */
+#include <motor.hpp>
 #include "tasks.hpp"
 #include "examples/examples.hpp"
 #include "utilities.h"
 #include "lpc_pwm.hpp"
-#include "Motor.hpp"
 #include "can.h"
 #include "MOTOR_CAN_HEADER.hpp"
 

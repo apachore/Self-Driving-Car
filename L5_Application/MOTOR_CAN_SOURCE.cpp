@@ -32,7 +32,7 @@ void Transmit_init()
 
 void Receive_init()
 {
-    CAN_init(can1, 500, 100, 100, *BusOffCb,*DataOverCanBuffer);/*Initializing CAN bus*/
+    CAN_init(can1, 100, 100, 100, *BusOffCb,*DataOverCanBuffer);/*Initializing CAN bus*/
     CAN_reset_bus(can1);          /*Reset CAN bus*/
 
     const can_std_id_t slist[]  { CAN_gen_sid(can1, 0x220), CAN_gen_sid(can1, 0x610),   // 2 entries
@@ -99,6 +99,7 @@ void Receiver_message()
 
         if(rx_msg.msg_id == 0x220)
         {
+            LE.toggle(3);
             //printf("%x", rx_msg.msg_id);
             //printf("%x", rx_msg.data.bytes[1]);
             if(!xQueueSend(Master_Motor_q, &rx_msg, 0))

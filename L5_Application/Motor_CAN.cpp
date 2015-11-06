@@ -4,8 +4,8 @@
  *  Created on: 25-Oct-2015
  *      Author: Su
  */
+#include <motor.hpp>
 #include <stdio.h>
-#include "Motor.hpp"
 #include "can.h"
 
 
