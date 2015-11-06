@@ -25,6 +25,8 @@
  */
 #include "tasks.hpp"
 #include "examples/examples.hpp"
+#include "compass/compass.hpp"
+
 
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
@@ -40,9 +42,13 @@
  *        In either case, you should avoid using this bus or interfacing to external components because
  *        there is no semaphore configured for this bus and it should be used exclusively by nordic wireless.
  */
+I2C2& i2c = I2C2::getInstance();
 int main(void)
 {
-    /**
+
+    compassInitialisation();
+
+	/**
      * A few basic tasks for this bare-bone system :
      *      1.  Terminal task provides gateway to interact with the board through UART terminal.
      *      2.  Remote task allows you to use remote control to interact with the board.
@@ -58,7 +64,7 @@ int main(void)
     scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
 
     /* Change "#if 0" to "#if 1" to run period tasks; @see period_callbacks.cpp */
-    #if 0
+    #if 1
     scheduler_add_task(new periodicSchedulerTask());
     #endif
 
@@ -73,6 +79,10 @@ int main(void)
      * This is a the board demonstration task that can be used to test the board.
      * This also shows you how to send a wireless packets to other boards.
      */
+    #if 0
+    scheduler_add_task(new compass_task());
+    #endif
+
     #if 0
         scheduler_add_task(new example_io_demo());
     #endif

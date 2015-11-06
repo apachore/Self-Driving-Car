@@ -13,32 +13,102 @@
 
 #define STACKMEMORYSIZE 5000
 #define I2CBAUDRATE 100
+#define COMPASSADDRESS 0x1E
 #define DEVICEWRITEADDRESS 0x3C
 #define DEVICEREADADDRESS  0x3D
 #define HALFCIRCLE 180
 #define RADIANTODEGREE  HALFCIRCLE/M_PI
 
-enum compass_RegAddress
+ struct compassRawValue
+ {
+     int16_t x_axis;
+     int16_t y_axis;
+     int16_t z_axis;
+ }raw;
+
+ struct compassScaledValue
+ {
+      float x_axis;
+      float y_axis;
+ }scaled;
+
+/* List of register address*/
+/*8 bit onchip registers for reading from and writing to HMC5883L compass module*/
+enum compassRegAddress
 {
     ConfigRegA = 0x00,
     ConfigRegB = 0x01,
     ModeReg    = 0x02,
     MSBReg_x   = 0x03,
     LSBReg_x   = 0x04,
+	MSBReg_z   = 0x05,
+	LSBReg_z   = 0x06,
     MSBReg_y   = 0x07,
     LSBReg_y   = 0x08,
 };
 
-enum register_ConfigValues
+/*Option for number of samples averaged per measurement output for setting Configuration Register A*/
+enum compassNoOfSamplesAvg
 {
-    /* These values are tentative. The values are taken as default  settings
-     specified by the HMC8335L and is subject to change as the project demands */
-    ConfigRegA_value = 0x10,
-    ConfigRegB_value = 0x00,
-    ModeReg_value    = 0x00,
+	One = 0x00,
+    Two = 0x20,
+    Four = 0x40,
+    Eight = 0x60,
+};
+
+/*Option for selectable output rates in continuous measurement mode for setting Configuration Register A*/
+enum compassDataOutputRate
+{
+	_point75Hz = 0x00,
+	_1point5Hz = 0x01,
+	_3Hz = 0x02,
+	_7point5Hz = 0x03,
+	_15Hz = 0x04,
+	_30Hz = 0x05,
+	_75Hz = 0x06,
+	_reserved = 0x07,
+};
+
+/*Option for Measurement Mode configuration for setting Configuration Register A*/
+enum compassMeasurementMode
+{
+	Normal = 0x00,
+	Positive = 0x01,
+	Negative = 0x02,
+};
+
+enum compassGainSettings
+{
+   Gain_1370 = 0x00,
+   Gain_1090 = 0x01,
+   Gain_820 = 0x02,
+   Gain_660 = 0x03,
+   Gain_440 = 0x04,
+   Gain_390 = 0x05,
+   Gain_330 = 0x06,
+   Gain_230 = 0x07,
+};
+
+/*Option for operating modes of the compass module for setting Mode Register */
+enum compassOperatingModes
+{
+	Continuous = 0x00,
+	Single = 0x01,
+	Idle = 0x02,
 };
 
 
+enum compassRegConfigValues
+{
+    /* These values are tentative. The values are taken as default  settings
+     specified by the HMC8335L and is subject to change as the project demands */
+    ConfigRegA_value = (Eight|_75Hz|Normal),
+    ConfigRegB_value = Gain_1370,
+    ModeReg_value    = Continuous,
+};
+
+/*Corresponds to gain of 1370. Inverse of 1370 is 0.73 milli gauss per count*/
+float resolution = 0.73;
 const float MagneticDeclination = 0.2361;
 
 #endif /* L5_APPLICATION_COMPASS_INF_HPP_ */

@@ -11,9 +11,21 @@
 #include "scheduler_task.hpp"
 #include "i2c2.hpp"
 
+//I2C2& i2c = I2C2::getInstance();
 
 
-class compass_task : public scheduler_task
+
+
+
+
+void compassInitialisation();
+void compassWriteReg();
+bool compassReadReg();
+int compassHeading();
+void compassCalibration();
+int masterTurnAngle(int sourceAngle, int destinationAngle);
+
+/*class compass_task : public scheduler_ask
 {
     public:
     compass_task();
@@ -38,7 +50,7 @@ class compass_task : public scheduler_task
     float Heading_radians;
     float Heading_degrees;
     float resolution;
-};
+};*/
 
 
 
