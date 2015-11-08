@@ -111,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
     private void openDriveModes(View view){
         Intent intent = new Intent(this, DriveModesActivity.class);
         startActivity(intent);
+        System.out.println("Inside drive modes");
     }
 
     private void openHelp(){

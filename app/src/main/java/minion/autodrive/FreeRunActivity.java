@@ -80,7 +80,7 @@ public class FreeRunActivity extends AppCompatActivity {
     }
 
     private void openMonitor() {
-        Toast.makeText(this, "Monitor", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Monitor Car", Toast.LENGTH_SHORT).show();
     }
 
 }
