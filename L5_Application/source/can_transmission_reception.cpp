@@ -11,7 +11,7 @@
 #include "string.h"
 #include "can.h"
 #include "io.hpp"
-#include "can_communication_ids.h"
+
 #include "source/can_transmission_reception.h"
 #include "scheduler_task.hpp"
 #include "queue.h"
@@ -21,6 +21,7 @@
 
 bool BootReplySent; //Used as indication of system startup flag
 uint8_t Received_Checkpoint_Count;
+uint16_t Total_Distance_To_Travel;
 
 //CANTransmissionReception::
 //CANTransmissionReception()
@@ -53,46 +54,76 @@ void CANInitialization()
     CAN_reset_bus(can1);
 
     // Create a queue which would send the data to wherever received
-    QueueHandle_t CAN_received_Data_Queue = xQueueCreate(50, sizeof(can_msg_t));
-    scheduler_task::addSharedObject("CANreceivedMessagesQueue", CAN_received_Data_Queue);
+//    QueueHandle_t CAN_received_Data_Queue = xQueueCreate(50, sizeof(can_msg_t));
+//    scheduler_task::addSharedObject("CANreceivedMessagesQueue", CAN_received_Data_Queue);
 
     QueueHandle_t Checkpoint_Queue = xQueueCreate(100, sizeof(coordinates));
     scheduler_task::addSharedObject("CheckpointsQueue", Checkpoint_Queue);
 }
 
 //void CANTransmissionReception::
-void CANTransmission(can_msg_t canMessageTransmittedBlock)
+bool CANTransmit(uint32_t msg_id , uint8_t * data, uint32_t len)
 {
-/*    canMessageBlock.msg_id = 0x2;
-    canMessageBlock.frame_fields.data_len = 8;
-    canMessageBlock.data.qword = 0x222;*/
+    can_msg_t tx;
+    uint8_t i;
+    tx.msg_id = msg_id;
+    tx.frame_fields.is_29bit = 0;
+    tx.frame_fields.data_len = len;
+    for (i=0;i<len;i++)
+    {
+        tx.data.bytes[i] = data[i];
+    }
 
-    bool flag = CAN_tx(can1,&canMessageTransmittedBlock, 0);
+    //printf("Transmitted ID: %x\n",tx.msg_id);
+    return(CAN_tx(can1,&tx,0));
 }
 
 //void CANTransmissionReception::
 void CANReception()
 {
-    //LE.toggle(4);
+    //LE.toggle(2);
     can_msg_t canMessageReceivedBlock;
-    QueueHandle_t CAN_received_Data_Queue = scheduler_task::getSharedObject("CANreceivedMessagesQueue");
+    QueueHandle_t Checkpoint_Queue = scheduler_task::getSharedObject("CheckpointsQueue");
+
     if(CAN_rx(can1, &canMessageReceivedBlock, 0))
     {
-        //LE.toggle(1);
-        LE.toggle(3);
-        if (!xQueueSend(CAN_received_Data_Queue, &canMessageReceivedBlock, 0))
-        {
-            // unexpected led
-            //LE.toggle(2);
-            LOG_ERROR("This should never happen");
-        }
-//        printf("%x\n", canMessageReceivedBlock.msg_id);
-    }
-    else
-    {
-        //LE.toggle(3);
-    }
 
+        switch (canMessageReceivedBlock.msg_id)
+        {
+            case RKillMessageFromMaster:
+                break;
+
+            case RCheckpointsFromAndroid:
+                coordinates checkpoint;
+                memcpy(&checkpoint,&canMessageReceivedBlock.data,sizeof(coordinates));
+                if (!xQueueSend(Checkpoint_Queue, &checkpoint, 0))
+                {
+                    // unexpected led
+                    LE.toggle(2);//if checkpoints are not sent on queue LED will toggle
+                    LOG_ERROR("Checkpoint Queue Send Failed");
+                }
+                else
+                {
+                    Received_Checkpoint_Count++;
+                    LE.toggle(3);
+                }
+                break;
+
+            case RBootRequestFromMaster:
+                if (BootReplySent == 0)
+                {
+                    uint32_t bootData = BootReplyData;
+                    CANTransmit(TBootReplyToMaster,(uint8_t*)&bootData,sizeof(bootData));
+                    //CANTransmitBootReply();
+                    BootReplySent = 1;
+                }
+                break;
+
+            case RTotalTravelDistanceFromAndroid:
+                memcpy(&Total_Distance_To_Travel,&canMessageReceivedBlock.data,sizeof(Total_Distance_To_Travel));
+                break;
+        }
+    }
 }
 
 //void CANTransmissionReception::
@@ -101,6 +132,8 @@ void CANReception()
 //
 //}
 
+
+/* Function Created before implementing common Can transmit Function
 void CANTransmitBootReply()
 {
     can_msg_t BootInfo;
@@ -112,49 +145,57 @@ void CANTransmitBootReply()
     //LE.toggle(4); //To test if boot reply is sent only once
     CANTransmission(BootInfo);
 
-}
+}*/
 
-void CANMessageProcessing()
-{
-    can_msg_t canMessageReceivedBlock;
-    QueueHandle_t CAN_received_Data_Queue = scheduler_task::getSharedObject("CANreceivedMessagesQueue");
+//void CANMessageProcessing()
+//{
+//    can_msg_t canMessageReceivedBlock;
+//    QueueHandle_t CAN_received_Data_Queue = scheduler_task::getSharedObject("CANreceivedMessagesQueue");
+//
+//
+//
+//    if (xQueueReceive(CAN_received_Data_Queue, &canMessageReceivedBlock, 0))
+//        //        printf("%x\n", canMessageReceivedBlock.msg_id);
+//    {
+//
+//
+//        if (canMessageReceivedBlock.msg_id == RKillMessageFromMaster)
+//        {
+//            //Probably reboot the system
+//        }
+//        else if (canMessageReceivedBlock.msg_id == RCheckpointsFromAndroid)
+//        {
+//            //LE.toggle(1); // To test is this condition is executed and checkpoints are sent on Queue
+//            coordinates checkpoint;
+//            checkpoint.latitude = *((float*)&canMessageReceivedBlock.data.dwords[0]);
+//            checkpoint.longitude = *((float*)&canMessageReceivedBlock.data.dwords[1]);
+//            if (!xQueueSend(Checkpoint_Queue, &checkpoint, 0))
+//            {
+//                // unexpected led
+//                LE.toggle(2);//if checkpoints are not sent on queue LED will toggle
+//                LOG_ERROR("Checkpoint Queue Send Failed");
+//            }
+//            else
+//            {
+//                Received_Checkpoint_Count++;
+//                LE.toggle(3);
+//            }
+//        }
+//        else if ((canMessageReceivedBlock.msg_id == RBootRequestFromMaster) && (BootReplySent == 0))
+//        {
+//            uint32_t bootData = BootReplyData;
+//            CANTransmit(TBootReplyToMaster,(uint8_t*)&bootData,sizeof(bootData));
+//            //CANTransmitBootReply();
+//            BootReplySent = 1;
+//        }
+//        else if (canMessageReceivedBlock.msg_id == RTotalTravelDistanceFromAndroid)
+//        {
+//
+//        }
+//    }
+//}
 
-    QueueHandle_t Checkpoint_Queue = scheduler_task::getSharedObject("CheckpointsQueue");
-
-    if (xQueueReceive(CAN_received_Data_Queue, &canMessageReceivedBlock, 0))
-        //        printf("%x\n", canMessageReceivedBlock.msg_id);
-    {
-        if (canMessageReceivedBlock.msg_id == RKillMessageFromMaster)
-        {
-            //Probably reboot the system
-        }
-        else if (canMessageReceivedBlock.msg_id == RCheckpointsFromAndroid)
-        {
-            //LE.toggle(1); // To test is this condition is executed and checkpoints are sent on Queue
-            coordinates checkpoint;
-            checkpoint.latitude = *((float*)&canMessageReceivedBlock.data.dwords[0]);
-            checkpoint.longitude = *((float*)&canMessageReceivedBlock.data.dwords[1]);
-            if (!xQueueSend(Checkpoint_Queue, &checkpoint, 0))
-            {
-                // unexpected led
-                LE.toggle(2);//if checkpoints are not sent on queue LED will toggle
-                LOG_ERROR("Checkpoint Queue Send Failed");
-            }
-            else
-                Received_Checkpoint_Count++;
-        }
-        else if ((canMessageReceivedBlock.msg_id == RBootRequestFromMaster) && (BootReplySent == 0))
-        {
-            CANTransmitBootReply();
-            BootReplySent = 1;
-        }
-        else if (canMessageReceivedBlock.msg_id == RTotalTravelDistanceFromAndroid)
-        {
-
-        }
-    }
-}
-
+/*/* Function Created before implementing common Can transmit Function
 void CANTransmitCoordinates(coordinates current_coordinates)
 {
     can_msg_t Transmit_Coordinates;
@@ -170,8 +211,8 @@ void CANTransmitCoordinates(coordinates current_coordinates)
 
     LE.toggle(1);// To test if coordinates are sent over CAN
 
-    printf("Sent Latitude: %x\n",Transmit_Coordinates.data.dwords[0]);
-    printf("Sent Longitude: %x\n",Transmit_Coordinates.data.dwords[1]);
+    //printf("Sent Latitude: %x\n",Transmit_Coordinates.data.dwords[0]);
+    //printf("Sent Longitude: %x\n",Transmit_Coordinates.data.dwords[1]);
     CANTransmission(Transmit_Coordinates);
-}
+}*/
 

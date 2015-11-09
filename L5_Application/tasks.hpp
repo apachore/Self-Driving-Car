@@ -130,6 +130,8 @@ class periodicSchedulerTask : public scheduler_task
 {
     public:
         periodicSchedulerTask(void);
+        bool init(void);
+        bool regTlm(void);
         bool run(void *p);
 
     private:

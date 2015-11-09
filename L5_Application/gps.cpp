@@ -18,10 +18,14 @@
 #include "file_logger.h"
 #include "io.hpp"
 
-//Commented printf statements are added for testing purpose
+#include "source/can_transmission_reception.h"
 
-#define Radius 20902231.64 //feet
-#define gps_uart_BaudRate 38400
+
+extern bool BootReplySent;
+extern uint8_t Received_Checkpoint_Count;
+extern uint16_t Total_Distance_To_Travel;
+
+//Commented printf statements are added for testing purpose
 
 gpsTask::gpsTask(uint8_t priority) : scheduler_task("gps", 4*512, priority),
 gps_uart(Uart3::getInstance()),
@@ -145,19 +149,12 @@ bool gpsTask::run(void *p)
                 current_gps_data.latitude = degrees.latitude + (((gps_readings.latitude-degrees.latitude)*100)/60);
                 current_gps_data.longitude = degrees.longitude + (((gps_readings.longitude-degrees.longitude)*100)/60);
 
-                //current_gps_data.latitude = atof(GPS_parsed_data[2]);
-                //current_gps_data.longitude = atof(GPS_parsed_data[4]);
                 if (*GPS_parsed_data[3] == 'S')
                     current_gps_data.latitude *= -1;
                 if (*GPS_parsed_data[5] == 'W')
                     current_gps_data.longitude *= -1;
 //                printf("Latitude: %f\n",current_gps_data.latitude);
 //                printf("Longitude: %f\n",current_gps_data.longitude);
-                //if (North_South_Hemisphere == 'S')
-                //    current_gps_data.latitude *=-1;
-                //if (East_West_Hemisphere == 'W')
-                //    current_gps_data.longitude *=-1;
-
 
                 if (!xQueueSend(gps_data_q, &current_gps_data, 0))
                 {
@@ -177,4 +174,74 @@ bool gpsTask::run(void *p)
 //        // error case
     }
     return true;
+}
+
+
+void GPS_Calculations()
+{
+    //gpsTask gpsTaskInstance()
+    QueueHandle_t gps_data_q = scheduler_task::getSharedObject("gps_queue");
+    QueueHandle_t Checkpoint_q = scheduler_task::getSharedObject("CheckpointQueue");
+    coordinates current_gps_data;
+    uint16_t current_cp_distance,Total_Distance_Remaining;
+    uint16_t current_bearing;
+    static uint16_t Previous_Checkpoint_Distnace,Total_Checkpoint_Distnace,Total_Distance_Traveled;
+    static coordinates checkpoint;
+    static bool Fetch_Checkpoint = 1;
+    static bool first_after_cp_fetch;
+    static uint8_t Fetched_Checkpoint_Count;
+
+    if (NULL == gps_data_q)
+    {
+        //light_up_the_project_blown_led();
+    }
+    else if (xQueueReceive(gps_data_q, &current_gps_data, 0))
+    {
+        if (BootReplySent)
+        {
+            //LE.toggle(2);
+            //printf("Latitude: %f\n",current_gps_data.latitude);
+            //printf("Longitude: %f\n",current_gps_data.longitude);
+
+            CANTransmit(TSourceCoordinates,(uint8_t*)&current_gps_data,sizeof(coordinates));
+
+            if (Fetch_Checkpoint)
+            {
+                if (xQueueReceive(Checkpoint_q, &checkpoint, 0))
+                {
+                    Fetch_Checkpoint = 0;
+                    Fetched_Checkpoint_Count++;
+                    first_after_cp_fetch = 1;
+                }
+            }
+
+            if(!Fetch_Checkpoint)
+            {
+                current_cp_distance = calculateCheckpointDistance(checkpoint,current_gps_data);
+                //printf("Current Checkpoint Distance: %d feet\n",current_cp_distance);
+                current_bearing = calculateBearing(checkpoint,current_gps_data);
+                //printf("Bearing: %d degrees\n",current_bearing);
+                if (first_after_cp_fetch)
+                {
+                    Previous_Checkpoint_Distnace = current_cp_distance;
+                    Total_Checkpoint_Distnace = current_cp_distance;
+                    first_after_cp_fetch = 0;
+                }
+
+                //printf("Total Checkpoint Distance: %d feet\n",previous_checkpoint_distnace);
+                //printf("Fetched_Checkpoint_Count: %d\n",Fetched_Checkpoint_Count);
+                //printf("Received Checkpoint Count: %d\n",Received_Checkpoint_Count);
+                if (current_cp_distance <  0.25*Total_Checkpoint_Distnace)
+                    Fetch_Checkpoint = 1;
+
+                Total_Distance_Traveled = Total_Distance_Traveled + (Previous_Checkpoint_Distnace - current_cp_distance);
+                Previous_Checkpoint_Distnace = current_cp_distance;
+                Total_Distance_Remaining = Total_Distance_To_Travel - Total_Distance_Traveled;
+
+                //                calc_Turning_Angle();
+                //                Transmitdata();
+
+            }
+        }
+    }
 }

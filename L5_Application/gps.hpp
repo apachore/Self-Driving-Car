@@ -12,6 +12,10 @@
 #include "scheduler_task.hpp"
 #include "Uart3.hpp"
 
+#define Radius 20902231.64 //feet
+#define gps_uart_BaudRate 38400
+#define BootReplyData 20151107
+
 typedef struct
 {
         float latitude;
@@ -30,6 +34,8 @@ uint16_t calculateBearing(coordinates,coordinates);
 uint16_t calculateCheckpointDistance(coordinates,coordinates);
 float ToRadians(float);
 float ToDegrees(float);
+
+void GPS_Calculations();
 
 class gpsTask : public scheduler_task
 {
