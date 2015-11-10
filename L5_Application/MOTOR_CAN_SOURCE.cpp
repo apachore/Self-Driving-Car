@@ -13,7 +13,12 @@
 #include "can.h"
 #include "file_logger.h"
 
+
 QueueHandle_t Master_Motor_q;
+
+
+uint8_t gps_data[4];
+uint8_t sensor_data[4];
 
 void BusOffCb(uint32_t param)
 {
@@ -35,8 +40,9 @@ void Receive_init()
     CAN_init(can1, 100, 100, 100, *BusOffCb,*DataOverCanBuffer);/*Initializing CAN bus*/
     CAN_reset_bus(can1);          /*Reset CAN bus*/
 
-    const can_std_id_t slist[]  { CAN_gen_sid(can1, 0x220), CAN_gen_sid(can1, 0x610),   // 2 entries
-                                              };    /*CAN standard ID list*/
+    const can_std_id_t slist[]  { CAN_gen_sid(can1, 0x210), CAN_gen_sid(can1, 0x220), CAN_gen_sid(can1, 0x260),
+            CAN_gen_sid(can1, 0x610)};    /*CAN standard ID list*/
+
     /*Motor Control message from Master : 0x220 */
     /*Boot Request message from Master : 0x610 */
 
@@ -48,7 +54,7 @@ void Receive_init()
     can_ext_grp_id_t *extgrp=NULL;
     //CAN_bypass_filter_accept_all_msgs();
 
-    CAN_setup_filter(slist,2,grplist,0,ext,0,extgrp,0);  /*CAN message filter */
+    CAN_setup_filter(slist,4,grplist,0,ext,0,extgrp,0);  /*CAN message filter */
 }
 
 void Transmitter_message()
@@ -93,36 +99,55 @@ void Transmitter_message()
 void Receiver_message()
 {
     can_msg_t rx_msg;
-
-    if(CAN_rx(can1, &rx_msg, 0))
+    if(CAN_rx(can1, &rx_msg, 10))
     {
-
-        if(rx_msg.msg_id == 0x220)
+        LE.on(1);
+        switch(rx_msg.msg_id)
         {
+            case 0x260:
+                gps_data[0] =rx_msg.data.bytes[0];
+                gps_data[1] =rx_msg.data.bytes[1];
+                gps_data[2] =rx_msg.data.bytes[2];
+                gps_data[3] =rx_msg.data.bytes[3];
+
+            break;
+
+            case 0x210:
+                sensor_data[0] =rx_msg.data.bytes[0];
+                sensor_data[1] =rx_msg.data.bytes[1];
+                puts("sensor data received");
+                LE.toggle(2);
+                sensor_data[2] =rx_msg.data.bytes[2];
+                sensor_data[3] =rx_msg.data.bytes[3];
+            break;
+            case 0x220:
             LE.toggle(3);
             //printf("%x", rx_msg.msg_id);
             //printf("%x", rx_msg.data.bytes[1]);
             if(!xQueueSend(Master_Motor_q, &rx_msg, 0))
             {
-                LE.toggle(2);
+               // LE.toggle(2);
               //printf("Queue Full\n");
             }
             else
             {
 
             }
-                //printf("CAN Sent");
+
+           break;
+           default:
+               break;
+
         }
-        else
-        {
-           /*Will be updated with other IO related messages */
-        }
+
     }
     else
     {
-        //printf("No message received\n");
+        puts("No message received\n");
+        LE.toggle(4);
     }
     //printf("This is Motor RX function\n");
+
 }
 
 

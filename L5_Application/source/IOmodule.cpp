@@ -16,52 +16,59 @@
  *
  *
  */
+#include <stdlib.h>
+#include "stdio.h"
+#include "IOmodule.hpp"
+extern uint32_t gps_data[4];
+char char_val[33];
+extern uint8_t sensor_data[4];
 
-IOTask::IOTask(uint8_t priority) :
-            scheduler_task("IOTask", 2000, priority),
-            IO_uart(Uart2 ::getInstance())
-        {
-                IO_uart.init(9600,io_rx_q_size,io_tx_q_size);        /* initialize uart and set baud rate */
-        }
+Uart2 &u2 = Uart2 ::getInstance();
 
-bool IOTask::init(void)
+void UARTInitialization()
 {
-        CAN_init(can1,100,64,64,NULL,NULL);              /*initialize can1 */
-        ack_msg1.frame_fields.is_29bit = 0;
-        ack_msg1.frame_fields.data_len = 0;
-        ack_msg1.data.bytes[1]=01;
+puts("uart init\n");
+   static const int io_rx_q_size = 32;
+   static const int io_tx_q_size = 32;
+   u2.init(9600, io_rx_q_size, io_tx_q_size);
+   u2.putline("FO");
 
-        can_std_grp_id_t *grplist=NULL;
-        can_ext_id_t *ext=NULL;
-        can_ext_grp_id_t *extgrp=NULL;
-
-         CAN_setup_filter(CANmsglist,5,grplist,0,ext,0,extgrp,0);
-         CAN_reset_bus(can1);              /* reset can1 */
-         vTaskDelay(100);                 /* Wait for 100 ms*/
-         IO_uart.putline("FO");           /* initialize LCD */
-         vTaskDelay(100);
-         return true;
 }
-
-bool IOTask:: run(void *p)
+void LCDdisplay()
 {
-    bool tx_flag,rx_flag;
-    rx_flag=CAN_rx(can1, &rx_msg, 1000); /* receive can message */
-    if(rx_flag)
+    int b1,b2,b3,b4,i,c1,c2,c3,c4;
+    sensor_data[0]=34;
+    sensor_data[1]=121;
+    sensor_data[2]=9;
+    sensor_data[3]=8;
+
+    char Front_Dist[] = "F Dist :    ";
+    char Rear_Dist[] = "R Dist :    ";
+    char Left_Dist[] = "L Dist :    ";
+    char Right_Dist[] = "R Dist :    ";
+    for(i=0;i<3;i++)
     {
-        switch(rx_msg.msg_id)
-        {
-            case 0x610:
-                LOG_INFO("Boot request received");
-                CAN_tx(can1, &ack_msg1, portMAX_DELAY);
-                break;
-            case 0x630:
-                 LOG_INFO("start controller message from master");
-                break;
-         }
-     }
-        return true;
+        b1=sensor_data[0]%10;
+        b2=sensor_data[1]%10;
+        b3=sensor_data[2]%10;
+        b4=sensor_data[3]%10;
+        Front_Dist[9-i] = b1 + '0';
+        Rear_Dist[9-i] = b2 + '0';
+        Left_Dist[9-i] = b3 + '0';
+        Right_Dist[9-i] = b4 + '0';
+        sensor_data[0]=sensor_data[0]/10;
+        sensor_data[1]=sensor_data[1]/10;
+        sensor_data[2]=sensor_data[2]/10;
+        sensor_data[3]=sensor_data[3]/10;
+    }
+
+    puts(Front_Dist);
+    u2.putline(Front_Dist);
+    u2.putline(Rear_Dist);
+    u2.putline(Left_Dist);
+    u2.putline(Right_Dist);
 }
+
 
 
 

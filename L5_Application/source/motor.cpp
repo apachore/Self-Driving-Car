@@ -48,7 +48,7 @@ bool MotorTask::run(void *p)
     if (xQueueReceive(receivedDataQueue, &canReceivedData, 0))
     {
 
-        LE.toggle(4);
+       // LE.toggle(4);
         servo_control = canReceivedData.data.bytes[0];
         servo_level = canReceivedData.data.bytes[1];
         DC_control = canReceivedData.data.bytes[2];
@@ -151,7 +151,7 @@ bool MotorTask::run(void *p)
     }
     else
     {
-        LE.toggle(1);
+ //       LE.toggle(1);
     }
     return true;
 }

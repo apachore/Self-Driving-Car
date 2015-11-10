@@ -15,16 +15,7 @@
 #include "can_comms.hpp"
 #include "uart2.hpp"
 
-class IOTask : public scheduler_task
-{
-    public:
-        IOTask(uint8_t priority);
-        bool init(void);
-        bool run(void *p);
-        can_msg_t rx_msg, ack_msg1;
-    private:
-           Uart2 &IO_uart;
-           static const int io_rx_q_size=100;
-           static const int io_tx_q_size=1;
-};
+void UARTInitialization();
+void LCDdisplay();
+
 #endif /* L5_APPLICATION_IOMODULE_HPP_ */

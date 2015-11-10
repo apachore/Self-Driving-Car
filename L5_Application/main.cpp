@@ -30,6 +30,7 @@
 #include "lpc_pwm.hpp"
 #include "can.h"
 #include "MOTOR_CAN_HEADER.hpp"
+#include "IOmodule.hpp"
 
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
@@ -63,6 +64,7 @@ int main(void)
 //    scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
 
     CANInitialization();
+    UARTInitialization();
     /* Change "#if 0" to "#if 1" to run period tasks; @see period_callbacks.cpp */
     #if 1
     scheduler_add_task(new periodicSchedulerTask());
