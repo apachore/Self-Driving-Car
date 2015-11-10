@@ -36,6 +36,7 @@
 #include "can.h"
 #include "source/MainMasterAlgorithm.h"
 
+int count = 0;
 
 /// This is the stack size used for each of the period tasks
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
@@ -48,6 +49,16 @@ void period_1Hz(void)
 
 void period_10Hz(void)
 {
+    can_msg_t canMessage;
+    bool received = CANReception(canMessage);
+    DecisionAlgorithm(canMessage);
+
+    if(!received) {
+        if(!canMessage.msg_id == RSensorDataFromSensor) {
+            MotorDriveFromSensors(true, false, false, false, false, 1, 0);
+        }
+    }
+
     //Recover from CAN Bus off at 10Hz
     if (CAN_is_bus_off(can1))
     {
@@ -57,9 +68,7 @@ void period_10Hz(void)
 
 void period_100Hz(void)
 {
-    can_msg_t canMessage;
-    CANReception(canMessage);
-    DecisionAlgorithm(canMessage);
+
 }
 
 void period_1000Hz(void)

@@ -14,8 +14,10 @@
 #include "scheduler_task.hpp"
 #include "can.h"
 #include "can_communication_ids.h"
+#include "lpc_sys.h"
 
 
+void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, bool rightMotor, bool brakeFlag, uint8_t levelOfSpeed, uint8_t levelOfDirection);
 void SensorProcessingAlgorithm(can_msg_t canData);
 void DecisionAlgorithm(can_msg_t canData);
 

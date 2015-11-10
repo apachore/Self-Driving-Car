@@ -13,12 +13,11 @@
 #include "can.h"
 #include "io.hpp"
 
-/*CANTransmissionReception(can_msg_t canMessageBlock);*/
 /* This function would initialize the CAN bus. It will setup the filter that is to be used for receiving
    messages. */
 void CANInitialization();
 void CANTransmission(can_msg_t canMessageBlock);
-void CANReception(can_msg_t canMessageBlock);
+bool CANReception(can_msg_t& canMessageBlock);
 
 
 #endif /* L5_APPLICATION_SOURCE_CAN_TRANSMISSION_RECEPTION_H_ */

@@ -66,6 +66,9 @@ typedef enum
     // Other Messages
     TDestinationReachedToAll         = 0x410,
     TKillMessageToAll                = 0x020,
+
+    //Disabled ID
+    RFilterDisabledId                = 0xFFFF,
 } CANMessageIds;
 
 
@@ -77,7 +80,8 @@ const can_std_id_t canMessagesFilterList[] =
 {
         CAN_gen_sid(can1, RKillMessageFromAndroid),CAN_gen_sid(can1, RStopMessageFromAndroid),  CAN_gen_sid(can1, RSensorDataFromSensor),
         CAN_gen_sid(can1, RDistanceFinalAndNextCheckpoint), CAN_gen_sid(can1, RHeadingAndBearingToGeo),
-        CAN_gen_sid(can1, RRunAndPauseCommandFromAndroid), CAN_gen_sid(can1, RBatteryStatusFromSensor)
+        CAN_gen_sid(can1, RRunAndPauseCommandFromAndroid), CAN_gen_sid(can1, RBatteryStatusFromSensor),
+        CAN_gen_sid(can1, RFilterDisabledId)
 };
 
 const can_std_grp_id_t groupList[] =
