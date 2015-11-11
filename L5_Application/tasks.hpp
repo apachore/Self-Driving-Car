@@ -123,6 +123,7 @@ class wirelessTask : public scheduler_task
         }
 };
 
+
 /**
  * Periodic callback dispatcher task
  * This task gives the semaphores that end up calling functions at periodic_callbacks.cpp
@@ -131,11 +132,14 @@ class periodicSchedulerTask : public scheduler_task
 {
     public:
         periodicSchedulerTask(void);
+        bool init(void);
+        bool regTlm(void);
         bool run(void *p);
 
     private:
         bool handlePeriodicSemaphore(const uint8_t index, const uint8_t frequency);
 };
+
 
 class CANTask : public scheduler_task
 {

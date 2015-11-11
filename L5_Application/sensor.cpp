@@ -60,9 +60,13 @@ void front_fall_edge()
     front_echo_width = lpc_timer_get_value(lpc_timer0) - front_start_time;
     front = (front_echo_width*2.54)/147;
      pin_number = 2;
-    if (!xQueueSend(sensor_data_q, &pin_number, 0))
+    if (!xQueueSendFromISR(sensor_data_q, &pin_number, 0))
     {
         LE.on(1); //   puts("Failed to send item to queue");
+    }
+    else
+    {
+        LE.off(1);
     }
 }
 void back_fall_edge()
@@ -71,10 +75,14 @@ void back_fall_edge()
     back_echo_width = lpc_timer_get_value(lpc_timer0) - back_start_time;
     back = (back_echo_width * 0.017) - 7;
     pin_number = 4;
-    if (!xQueueSend(sensor_data_q, &pin_number, 0))
+    if (!xQueueSendFromISR(sensor_data_q, &pin_number, 0))
     {
-        LE.on(2); //         puts("Failed to send item to queue");
+        LE.on(1); //         puts("Failed to send item to queue");
     }
+    else
+        {
+            LE.off(1);
+        }
 }
 void left_fall_edge()
 {
@@ -82,21 +90,25 @@ void left_fall_edge()
     left_echo_width = lpc_timer_get_value(lpc_timer0) - left_start_time;
     left = (left_echo_width*2.54)/147;
     pin_number = 6;
-    if (!xQueueSend(sensor_data_q, &pin_number, 0))
+    if (!xQueueSendFromISR(sensor_data_q, &pin_number, 0))
     {
-        LE.on(3); //         puts("Failed to send item to queue");
+        LE.on(1); //         puts("Failed to send item to queue");
     }
+    else
+        {
+            LE.off(1);
+        }
 }
 void right_fall_edge()
 {
-   static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
+   //static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
     right_echo_width = lpc_timer_get_value(lpc_timer0) - right_start_time;
     right =(right_echo_width*2.54)/147;
-    pin_number = 0;
-    if (!xQueueSend(sensor_data_q, &pin_number, 0))
-    {
-        LE.toggle(1); //       puts("Failed to send item to queue");
-    }
+//    pin_number = 0;
+//    if (!xQueueSend(sensor_data_q, &pin_number, 0))
+//    {
+//        LE.toggle(1); //       puts("Failed to send item to queue");
+//    }
 }
 
 
@@ -116,7 +128,7 @@ bool sensor_init(void)
     eint3_enable_port2(port2_5, eint_falling_edge, left_fall_edge);
     eint3_enable_port2(port2_7, eint_falling_edge, right_fall_edge);
 
-    LPC_PINCON->PINSEL3 |= (3 << 28); // ADC-4 is on P1.30, select this as ADC0.4
+   // LPC_PINCON->PINSEL3 |= (3 << 28); // ADC-4 is on P1.30, select this as ADC0.4
 
     lpc_timer_enable(lpc_timer0, 1);
     LPC_GPIO2->FIODIR |= (1 << 0);
@@ -131,37 +143,40 @@ bool sensor_init(void)
 bool sensor_compute()
 {
     static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
-    if(start_flag == 0)
-    {
-        pin_number = 0;
-        start_flag = 1;
+//    if(start_flag == 0)
+//    {
+//        pin_number = 0;
+//        start_flag = 1;
+    pin_number = 0;
         if (!xQueueSend(sensor_data_q, &pin_number, 0))
         {
            // LE.on(4); //         puts("Failed to send item to queue");
         }
-    }
+//    }
 
-    if (xQueueReceive(sensor_data_q, &pin_number, 10))
+    if (xQueueReceive(sensor_data_q, &pin_number, 0))
     {
+       // printf("%d\n",pin_number);
         if(pin_number ==2)
         {
             sensor_trig_HCSR04(pin_number);
         }
         else
         {
-        sensor_trig_MB1010(pin_number);
+            sensor_trig_MB1010(pin_number);
         }
     }
     else
     {
-        if(pin_number ==2)
-                {
-                    sensor_trig_HCSR04(pin_number);
-                }
-                else
-                {
-                sensor_trig_MB1010(pin_number);
-                }
+        LE.on(2);
+//        if(pin_number ==2)
+//                {
+//                    sensor_trig_HCSR04(pin_number);
+//                }
+//                else
+//                {
+//                sensor_trig_MB1010(pin_number);
+//                }
     }
   //printf("%d\n",front);
 
@@ -173,12 +188,16 @@ bool sensor_compute()
 //        can_Boot_stat();
 //    }
 //    can_Heart_beat();
-//    printf("%d %d %d\n",front, right,left);
-    printf("%d\n",front);
-    if((front<200)||(left<200)||(right<200)||(back<100))
-    {
+   // printf("%d %d %d\n",front, left, right);
+    if(front >255){front =255;}
+    if(back>255){back =255;}
+    if(right>255){right =255;}
+    if(left>255){left=255;}
+   // printf("%d\n",front);
+//    if((front<200)||(left<200)||(right<200)||(back<100))
+//    {
         can_Tx_Sensor_data();
-    }
+//    }
   if(CAN_is_bus_off(can1))
   {
       CAN_reset_bus(can1);

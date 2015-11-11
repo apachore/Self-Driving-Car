@@ -37,6 +37,18 @@
 /// This is the stack size used for each of the period tasks
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 
+/// Called once before the RTOS is started, this is a good place to initialize things once
+bool period_init(void)
+{
+    return true; // Must return true upon success
+}
+
+/// Register any telemetry variables
+bool period_reg_tlm(void)
+{
+    // Make sure "SYS_CFG_ENABLE_TLM" is enabled at sys_config.h to use Telemetry
+    return true; // Must return true upon success
+}
 
 
 void period_1Hz(void)
@@ -46,12 +58,12 @@ void period_1Hz(void)
 
 void period_10Hz(void)
 {
-   // sensor_compute();  //LE.on(1);//sensorTask_run();
+    sensor_compute();  //LE.on(1);//sensorTask_run();
 }
 
 void period_100Hz(void)
 {
-    sensor_compute();
+//    sensor_compute();
     //LE.toggle(3);
 }
 
