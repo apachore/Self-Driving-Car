@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/activity_main2"
+    tools:context="com.example.boogie.myapplication.Main2Activity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Welcome to second activity"
+        android:id="@+id/textView2"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="On"
+        android:onClick="selectFrag"
+        android:id="@+id/button2"
+        android:layout_marginTop="73dp"
+        android:layout_below="@+id/textView2"
+        android:layout_alignLeft="@+id/textView2"
+        android:layout_alignStart="@+id/textView2" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Off"
+        android:id="@+id/button3"
+        android:onClick="selectFrag"
+        android:layout_alignTop="@+id/button2"
+        android:layout_alignRight="@+id/textView2"
+        android:layout_alignEnd="@+id/textView2" />
+
+    <fragment
+        android:name="com.example.boogie.myapplication.FragmentOne"
+        android:id="@+id/fragment_place"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout="@layout/fragment_one" />
+
+
+</RelativeLayout>
