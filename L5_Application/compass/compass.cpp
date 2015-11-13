@@ -11,7 +11,8 @@
 #include "stdio.h"
 #include "inttypes.h"
 #include "io.hpp"
-
+#include "can_communication_ids.h"
+#include "can.h"
 
 extern I2C2& i2c;
 void compassInitialisation()
@@ -22,6 +23,8 @@ void compassInitialisation()
 	{
 		LE.toggle(1);
 	}
+
+	/*Intialise the device and write the compass registers*/
 	else
 	{
 		i2c.init(I2CBAUDRATE);
@@ -33,7 +36,7 @@ void compassWriteReg()
 {
 	/*Setting Configuration Register A for
 	 number of samples averaged(8 samples),
-	 data output rate(75Hz default) ,
+	 data output rate(15Hz default) ,
 	 measurement configuration(Normal measurement config)*/
 	i2c.writeReg(DEVICEWRITEADDRESS,ConfigRegA,ConfigRegA_value);
 
@@ -69,67 +72,67 @@ int compassHeading()
 
 	 bool registerRead;
 	 registerRead = compassReadReg();
-     if(registerRead)
+     if(!registerRead)
      {
-    	 puts("Read successful\n");
+    	 LE.toggle(2);
      }
 
-     float headingRadians;
+     float headingRadians, headingRadiansCalibrated;
 	 headingRadians = atan2f(scaled.y_axis,scaled.x_axis);
-	// printf("Heading: %f\n",headingRadians);
-
-	 /*Calibration will be done before converting to radians to degrees*/
-
-     compassCalibration();
 
 	 /*Compass points to magnetic north. Declination is Angle between true north and magnetic north
 	 Magnetic declination at San Francisco is 13.53  degrees east*/
 	 headingRadians = headingRadians + MagneticDeclination;
+	 printf("Heading in radians: %f\n",headingRadians);
 
+	 /*Calibrate the compass for instrument error*/
+	 headingRadiansCalibrated = compassCalibration(headingRadians);
 
-	 if(headingRadians < 0)
-	 {
-	     headingRadians = headingRadians + M_TWOPI;
-	 }
-	 if(headingRadians > M_TWOPI)
-	 {
-	     headingRadians = headingRadians - M_TWOPI;
-	 }
+     /*Conversion from degrees to radians*/
+	 float headingDegrees;
+	 headingDegrees = headingRadiansCalibrated *  RADIANTODEGREE;
 
-	float headingDegrees;
-	headingDegrees = headingRadians *  RADIANTODEGREE;
-	//printf("Heading: %f\n",headingDegrees);
-
-    int heading;
-    heading = static_cast<int>(headingDegrees);
-   // printf("Heading in int: %i\n",heading);
-	return heading;
+     /*Conversion from float to integer*/
+     int heading;
+     heading = static_cast<int>(headingDegrees);
+     printf("Heading in int: %i\n",heading);
+	 return heading;
 }
 
-void compassCalibration()
+float compassCalibration(float headingNotCalibrated)
 {
-	/*Code for calibration will be included*/
+	float headingCalibrated;
+	headingCalibrated = headingNotCalibrated + 0.267;
+	if(headingCalibrated < 0)
+	{
+		headingCalibrated = (headingCalibrated * 1.35)+ M_TWOPI;
+	}
+	else if(headingCalibrated > 0)
+	{
+		headingCalibrated = headingCalibrated * 0.73;
+	}
+	return headingCalibrated;
 }
 
-int masterTurnAngle(int sourceAngle, int destinationAngle)
+void masterTurnAngle(int sourceAngle, int destinationAngle)
 {
-	/*Bit 8 indicates clockwise or anti clockwise direction
-	  if Bit 8 is 1,  car needs to turn anticlockwise
-	  if Bit 8 is 0, car needs to turn clockwise*/
+	/*"degree" is the angle to turn the car
+	  if "direction" is 1, car needs to turn anti clockwise
+	  if "direction" is 0, car needs to turn clockwise*/
 	int angle = 0;
 	if(destinationAngle > sourceAngle)
 	{
 		angle = destinationAngle - sourceAngle;
 		if(angle <= 180)
 		{
-			puts("Turn clockwise");
-			angle &= ~(1<<8);
+			/*Turn clockwise as the angle is less in clockwise direction*/
+			turn.direction = 0;
 		}
 		else
 		{
-			puts("Turn anticlockwise");
+			/*Turn Anticlockwise as the angle is less in anticlockwise direction*/
 			angle = 360 - angle;
-			angle |= (1<<8);
+			turn.direction = 1;
 		}
 	}
 
@@ -138,20 +141,35 @@ int masterTurnAngle(int sourceAngle, int destinationAngle)
 		angle = sourceAngle - destinationAngle;
 		if(angle<= 180)
 		{
-			puts("Turn anticlockwise");
-			angle |= (1<<8);
+			/*Turn Anticlockwise as the angle is less in anticlockwise direction*/
+			turn.direction = 1;
 		}
 		else
 		{
-			puts("Turn clockwise");
+			/*Turn clockwise as the angle is less in clockwise direction*/
 			angle = 360 - angle;
-			angle &= ~(1<<8);
+			turn.direction = 0;
 		}
 	}
 	else if(sourceAngle == destinationAngle)
 	{
 		angle = 0;
 	}
-	//printf("angle: %i\n",angle);
-	return angle;
+
+	turn.degree = angle;
+
+
+	/*Temporary can structure for transmitting turn angle*/
+	can_msg_t tx;
+	tx.msg_id = TTurnAngle;
+	tx.frame_fields.is_29bit = 0;
+	tx.frame_fields.data_len = 2;
+    tx.data.bytes[0] = turn.degree;
+	tx.data.bytes[1] = turn.direction;
+
+	if (!CAN_tx(can1,&tx,0))
+	{
+	    LE.toggle(3);
+	}
+
 }

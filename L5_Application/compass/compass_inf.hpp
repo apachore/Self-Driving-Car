@@ -19,6 +19,11 @@
 #define HALFCIRCLE 180
 #define RADIANTODEGREE  HALFCIRCLE/M_PI
 
+const float MagneticDeclination = 0.2361;
+
+/*Corresponds to gain of 1370. Resolution is inverse of Gain -> 0.73 milli gauss per count*/
+float resolution = 0.73;
+
  struct compassRawValue
  {
      int16_t x_axis;
@@ -31,6 +36,7 @@
       float x_axis;
       float y_axis;
  }scaled;
+
 
 /* List of register address*/
 /*8 bit onchip registers for reading from and writing to HMC5883L compass module*/
@@ -102,13 +108,14 @@ enum compassRegConfigValues
 {
     /* These values are tentative. The values are taken as default  settings
      specified by the HMC8335L and is subject to change as the project demands */
-    ConfigRegA_value = (Eight|_75Hz|Normal),
+    ConfigRegA_value = (Eight|_15Hz|Normal),
     ConfigRegB_value = Gain_1370,
     ModeReg_value    = Continuous,
 };
 
-/*Corresponds to gain of 1370. Inverse of 1370 is 0.73 milli gauss per count*/
-float resolution = 0.73;
-const float MagneticDeclination = 0.2361;
-
+struct angle
+ {
+	 uint8_t degree;
+	 uint8_t direction;
+ }turn;
 #endif /* L5_APPLICATION_COMPASS_INF_HPP_ */

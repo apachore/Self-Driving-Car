@@ -26,6 +26,7 @@
 #include "tasks.hpp"
 #include "examples/examples.hpp"
 #include "compass/compass.hpp"
+#include "can_transmission_reception.h"
 
 
 /**
@@ -47,6 +48,7 @@ int main(void)
 {
 
     compassInitialisation();
+    CANInitialization();
 
 	/**
      * A few basic tasks for this bare-bone system :

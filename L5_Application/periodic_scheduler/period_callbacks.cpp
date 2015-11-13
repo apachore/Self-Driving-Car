@@ -32,6 +32,7 @@
 #include "io.hpp"
 #include "periodic_callback.h"
 #include "compass/compass.hpp"
+#include "can_transmission_reception.h"
 
 
 /// This is the stack size used for each of the period tasks
@@ -43,7 +44,11 @@ int turnAngle;
 
 void period_1Hz(void)
 {
-    // LE.toggle(1);
+
+	heading = compassHeading();
+    bearing = 0;
+    masterTurnAngle(heading,bearing);
+	// LE.toggle(1);
 }
 
 void period_10Hz(void)
@@ -54,9 +59,9 @@ void period_10Hz(void)
 void period_100Hz(void)
 {
 
-	heading = compassHeading();
+	/*heading = compassHeading();
     bearing = 0;
-    turnAngle = masterTurnAngle(heading,bearing);
+    turnAngle = masterTurnAngle(heading,bearing);*/
 	// LE.toggle(3);
 }
 

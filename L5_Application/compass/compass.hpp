@@ -22,8 +22,8 @@ void compassInitialisation();
 void compassWriteReg();
 bool compassReadReg();
 int compassHeading();
-void compassCalibration();
-int masterTurnAngle(int sourceAngle, int destinationAngle);
+float compassCalibration(float headingNotCalibrated);
+void masterTurnAngle(int sourceAngle, int destinationAngle);
 
 /*class compass_task : public scheduler_ask
 {
