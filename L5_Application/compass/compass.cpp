@@ -107,7 +107,11 @@ float compassCalibration(float headingNotCalibrated)
 	{
 		headingCalibrated = (headingCalibrated * 1.35)+ M_TWOPI;
 	}
-	else if(headingCalibrated > 0)
+	else if((headingCalibrated >= 0)&&(headingCalibrated <=1))
+	{
+		return headingCalibrated;
+	}
+	else if(headingCalibrated > 1)
 	{
 		headingCalibrated = headingCalibrated * 0.73;
 	}
