@@ -102,7 +102,7 @@ void right_fall_edge()
             LE.on(2); //         puts("Failed to send item to queue");
            // sensor_trig_MB1010(4);//force trigger right sensor if cannot queue send fails
         }
- //   portYIELD_FROM_ISR(yield);
+    portYIELD_FROM_ISR(yield);
 
 }
 
@@ -187,6 +187,7 @@ bool sensor_compute()
 //    if((front<200)||(left<200)||(right<200)||(back<100))
 //    {
         can_Tx_Sensor_data();
+
 //    }
   if(CAN_is_bus_off(can1))
   {
