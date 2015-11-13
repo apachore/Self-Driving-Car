@@ -37,6 +37,7 @@ gps_data_q(NULL)
 
 bool gpsTask::init(void)
 {
+    void logger_init();
     gps_data_q = xQueueCreate(2, sizeof(coordinates));
     addSharedObject("gps_queue", gps_data_q);
 
@@ -197,8 +198,9 @@ void GPS_Calculations()
     }
     else if (xQueueReceive(gps_data_q, &current_gps_data, 0))
     {
-        if (BootReplySent)
+        //if (BootReplySent)
         {
+            //LOG_INFO("Latitude: %f  Longitude: %f ",current_gps_data.latitude,current_gps_data.longitude);
             //LE.toggle(2);
             //printf("Latitude: %f\n",current_gps_data.latitude);
             //printf("Longitude: %f\n",current_gps_data.longitude);
