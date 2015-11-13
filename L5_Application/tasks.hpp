@@ -141,47 +141,4 @@ class periodicSchedulerTask : public scheduler_task
 };
 
 
-class CANTask : public scheduler_task
-{
-    public:
-
-        CANTask(uint8_t priority) :
-            scheduler_task("CANTask", 1024, priority)
-        {
-            CAN_init(can2, 500,500,500,NULL,NULL);
-            CAN_bypass_filter_accept_all_msgs(); // if filters are not configured and u wnt to accept all message
-            CAN_reset_bus(can2); //enble the can bus
-        }
-
-        bool run(void *p)
-        {
-           can_msg_t msgTx,msgRx;
-           msgTx.frame_fields.is_29bit = 0;
-           msgTx.frame_fields.data_len = 8;       // Send 8 bytes
-           msgTx.data.qword =0x0001; // Write all 8 bytes of data at once
-
-           if(SW.getSwitch(1))
-           {   msgTx.msg_id = 0x01;
-               CAN_tx(can2, &msgTx, 1000); //Transmit msg over CAN bus to node 2 to turn on LED on node 1
-           }
-           else
-           {    msgTx.msg_id = 0x02;
-                CAN_tx(can2, &msgTx, 1000); //Transmit msg over CAN bus to node 2 to turn off LED on node 2
-           }
-
-           CAN_rx(can2,&msgRx, 1000);      //Receive msg over CAN Bus
-
-           if(msgRx.msg_id == 0x03)
-           {
-               LE.on(1);                   //LED on if the CAN msg with ID 0x03 is received else turn OFF LED
-           }
-           else
-           {
-               LE.off(1);
-           }
-
-           return true;
-        }
-};
-
 #endif /* TASKS_HPP_ */

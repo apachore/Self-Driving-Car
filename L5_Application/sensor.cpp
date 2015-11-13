@@ -21,11 +21,13 @@
 #include "scheduler_task.hpp"
 #include "can.h"
 #include "can_Tx_Rx.hpp"
+#include "LED_Display.hpp"
 
 
 int front_start_time =0,back_start_time=0, right_start_time=0,left_start_time=0;
 int front_echo_width = 0,back_echo_width = 0, right_echo_width = 0,left_echo_width = 0;
 int front=0, back = 0, right =0, left = 0,start =0;
+long yield = 0;
 int start_flag, pin_number,count;
 void sensor_trig_MB1010(int pin)
 {
@@ -59,30 +61,22 @@ void front_fall_edge()
     static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
     front_echo_width = lpc_timer_get_value(lpc_timer0) - front_start_time;
     front = (front_echo_width*2.54)/147;
-     pin_number = 2;
+     pin_number = 4;
+
     if (!xQueueSendFromISR(sensor_data_q, &pin_number, 0))
     {
         LE.on(1); //   puts("Failed to send item to queue");
+      //  sensor_trig_HCSR04(2); //force trigger back sensor if cannot queue send fails
     }
-    else
-    {
-        LE.off(1);
-    }
+    portYIELD_FROM_ISR(yield);
 }
 void back_fall_edge()
 {
-    static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
+   // static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
     back_echo_width = lpc_timer_get_value(lpc_timer0) - back_start_time;
     back = (back_echo_width * 0.017) - 7;
-    pin_number = 4;
-    if (!xQueueSendFromISR(sensor_data_q, &pin_number, 0))
-    {
-        LE.on(1); //         puts("Failed to send item to queue");
-    }
-    else
-        {
-            LE.off(1);
-        }
+
+    portYIELD_FROM_ISR(yield);
 }
 void left_fall_edge()
 {
@@ -92,49 +86,55 @@ void left_fall_edge()
     pin_number = 6;
     if (!xQueueSendFromISR(sensor_data_q, &pin_number, 0))
     {
-        LE.on(1); //         puts("Failed to send item to queue");
+        LE.on(3); //         puts("Failed to send item to queue");
+       // sensor_trig_MB1010(6);
     }
-    else
-        {
-            LE.off(1);
-        }
+    portYIELD_FROM_ISR(yield);
 }
 void right_fall_edge()
 {
-   //static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
+   static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
     right_echo_width = lpc_timer_get_value(lpc_timer0) - right_start_time;
     right =(right_echo_width*2.54)/147;
-//    pin_number = 0;
-//    if (!xQueueSend(sensor_data_q, &pin_number, 0))
-//    {
-//        LE.toggle(1); //       puts("Failed to send item to queue");
-//    }
+    pin_number = 2;
+        if (!xQueueSendFromISR(sensor_data_q, &pin_number, 0))
+        {
+            LE.on(2); //         puts("Failed to send item to queue");
+           // sensor_trig_MB1010(4);//force trigger right sensor if cannot queue send fails
+        }
+ //   portYIELD_FROM_ISR(yield);
+
 }
 
-
-bool sensor_init(void)
+void interrupt_init()
 {
-    QueueHandle_t sensor_data_q = xQueueCreate(50, sizeof(int));
-    scheduler_task::addSharedObject("sensor_queue", sensor_data_q);
-    const uint8_t port2_1 = 1, port2_3 = 3, port2_5 = 5,port2_7 = 7;
+       const uint8_t port2_1 = 1, port2_3 = 3, port2_5 = 5,port2_7 = 7;
+       eint3_enable_port2(port2_1, eint_rising_edge, front_rise_edge);
+      //HCSR04 :interrupt for rising edge not required
+       eint3_enable_port2(port2_5, eint_rising_edge, left_rise_edge);
+       eint3_enable_port2(port2_7, eint_rising_edge, right_rise_edge );
 
-    eint3_enable_port2(port2_1, eint_rising_edge, front_rise_edge);
-   //HCSR04 :interrupt for rising edge not required
-    eint3_enable_port2(port2_5, eint_rising_edge, left_rise_edge);
-    eint3_enable_port2(port2_7, eint_rising_edge, right_rise_edge );
+       eint3_enable_port2(port2_1, eint_falling_edge, front_fall_edge);
+       eint3_enable_port2(port2_3, eint_falling_edge, back_fall_edge);
+       eint3_enable_port2(port2_5, eint_falling_edge, left_fall_edge);
+       eint3_enable_port2(port2_7, eint_falling_edge, right_fall_edge);
+}
 
-    eint3_enable_port2(port2_1, eint_falling_edge, front_fall_edge);
-    eint3_enable_port2(port2_3, eint_falling_edge, back_fall_edge);
-    eint3_enable_port2(port2_5, eint_falling_edge, left_fall_edge);
-    eint3_enable_port2(port2_7, eint_falling_edge, right_fall_edge);
-
-   // LPC_PINCON->PINSEL3 |= (3 << 28); // ADC-4 is on P1.30, select this as ADC0.4
-
-    lpc_timer_enable(lpc_timer0, 1);
+void config_trigger()
+{
     LPC_GPIO2->FIODIR |= (1 << 0);
     LPC_GPIO2->FIODIR |= (1 << 2);
     LPC_GPIO2->FIODIR |= (1 << 4);
     LPC_GPIO2->FIODIR |= (1 << 6);
+}
+bool sensor_init(void)
+{
+    QueueHandle_t sensor_data_q = xQueueCreate(5, sizeof(int));
+    scheduler_task::addSharedObject("sensor_queue", sensor_data_q);
+      // LPC_PINCON->PINSEL3 |= (3 << 28); // ADC-4 is on P1.30, select this as ADC0.4
+    config_trigger();
+    interrupt_init();
+    lpc_timer_enable(lpc_timer0, 1);
     can_Tx_Rx_init();
     return true;
 //    return (NULL != sensor_data_q);
@@ -143,20 +143,16 @@ bool sensor_init(void)
 bool sensor_compute()
 {
     static QueueHandle_t sensor_data_q = scheduler_task::getSharedObject("sensor_queue");
-//    if(start_flag == 0)
-//    {
-//        pin_number = 0;
-//        start_flag = 1;
+   // sensor_trig_MB1010(0); //Trigger first sensor
     pin_number = 0;
+
         if (!xQueueSend(sensor_data_q, &pin_number, 0))
         {
-           // LE.on(4); //         puts("Failed to send item to queue");
+            LD.setNumber(88); //         puts("Failed to send item to queue");
+           // sensor_trig_MB1010(6);
         }
-//    }
-
     if (xQueueReceive(sensor_data_q, &pin_number, 0))
     {
-       // printf("%d\n",pin_number);
         if(pin_number ==2)
         {
             sensor_trig_HCSR04(pin_number);
@@ -168,18 +164,10 @@ bool sensor_compute()
     }
     else
     {
-        LE.on(2);
-//        if(pin_number ==2)
-//                {
-//                    sensor_trig_HCSR04(pin_number);
-//                }
-//                else
-//                {
-//                sensor_trig_MB1010(pin_number);
-//                }
+        LD.setNumber(99);//  LE.on(2);
     }
-  //printf("%d\n",front);
 
+  //  LE.setAll(0);
     //can_msg_t msgRx;
     //CAN_rx(can1,&msgRx, 0); //Receive msg over CAN Bus
 
@@ -188,7 +176,9 @@ bool sensor_compute()
 //        can_Boot_stat();
 //    }
 //    can_Heart_beat();
-   // printf("%d %d %d\n",front, left, right);
+    printf("%d %d %d\n",front, left, right);
+
+    LD.setNumber(front/10);
     if(front >255){front =255;}
     if(back>255){back =255;}
     if(right>255){right =255;}

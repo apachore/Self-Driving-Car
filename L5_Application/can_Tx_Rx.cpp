@@ -34,11 +34,11 @@ void can_Tx_Sensor_data()
    msgTx.data.bytes[3] =back;
    if(!CAN_tx(can1, &msgTx, 0))
    {
-        LE.toggle(3) ; //printf("Sensor data not sent");
+        LE.off(4) ; //printf("Sensor data not sent");
    }
    else
    {
-       LE.toggle(4);
+       LE.on(4);
    }
 }
 void can_Heart_beat()
@@ -50,7 +50,7 @@ void can_Heart_beat()
    msgTx.data.qword = 0x00;
    if( !(CAN_tx(can1, &msgTx, 0)))
    {
-       LE.toggle(1) ;// printf("Heart beat not sent");
+      // LE.toggle(1) ;// printf("Heart beat not sent");
    }
 }
 
