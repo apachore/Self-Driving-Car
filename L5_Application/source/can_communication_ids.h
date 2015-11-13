@@ -37,7 +37,7 @@ typedef enum
     // Messages between Master and Geo
     // From Geo
     TFinalAndNextCheckpointDistance   = 0x250,
-    THeadingAndBearingToMaster        = 0x260,
+    TTurnAngleToMaster                = 0x260,
 
     // Messages between Geo and Android
     // From Android

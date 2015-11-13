@@ -25,7 +25,7 @@
  */
 #include "tasks.hpp"
 #include "examples/examples.hpp"
-
+#include "compass/compass.hpp"
 #include "gps.hpp"
 
 #include "source/can_transmission_reception.h"
@@ -44,11 +44,13 @@
  *        In either case, you should avoid using this bus or interfacing to external components because
  *        there is no semaphore configured for this bus and it should be used exclusively by nordic wireless.
  */
+I2C2& i2c = I2C2::getInstance();
 int main(void)
 {
     //CANTransmissionReception canMessageBus;
     //canMessageBus.
     CANInitialization();
+    compassInitialisation();
     /**
      * A few basic tasks for this bare-bone system :
      *      1.  Terminal task provides gateway to interact with the board through UART terminal.

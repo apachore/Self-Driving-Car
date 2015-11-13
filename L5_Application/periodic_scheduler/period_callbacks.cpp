@@ -32,12 +32,14 @@
 #include <stdio.h>
 #include "io.hpp"
 #include "periodic_callback.h"
-
+#include "compass/compass.hpp"
 #include "gps.hpp"
 #include "source/can_transmission_reception.h"
 
 /// This is the stack size used for each of the period tasks
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
+int heading;
+extern uint16_t current_bearing;
 
 /// Called once before the RTOS is started, this is a good place to initialize things once
 bool period_init(void)
@@ -55,6 +57,9 @@ bool period_reg_tlm(void)
 
 void period_1Hz(void)
 {
+    heading = compassHeading();
+    current_bearing = 0;
+    masterTurnAngle(heading,current_bearing);
     //LE.toggle(1);
 }
 
