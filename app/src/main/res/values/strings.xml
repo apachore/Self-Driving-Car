@@ -50,6 +50,11 @@
     <string name="title_activity_device_list">DeviceListActivity</string>
     <string name="title_activity_device_list_adapter">DeviceListAdapter</string>
 
+    <string name="none_paired">No devices have been paired</string>
+
+    <string name="label_latitude">Lat </string>
+    <string name="label_longitude">Long</string>
+    <string name="title_activity_maps1">Map</string>
     <!--
     <string name="hello_world">Hello world!</string>
 -->

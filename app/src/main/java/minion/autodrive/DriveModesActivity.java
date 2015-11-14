@@ -60,7 +60,7 @@ public class DriveModesActivity extends AppCompatActivity {
 
     private void openMapMode(View view) {
         //Toast.makeText(this, "Search button pressed", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, MapsActivity.class);
+        Intent intent = new Intent(this, MapsActivity1.class);
         //EditText editText = (EditText) findViewById(R.id.edit_message);
         //String message = editText.getText().toString();
         //intent.putExtra(EXTRA_MESSAGE, message);

@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 */
     //Perform action when user clicks on Map
     public void openMaps(View view) {
-        Intent intent = new Intent(this, MapsActivity.class);
+        Intent intent = new Intent(this, MapsActivity1.class);
         //EditText editText = (EditText) findViewById(R.id.edit_message);
         //String message = editText.getText().toString();
         //intent.putExtra(EXTRA_MESSAGE, message);
