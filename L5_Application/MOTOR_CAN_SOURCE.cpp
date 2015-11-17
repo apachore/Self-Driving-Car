@@ -12,12 +12,15 @@
 #include "lpc_pwm.hpp"
 #include "can.h"
 #include "file_logger.h"
+#include "string.h"
+#include "stdlib.h"
+
 
 
 QueueHandle_t Master_Motor_q;
-
-
-uint8_t gps_data[4];
+int final_dist_remaining;
+float gps_longitude;
+float gps_latitude;
 uint8_t sensor_data[4];
 
 void BusOffCb(uint32_t param)
@@ -40,8 +43,8 @@ void Receive_init()
     CAN_init(can1, 100, 100, 100, *BusOffCb,*DataOverCanBuffer);/*Initializing CAN bus*/
     CAN_reset_bus(can1);          /*Reset CAN bus*/
 
-    const can_std_id_t slist[]  { CAN_gen_sid(can1, 0x210), CAN_gen_sid(can1, 0x220), CAN_gen_sid(can1, 0x260),
-            CAN_gen_sid(can1, 0x610)};    /*CAN standard ID list*/
+    const can_std_id_t slist[]  { CAN_gen_sid(can1, 0x210), CAN_gen_sid(can1, 0x220), CAN_gen_sid(can1, 0x240),
+            CAN_gen_sid(can1, 0x610), CAN_gen_sid(can1, 0x250), CAN_gen_sid(can1, 0x410)};    /*CAN standard ID list*/
 
     /*Motor Control message from Master : 0x220 */
     /*Boot Request message from Master : 0x610 */
@@ -54,7 +57,7 @@ void Receive_init()
     can_ext_grp_id_t *extgrp=NULL;
     //CAN_bypass_filter_accept_all_msgs();
 
-    CAN_setup_filter(slist,4,grplist,0,ext,0,extgrp,0);  /*CAN message filter */
+    CAN_setup_filter(slist,6,grplist,0,ext,0,extgrp,0);  /*CAN message filter */
 }
 
 void Transmitter_message()
@@ -104,14 +107,6 @@ void Receiver_message()
         LE.on(1);
         switch(rx_msg.msg_id)
         {
-            case 0x260:
-                gps_data[0] =rx_msg.data.bytes[0];
-                gps_data[1] =rx_msg.data.bytes[1];
-                gps_data[2] =rx_msg.data.bytes[2];
-                gps_data[3] =rx_msg.data.bytes[3];
-
-            break;
-
             case 0x210:
                 sensor_data[0] =rx_msg.data.bytes[0];
                 sensor_data[1] =rx_msg.data.bytes[1];
@@ -135,6 +130,16 @@ void Receiver_message()
             }
 
            break;
+            case 0x240:
+                memcpy(&gps_latitude,&rx_msg.data.dwords[0],4);
+                memcpy(&gps_longitude,&rx_msg.data.dwords[1],4);
+               break;
+            case 0x250:
+                memcpy(&final_dist_remaining,&rx_msg.data.words[0],2);
+
+
+               break;
+
            default:
                break;
 

@@ -15,9 +15,10 @@
  */
 typedef enum
 {
-    RkillmsgAndroid =0x610,
+    RkillmsgAndroid =0x010,
     Rdatafromsensor =0x210,
-    Rdatafromgps =0x260,
+    Rlatlongfromgps =0x240,
+    Rdistremainfromgps=0x250,
     Rdestreachedfrommaster =0x410,
     Rbootreqfrommaster =0x610,
     RBootstatusfrommaster= 0x630,
@@ -34,8 +35,9 @@ typedef enum
  {
          CAN_gen_sid(can1, RkillmsgAndroid),
          CAN_gen_sid(can1, Rdatafromsensor),
-         CAN_gen_sid(can1, Rdatafromgps),
-         CAN_gen_sid(can1, Rdestreachedfrommaster),
+         CAN_gen_sid(can1, Rlatlongfromgps),
+         CAN_gen_sid(can1, Rlatlongfromgps),
+         CAN_gen_sid(can1, Rdistremainfromgps),
          CAN_gen_sid(can1, Rbootreqfrommaster),
          CAN_gen_sid(can1, RBootstatusfrommaster)
 
@@ -59,12 +61,9 @@ typedef enum
 
  typedef struct
  {
-
-         uint32_t Final_Dist;
-         uint32_t nextCheckpoint_Dist;
-
-         uint16_t Heading_Angle;           // Heading angle
-         uint16_t Bearing_Angle;           // Bearing angle
+         uint16_t Dist_Remaining;
+         float Latitude;
+         float Longitude;
  } Geo_Data;
 
 

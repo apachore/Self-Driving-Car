@@ -16,11 +16,13 @@
  *
  *
  */
-#include <stdlib.h>
+#include "stdlib.h"
 #include "stdio.h"
 #include "IOmodule.hpp"
-extern uint32_t gps_data[4];
-char char_val[33];
+
+extern float gps_latitude;
+extern float gps_longitude;
+extern int final_dist_remaining;
 extern uint8_t sensor_data[4];
 
 Uart2 &u2 = Uart2 ::getInstance();
@@ -36,37 +38,36 @@ puts("uart init\n");
 }
 void LCDdisplay()
 {
-    int b1,b2,b3,b4,i,c1,c2,c3,c4;
-    sensor_data[0]=34;
-    sensor_data[1]=121;
+    char a1[6],a2[6],a3[6],a4[3],a5[3],a6[3],a7[3],a8[10];
+    sensor_data[0]=88;
+    sensor_data[1]=126;
     sensor_data[2]=9;
     sensor_data[3]=8;
+    gps_longitude =24.45;
+    gps_latitude=7.89;
+    final_dist_remaining=63;
+    snprintf(a1,5,"%f",gps_latitude);
+    snprintf(a2,6,"%f",gps_longitude);
+    snprintf(a3,3,"%d",final_dist_remaining);
+    snprintf(a4,4,"%d",sensor_data[0]);
+    snprintf(a5,4,"%d",sensor_data[1]);
+    snprintf(a6,4,"%d",sensor_data[2]);
+    snprintf(a7,4,"%d",sensor_data[3]);
+    u2.putline("F_dist");
+    u2.putline(a4);
+    u2.putline("Rr_dist");
+    u2.putline(a5);
+    u2.putline("L_dist");
+    u2.putline(a6);
+    u2.putline("Rt_dist");
+    u2.putline(a7);
+    u2.putline("gps_lat");
+    u2.putline(a1);
+    u2.putline("gps_long");
+    u2.putline(a2);
+    u2.putline("dist_remain");
+    u2.putline(a3);
 
-    char Front_Dist[] = "F Dist :    ";
-    char Rear_Dist[] = "R Dist :    ";
-    char Left_Dist[] = "L Dist :    ";
-    char Right_Dist[] = "R Dist :    ";
-    for(i=0;i<3;i++)
-    {
-        b1=sensor_data[0]%10;
-        b2=sensor_data[1]%10;
-        b3=sensor_data[2]%10;
-        b4=sensor_data[3]%10;
-        Front_Dist[9-i] = b1 + '0';
-        Rear_Dist[9-i] = b2 + '0';
-        Left_Dist[9-i] = b3 + '0';
-        Right_Dist[9-i] = b4 + '0';
-        sensor_data[0]=sensor_data[0]/10;
-        sensor_data[1]=sensor_data[1]/10;
-        sensor_data[2]=sensor_data[2]/10;
-        sensor_data[3]=sensor_data[3]/10;
-    }
-
-    puts(Front_Dist);
-    u2.putline(Front_Dist);
-    u2.putline(Rear_Dist);
-    u2.putline(Left_Dist);
-    u2.putline(Right_Dist);
 }
 
 
