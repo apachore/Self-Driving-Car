@@ -122,6 +122,9 @@ void CANReception()
             case RTotalTravelDistanceFromAndroid:
                 memcpy(&Total_Distance_To_Travel,&canMessageReceivedBlock.data,sizeof(Total_Distance_To_Travel));
                 break;
+
+            case RDestinationReached:
+                break;
         }
     }
 }

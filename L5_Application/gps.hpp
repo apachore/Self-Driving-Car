@@ -24,11 +24,10 @@ typedef struct
 
 typedef struct
 {
-        uint16_t TotalDistance;
-        uint16_t ChekpointDistance;
-        uint8_t TurnAngle;
-        uint8_t Direction;
-}Sendmessage;
+        uint16_t Total_Distance_Remaining;
+        uint16_t Current_Checkpoint_Distance;
+}Distance;
+
 
 uint16_t calculateBearing(coordinates,coordinates);
 uint16_t calculateCheckpointDistance(coordinates,coordinates);

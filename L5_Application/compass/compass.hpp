@@ -13,20 +13,11 @@
 
 //I2C2& i2c = I2C2::getInstance();
 
-
-
-
-
-
 void compassInitialisation();
 void compassWriteReg();
 bool compassReadReg();
 int compassHeading();
 float compassCalibration(float headingNotCalibrated);
 void masterTurnAngle(int sourceAngle, int destinationAngle);
-
-
-
-
 
 #endif /* L5_APPLICATION_COMPASS_HPP_ */

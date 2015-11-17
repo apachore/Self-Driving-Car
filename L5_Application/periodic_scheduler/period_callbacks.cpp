@@ -76,13 +76,14 @@ void period_10Hz(void)
 void period_100Hz(void)
 {
 
-    CANReception();
+//    CANReception();
 //    CANMessageProcessing();
     //LE.toggle(2);
 }
 
 void period_1000Hz(void)
 {
+    CANReception();
     //LE.toggle(4);
 //    void CANReception(/*can_msg_t canMessageBlock*/);
 }

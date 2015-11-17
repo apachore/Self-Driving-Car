@@ -28,14 +28,16 @@ typedef enum
     // Boot messages
     RBootRequestFromMaster            = 0x610,
     TBootReplyToMaster                = 0x622,
+    RDestinationReached               = 0x410,
 
     // This message will enable the map and run button in Android to be handled at Android end
 
     //In Geo Module this message can be looked to transmit coordinates to Android
     //As soon as this message is received transmit coordinates(Initial Logic on 25 Oct 15)
     RBootStatusFromMaster             = 0x630,
+
     // Messages between Master and Geo
-    // From Geo
+    //From Geo
     TFinalAndNextCheckpointDistance   = 0x250,
     TTurnAngleToMaster                = 0x260,
 
@@ -66,9 +68,9 @@ const can_std_id_t canMessagesFilterList[] =
         CAN_gen_sid(can1, RKillMessageFromMaster),         /*MSG ID = 0x020*/
         CAN_gen_sid(can1, RTotalTravelDistanceFromAndroid),/*MSG ID = 0x230*/
         CAN_gen_sid(can1, RCheckpointsFromAndroid),        /*MSG ID = 0x240*/
+        CAN_gen_sid(can1, RDestinationReached),             /*MSG ID = 0x410*/
         CAN_gen_sid(can1, RBootRequestFromMaster),         /*MSG ID = 0x610*/
         CAN_gen_sid(can1, RBootStatusFromMaster),          /*MSG ID = 0x630*/
-        CAN_gen_sid(can1, FilterDisabledCANmsgID)          /*MSG ID = 0xFFFF*/
 };
 
 

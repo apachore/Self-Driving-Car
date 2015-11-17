@@ -185,7 +185,8 @@ void GPS_Calculations()
     QueueHandle_t gps_data_q = scheduler_task::getSharedObject("gps_queue");
     QueueHandle_t Checkpoint_q = scheduler_task::getSharedObject("CheckpointQueue");
     coordinates current_gps_data;
-    uint16_t current_cp_distance,Total_Distance_Remaining;
+    Distance Current_Distances;
+    //uint16_t Current_Checkpoint_Distance,Total_Distance_Remaining;
 
     static uint16_t Previous_Checkpoint_Distnace,Total_Checkpoint_Distnace,Total_Distance_Traveled;
     static coordinates checkpoint;
@@ -220,30 +221,28 @@ void GPS_Calculations()
 
             if(!Fetch_Checkpoint)
             {
-                current_cp_distance = calculateCheckpointDistance(checkpoint,current_gps_data);
+                Current_Distances.Current_Checkpoint_Distance = calculateCheckpointDistance(checkpoint,current_gps_data);
                 //printf("Current Checkpoint Distance: %d feet\n",current_cp_distance);
                 current_bearing = calculateBearing(checkpoint,current_gps_data);
                 //printf("Bearing: %d degrees\n",current_bearing);
                 if (first_after_cp_fetch)
                 {
-                    Previous_Checkpoint_Distnace = current_cp_distance;
-                    Total_Checkpoint_Distnace = current_cp_distance;
+                    Previous_Checkpoint_Distnace = Current_Distances.Current_Checkpoint_Distance;
+                    Total_Checkpoint_Distnace = Current_Distances.Current_Checkpoint_Distance;
                     first_after_cp_fetch = 0;
                 }
 
                 //printf("Total Checkpoint Distance: %d feet\n",previous_checkpoint_distnace);
                 //printf("Fetched_Checkpoint_Count: %d\n",Fetched_Checkpoint_Count);
                 //printf("Received Checkpoint Count: %d\n",Received_Checkpoint_Count);
-                if (current_cp_distance <  0.25*Total_Checkpoint_Distnace)
+                if (Current_Distances.Current_Checkpoint_Distance <  0.25*Total_Checkpoint_Distnace)
                     Fetch_Checkpoint = 1;
 
-                Total_Distance_Traveled = Total_Distance_Traveled + (Previous_Checkpoint_Distnace - current_cp_distance);
-                Previous_Checkpoint_Distnace = current_cp_distance;
-                Total_Distance_Remaining = Total_Distance_To_Travel - Total_Distance_Traveled;
+                Total_Distance_Traveled = Total_Distance_Traveled + (Previous_Checkpoint_Distnace - Current_Distances.Current_Checkpoint_Distance);
+                Previous_Checkpoint_Distnace = Current_Distances.Current_Checkpoint_Distance;
+                Current_Distances.Total_Distance_Remaining = Total_Distance_To_Travel - Total_Distance_Traveled;
 
-                //                calc_Turning_Angle();
-                //                Transmitdata();
-
+                CANTransmit(TFinalAndNextCheckpointDistance,(uint8_t*)&Current_Distances,sizeof(Current_Distances));
             }
         }
     }
