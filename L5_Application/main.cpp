@@ -25,8 +25,8 @@
  */
 #include "tasks.hpp"
 #include "examples/examples.hpp"
-#include "source/can_base_communication.hpp"
 #include "source/can_transmission_reception.h"
+#include "source/MainMasterAlgorithm.h"
 
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
@@ -45,6 +45,8 @@
 int main(void)
 {
     //Setting up the CAN bus.
+
+    //SystemInitialization();
     CANInitialization();
 
     /**

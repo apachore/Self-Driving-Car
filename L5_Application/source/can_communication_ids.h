@@ -123,5 +123,33 @@ typedef struct
         uint16_t BearingAngle;           // Bearing angle with respect to North
 } GeoData;
 
+typedef struct
+{
+        uint8_t Hour;
+        uint8_t Minutes;
+        uint8_t Day;
+        uint8_t Month;
+        uint8_t Year;
+} BootReply;
+
+// Struct for Motor Speed Levels
+typedef enum
+{
+        SpeedLevel1  =   1,
+        SpeedLevel2  =   2,
+        SpeedLevel3  =   3,
+        SpeedLevel4  =   4,
+        SpeedLevel5  =   5
+} MotorSpeedLevels;
+
+// Struct for Motor Direction Levels
+typedef enum
+{
+        DirectionLevel1  =   1,
+        DirectionLevel2  =   2,
+        DirectionLevel3  =   3,
+        DirectionLevel4  =   4,
+        DirectionLevel5  =   5
+} MotorDirectionLevels;
 
 #endif /* L5_APPLICATION_SOURCE_CAN_COMMUNICATION_IDS_H_ */

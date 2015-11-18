@@ -1,0 +1,75 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: NOONE SENSOR MASTER MOTORIO ANDROID GEO
+
+BO_ 100 HEARTBEAT: 1 MASTER
+ SG_ MASTER_HEARTBEAT_cmd : 0|8@1+ (1,0) [0|0] "" SENSOR,MOTORIO
+
+BO_ 210 SONARS: 4 SENSOR
+ SG_ SENSOR_SONARS_FrontDistance : 0|8@1+ (1,0) [0|0] "" MASTER,MOTORIO
+ SG_ SENSOR_SONARS_LeftDistance : 8|8@1+ (1,0) [0|0] "" MASTER,MOTORIO
+ SG_ SENSOR_SONARS_RightDistance : 16|8@1+ (1,0) [0|0] "" MASTER,MOTORIO
+ SG_ SENSOR_SONARS_RearDistance : 24|12@1+ (1,0) [0|0] "" MASTER,MOTORIO
+
+BO_ 220 MOTORIO_CMD: 4 MASTER
+ SG_ MOTORIO_CMD_leftRightdirection : 0|8@1+ (1,0) [0|0] "" MOTORIO
+ SG_ MOTORIO_CMD_levelOfDirection : 8|8@1+ (1,0) [0|0] "" MOTORIO
+ SG_ MOTORIO_CMD_frontBackDirection : 16|8@1+(1,0) [0|0] "" MOTORIO
+ SG_ MOTORIO_CMD_levelOfSpeed : 24|8@1+ (1,0) [0|0] "" MOTORIO
+ 
+ BO_ 260 TURN_ANGLE_DIRECTION: 4 GEO
+ SG_ TURN_ANGLE_DIRECTION_TurnAngle : 0|8@1+ (1,0) [0|0] "" MASTER
+ SG_ TURN_ANGLE_DIRECTION_TurnDirection : 8|8@1+ (1,0) [0|0] "" MASTER
+
+CM_ BU_ NOONE "No node, used to indicate if it's a debug message going to no one";
+CM_ BU_ MASTER "The master controller driving the car";
+CM_ BU_ SENSOR "The sensor controller of the car";
+CM_ BU_ MOTORIO "The MOTORIO controller of the car";
+CM_ BO_ 100 "Sync message used to synchronize the controllers";
+
+BA_DEF_  "BusType" STRING ;
+BA_DEF_ SG_ "FieldType" STRING ;
+BA_DEF_ BO_ "GenMsgCycleTime" INT 0 0;
+
+BA_DEF_DEF_ "BusType" "CAN";
+BA_DEF_DEF_ "FieldType" "";
+
+BA_ "GenMsgCycleTime" BO_ 100 1000;
+BA_ "GenMsgCycleTime" BO_ 200 100;
+BA_ "GenMsgCycleTime" BO_ 300 100;
+BA_ "FieldType" SG_ 100 MASTER_HEARTBEAT_cmd "MASTER_HEARTBEAT_cmd";
+
+VAL_ 100 MASTER_HEARTBEAT_cmd 0 "MASTER_HEARTBEAT_cmd_NOOP" 1 "MASTER_HEARTBEAT_cmd_SYNC" 2 "MASTER_HEARTBEAT_cmd_REBOOT";

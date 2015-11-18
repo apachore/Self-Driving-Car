@@ -18,8 +18,9 @@
 
 
 void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, bool rightMotor, bool brakeFlag, uint8_t levelOfSpeed, uint8_t levelOfDirection);
-void SensorProcessingAlgorithm(can_msg_t canData);
+void SensorProcessingAlgorithm(SensorData receivedSensorData);
 void DecisionAlgorithm(can_msg_t canData);
-
+void SendKillMessageToAllControllers();
+void SystemInitialization();
 
 #endif /* L5_APPLICATION_SOURCE_MAINMASTERALGORITHM_H_ */

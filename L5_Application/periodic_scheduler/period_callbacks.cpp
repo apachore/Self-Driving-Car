@@ -51,13 +51,13 @@ void period_10Hz(void)
 {
     can_msg_t canMessage;
     bool received = CANReception(canMessage);
-    DecisionAlgorithm(canMessage);
 
     if(!received) {
         if(!canMessage.msg_id == RSensorDataFromSensor) {
-            MotorDriveFromSensors(true, false, false, false, false, 1, 0);
+            MotorDriveFromSensors(true, false, false, false, false, SpeedLevel3, 0);
         }
     }
+    //DecisionAlgorithm(canMessage);
 
     //Recover from CAN Bus off at 10Hz
     if (CAN_is_bus_off(can1))

@@ -41,19 +41,32 @@ void CANInitialization()
     CAN_setup_filter(canMessagesFilterList, 8, groupList, 2, NULL, 0, NULL, 0);
 }
 
-void CANTransmission(can_msg_t canMessageBlock)
+
+void CANTransmission(can_msg_t canMessageBlock)/*uint32_t msg_id, uint8_t* data, uint32_t length*/
 {
-    if(CAN_tx(can1, &canMessageBlock, 0))
+/*    can_msg_t canMessageBlock;
+    uint8_t i;
+    canMessageBlock.msg_id = msg_id;
+    canMessageBlock.frame_fields.is_29bit = 0;
+    canMessageBlock.frame_fields.data_len = length;*/
+
+/*    for (i = 0; i < length; i++)
+    {*/
+    //canMessageBlock.data.bytes = data;
+    //}
+    CAN_tx(can1,&canMessageBlock, 0);
+
+/*    if(CAN_tx(can1, &canMessageBlock, 0))
     {
-        /*LE.toggle(3);
-        LE.off(4);*/
+        LE.toggle(3);
+        LE.off(4);
     }
     else
     {
         //LOG_ERROR("Message %d not transmitted", canMessageBlock.msg_id);
-        /*LE.toggle(4);
-        LE.off(3);*/
-    }
+        LE.toggle(4);
+        LE.off(3);
+    }*/
 }
 
 bool CANReception(can_msg_t& canMessageBlock)
@@ -64,11 +77,37 @@ bool CANReception(can_msg_t& canMessageBlock)
         switch (canMessageBlock.msg_id)
         {
             case RSensorDataFromSensor:
-                //SensorData = canMessageBlock;
-                //DecisionAlgorithm(canMessageBlock);
+                SensorData receivedSensorData;
+/*                receivedSensorData.FrontDistance    = canMessageBlock.data.words[0];
+                receivedSensorData.LeftDistance     = canMessageBlock.data.words[1];
+                receivedSensorData.RightDistance    = canMessageBlock.data.words[2];
+                receivedSensorData.RearDistance     = canMessageBlock.data.words[3];*/
+                receivedSensorData.FrontDistance    = canMessageBlock.data.bytes[0];
+                receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
+                receivedSensorData.RightDistance    = canMessageBlock.data.bytes[2];
+                receivedSensorData.RearDistance     = canMessageBlock.data.bytes[3];
+                SensorProcessingAlgorithm(receivedSensorData);
                 break;
 
             case RKillMessageFromAndroid:
+                SendKillMessageToAllControllers();
+                break;
+
+            case RBootReplyFromAndroid:
+
+                break;
+
+            case RBootReplyFromGeo:
+                break;
+
+            case RBootReplyFromMotor:
+                break;
+
+            case RBootReplyFromSensor:
+                break;
+
+            default:
+                MotorDriveFromSensors(true, false, false, false, false, SpeedLevel3, 0);
                 break;
         }
         return true;

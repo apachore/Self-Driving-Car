@@ -61,6 +61,6 @@ void MotorDriveFromSensor(bool motorStraight, bool motorReverse, bool motorLeft,
     }
 
     canMessage.msg_id = TMotorControlToMotor;
-    CANTransmission(canMessage);
+    //CANTransmission(canMessage.msg_id, &canMessage.data.bytes[0], 4);
 }
 
