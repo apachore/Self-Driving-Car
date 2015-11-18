@@ -16,24 +16,13 @@
         android:text="@string/button_car_connect"
         android:onClick="openCarConnect"/>
 
-
-    <!--Button for Drive mode -->
     <Button
-        android:id="@+id/drive_mode"
+        android:id="@+id/map_mode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="@string/button_map_mode"
         android:layout_below="@+id/car_connect"
-        android:text="@string/button_drive_mode"
-        android:onClick="openDriveModes"/>
-
-    <!--Button for App usage guide-->
-    <Button
-        android:id="@+id/help"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/drive_mode"
-        android:text="@string/button_help"
-        android:onClick="openHelp"/>
+        android:onClick="openMapMode"/>
 
 
 </RelativeLayout>

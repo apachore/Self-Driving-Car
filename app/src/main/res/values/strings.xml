@@ -7,23 +7,15 @@
         <string name="edit_message">Enter a message</string>
         <string name="button_send">Send</string>
     -->
-    <string name="title_activity_display_message">My Message</string>
-    <string name="action_search"></string>
-    <string name="title_activity_maps">Map</string>
+     <string name="title_activity_maps">Map</string>
     <!--
         <string name="button_maps">Map</string>
     -->
 
-    <string name="button_drive_mode">Drive modes</string>
-    <string name="button_help">Help</string>
     <string name="button_car_connect">Car connect</string>
 
-    <string name="hello_world">Hello world!</string>
 
     <string name="button_map_mode">Map Navigation</string>
-    <string name="button_free_run">Free Run</string>
-    <string name="title_activity_drive_modes">Drive Modes</string>
-    <string name="title_activity_free_run">Free Run</string>
 
     <string name="button_start">Start</string>
     <string name="button_monitor">Monitor</string>

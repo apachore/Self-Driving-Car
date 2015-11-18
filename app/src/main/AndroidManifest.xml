@@ -38,31 +38,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".DisplayMessageActivity"
-            android:label="@string/title_activity_display_message"
-            android:parentActivityName=".MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="minion.autodrive.MainActivity" />
-        </activity>
 
-        <activity
-            android:name=".DriveModesActivity"
-            android:label="@string/title_activity_drive_modes"
-            android:parentActivityName=".MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="minion.autodrive.MainActivity" />
-        </activity>
-        <activity
-            android:name=".FreeRunActivity"
-            android:label="@string/title_activity_free_run"
-            android:parentActivityName=".DriveModesActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="minion.autodrive.DriveModesActivity" />
-        </activity>
+
         <activity
             android:name=".BluetoothActivity"
             android:label="@string/title_activity_bluetooth"
@@ -96,7 +73,7 @@
             android:label="@string/title_activity_maps1" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="minion.autodrive.DriveModesActivity" />
+                android:value="minion.autodrive.MainActivity" />
         </activity>
     </application>
 
