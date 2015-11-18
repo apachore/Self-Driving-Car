@@ -9,6 +9,7 @@
 #define L5_APPLICATION_CAN_COMMS_HPP_
 
 #include "stdio.h"
+#include "can.h"
 /*
  *
  * Message ids that shall be accepted and transmitted by IO module
@@ -65,6 +66,12 @@ typedef enum
          float Latitude;
          float Longitude;
  } Geo_Data;
-
+typedef struct
+{
+   can_msg_t canReceivedData;
+   can_msg_t canReceivedMsg_gps1;
+   can_msg_t canReceivedMsg_gps2;
+   can_msg_t canReceivedMsg_Sensor;
+}Can_msg;
 
 #endif /* L5_APPLICATION_CAN_COMMS_HPP_ */

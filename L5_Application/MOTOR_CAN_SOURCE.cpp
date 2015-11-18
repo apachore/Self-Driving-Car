@@ -14,14 +14,12 @@
 #include "file_logger.h"
 #include "string.h"
 #include "stdlib.h"
+#include "can_comms.hpp"
 
 
 
 QueueHandle_t Master_Motor_q;
-int final_dist_remaining;
-float gps_longitude;
-float gps_latitude;
-uint8_t sensor_data[4];
+Can_msg Message;
 
 void BusOffCb(uint32_t param)
 {
@@ -108,12 +106,13 @@ void Receiver_message()
         switch(rx_msg.msg_id)
         {
             case 0x210:
-                sensor_data[0] =rx_msg.data.bytes[0];
+               /* sensor_data[0] =rx_msg.data.bytes[0];
                 sensor_data[1] =rx_msg.data.bytes[1];
                 puts("sensor data received");
                 LE.toggle(2);
                 sensor_data[2] =rx_msg.data.bytes[2];
-                sensor_data[3] =rx_msg.data.bytes[3];
+                sensor_data[3] =rx_msg.data.bytes[3];*/
+                Message.canReceivedMsg_Sensor=rx_msg;
             break;
             case 0x220:
             LE.toggle(3);
@@ -131,11 +130,14 @@ void Receiver_message()
 
            break;
             case 0x240:
-                memcpy(&gps_latitude,&rx_msg.data.dwords[0],4);
-                memcpy(&gps_longitude,&rx_msg.data.dwords[1],4);
+            /*    memcpy(&gps_latitude,&rx_msg.data.dwords[0],4);
+                memcpy(&gps_longitude,&rx_msg.data.dwords[1],4);*/
+                Message.canReceivedMsg_gps1=rx_msg;
+
                break;
             case 0x250:
-                memcpy(&final_dist_remaining,&rx_msg.data.words[0],2);
+              //  memcpy(&final_dist_remaining,&rx_msg.data.words[0],2);
+                Message.canReceivedMsg_gps2=rx_msg;
 
 
                break;

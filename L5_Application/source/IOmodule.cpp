@@ -19,11 +19,13 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "IOmodule.hpp"
+#include "can_comms.hpp"
 
-extern float gps_latitude;
-extern float gps_longitude;
-extern int final_dist_remaining;
-extern uint8_t sensor_data[4];
+float gps_latitude;
+float gps_longitude;
+int final_dist_remaining;
+extern Can_msg Message;
+uint8_t sensor_data[4];
 
 Uart2 &u2 = Uart2 ::getInstance();
 
@@ -39,10 +41,17 @@ puts("uart init\n");
 void LCDdisplay()
 {
     char a1[6],a2[6],a3[6],a4[3],a5[3],a6[3],a7[3],a8[10];
+  /*  sensor_data[0] =Message.canReceivedMsg_Sensor.data.bytes[0];
+    sensor_data[1] =Message.canReceivedMsg_Sensor.data.bytes[1];
+    sensor_data[2] =Message.canReceivedMsg_Sensor.data.bytes[2];
+    sensor_data[3] =Message.canReceivedMsg_Sensor.data.bytes[3];*/
     sensor_data[0]=88;
     sensor_data[1]=126;
     sensor_data[2]=9;
     sensor_data[3]=8;
+   /* gps_latitude=Message.canReceivedMsg_gps1.data.dwords[0];
+    gps_longitude=Message.canReceivedMsg_gps1.data.dwords[1];
+    final_dist_remaining=Message.canReceivedMsg_gps2.data.words[0];*/
     gps_longitude =24.45;
     gps_latitude=7.89;
     final_dist_remaining=63;
