@@ -30,6 +30,9 @@
     <string name="button_pause">Pause</string>
     <string name="button_stop">Stop</string>
 
+    <string name="toggle_turn_on">Stop</string>
+    <string name="toggle_turn_off">Run</string>
+
     <string name="label_speed">Set speed</string>
     <string name="title_activity_bluetooth">BluetoothActivity</string>
 

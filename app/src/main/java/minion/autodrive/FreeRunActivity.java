@@ -75,41 +75,12 @@ public class FreeRunActivity extends ActionBarActivity {
         textInfo = (TextView)findViewById(R.id.info);
         listViewPairedDevice = (ListView)findViewById(R.id.pairedlist);
         inputPane = (LinearLayout)findViewById(R.id.inputpane);
-        //inputField = (EditText)findViewById(R.id.input);
-        //btnSend = (Button)findViewById(R.id.send);
-        /*btnSend.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-                if(myThreadConnected!=null){
-                    byte[] bytesToSend = inputField.getText().toString().getBytes();
-                    myThreadConnected.write(bytesToSend);
-                    byte[] NewLine = "\n".getBytes();
-                    myThreadConnected.write(NewLine);
-                }
-            }});*/
-
-        //btnClear = (Button)findViewById(R.id.clear);
-/*
-        btnClear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //textStatus.setText("");
-                //textByteCnt.setText("");
-            }
-        });
-*/
 
         dashboard=(RelativeLayout)findViewById(R.id.dashboard);
         latitude=(TextView)findViewById(R.id.latitude);
         latinput=(EditText)findViewById(R.id.latinput);
         longitude=(TextView)findViewById(R.id.longitude);
         loninput=(EditText)findViewById(R.id.loninput);
-
-/*
-        speed=(TextView)findViewById(R.id.speed);
-        speedinput=(EditText)findViewById(R.id.speedinput);
-*/
 
         monitor=(Button)findViewById(R.id.monitor);
         monitor.setOnClickListener(new View.OnClickListener(){

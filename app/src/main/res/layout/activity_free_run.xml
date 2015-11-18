@@ -30,23 +30,6 @@
 
             />
 
-        <!--<EditText
-            android:id="@+id/input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-        <Button
-            android:id="@+id/send"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Sent"/>
-        <Button
-            android:id="@+id/clear"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Clear"/>
--->
-
-
         <RelativeLayout
             android:id="@+id/dashboard"
             android:layout_width="match_parent"
