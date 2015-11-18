@@ -58,12 +58,22 @@ void period_1Hz(void)
 
 void period_10Hz(void)
 {
+    if(CAN_is_bus_off(can1))
+    {
+        CAN_reset_bus(can1);
+        //  LE.toggle(2);
+    }
     sensor_compute();  //LE.on(1);//sensorTask_run();
+    sensor_compute();
+    sensor_compute();
+    sensor_compute();
+    sensor_compute();
+    sensor_compute();
 }
 
 void period_100Hz(void)
 {
-    //sensor_compute();
+  //  sensor_compute();
     //LE.toggle(3);
 }
 

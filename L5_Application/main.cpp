@@ -44,10 +44,10 @@
 int main(void)
 {
     int flag_init =0;
-    if(flag_init ==0)
+    if(flag_init == 0)
     {
         sensor_init();
-        flag_init =1;
+        flag_init = 1;
     }
 
      /**
@@ -73,10 +73,6 @@ int main(void)
 //    #if 1
 //    scheduler_add_task(new sensorTask(PRIORITY_CRITICAL));
 //    #endif
-    /* Change "#if 0" t "#if 1" to runCAN msg task*/
-    #if 0
-    scheduler_add_task(new CANTask(PRIORITY_CRITICAL));
-    #endif
     /* Change "#if 0" t "#if 1" to run period tasks; @see period_callbacks.cpp */
     #if 1
     scheduler_add_task(new periodicSchedulerTask());
