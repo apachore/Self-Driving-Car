@@ -23,5 +23,6 @@ void DecisionAlgorithm(can_msg_t canData);
 void SendKillMessageToAllControllers();
 void SystemInitialization();
 void AndroidReceivingProcessing();
+void GeoDecision(uint8_t angle,uint8_t turn);
 
 #endif /* L5_APPLICATION_SOURCE_MAINMASTERALGORITHM_H_ */

@@ -77,6 +77,13 @@ bool CANReception(can_msg_t& canMessageBlock)
                 SensorProcessingAlgorithm(receivedSensorData);
                 break;
 
+            case RHeadingAndBearingToGeo:
+                GeoData geoReceivedData;
+                geoReceivedData.HeadingAngle = canMessageBlock.data.bytes[0];
+                geoReceivedData.BearingAngle = canMessageBlock.data.bytes[1];
+                printf("%d %d",canMessageBlock.data.bytes[0],canMessageBlock.data.bytes[1]);
+                GeoDecision(geoReceivedData.HeadingAngle,geoReceivedData.BearingAngle);
+                break;
             case RKillMessageFromAndroid:
                 SendKillMessageToAllControllers();
                 break;
