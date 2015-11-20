@@ -41,15 +41,15 @@ void CANInitialization()
 }
 
 
-void CANTransmission(uint32_t msg_id, uint64_t* data, uint32_t length)
+void CANTransmission(uint32_t msg_id, uint8_t* data, uint32_t length)
 {
     can_msg_t canMessageBlock = {0};
     uint8_t i;
     canMessageBlock.msg_id = msg_id;
     canMessageBlock.frame_fields.is_29bit = 0;
     canMessageBlock.frame_fields.data_len = length;
-    canMessageBlock.data.bytes[0] = data;
-    canMessageBlock.data.qword = data;
+    canMessageBlock.data.bytes[0] = data[0];
+    //canMessageBlock.data.qword = data[0];
 
     CAN_tx(can1,&canMessageBlock, 0);
 

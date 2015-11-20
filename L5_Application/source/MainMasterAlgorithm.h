@@ -22,5 +22,6 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData);
 void DecisionAlgorithm(can_msg_t canData);
 void SendKillMessageToAllControllers();
 void SystemInitialization();
+void AndroidReceivingProcessing();
 
 #endif /* L5_APPLICATION_SOURCE_MAINMASTERALGORITHM_H_ */

@@ -252,3 +252,8 @@ void SystemInitialization()
 {
     //CANTransmission(TBootRequestToAll, NULL, 0);
 }
+
+void AndroidReceivingProcessing()
+{
+
+}
