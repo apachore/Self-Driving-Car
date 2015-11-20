@@ -15,8 +15,7 @@
 #include "scheduler_task.hpp"
 #include "MainMasterAlgorithm.h"
 #include "file_logger.h"
-
-QueueHandle_t receivedDataQueue;
+#include "string.h"
 
 // XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
 // XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
@@ -42,31 +41,19 @@ void CANInitialization()
 }
 
 
-void CANTransmission(can_msg_t canMessageBlock)/*uint32_t msg_id, uint8_t* data, uint32_t length*/
+void CANTransmission(uint32_t msg_id, uint64_t* data, uint32_t length)
 {
-/*    can_msg_t canMessageBlock;
+    can_msg_t canMessageBlock = {0};
     uint8_t i;
     canMessageBlock.msg_id = msg_id;
     canMessageBlock.frame_fields.is_29bit = 0;
-    canMessageBlock.frame_fields.data_len = length;*/
+    canMessageBlock.frame_fields.data_len = length;
+    canMessageBlock.data.bytes[0] = data;
+    canMessageBlock.data.qword = data;
 
-/*    for (i = 0; i < length; i++)
-    {*/
-    //canMessageBlock.data.bytes = data;
-    //}
     CAN_tx(can1,&canMessageBlock, 0);
 
-/*    if(CAN_tx(can1, &canMessageBlock, 0))
-    {
-        LE.toggle(3);
-        LE.off(4);
-    }
-    else
-    {
-        //LOG_ERROR("Message %d not transmitted", canMessageBlock.msg_id);
-        LE.toggle(4);
-        LE.off(3);
-    }*/
+    //LOG_ERROR("Message %d not transmitted", canMessageBlock.msg_id);
 }
 
 bool CANReception(can_msg_t& canMessageBlock)
@@ -86,6 +73,7 @@ bool CANReception(can_msg_t& canMessageBlock)
                 receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
                 receivedSensorData.RightDistance    = canMessageBlock.data.bytes[2];
                 receivedSensorData.RearDistance     = canMessageBlock.data.bytes[3];
+                memcpy(&receivedSensorData, &canMessageBlock.data, sizeof(receivedSensorData));
                 SensorProcessingAlgorithm(receivedSensorData);
                 break;
 

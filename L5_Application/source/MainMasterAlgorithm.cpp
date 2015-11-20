@@ -72,9 +72,9 @@ void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, b
         canMessage.data.bytes[1] = levelOfDirection;
     }
 
-    ///printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
-    CANTransmission(canMessage);
-    //CANTransmission(canMessage.msg_id, &canMessage.data.bytes[0], 4);
+    printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
+    //CANTransmission(canMessage);
+    CANTransmission(canMessage.msg_id, &canMessage.data.bytes[0], 4);
 }
 
 void SensorProcessingAlgorithm(SensorData receivedSensorData)

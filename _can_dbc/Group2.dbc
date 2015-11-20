@@ -35,8 +35,17 @@ BS_:
 
 BU_: NOONE SENSOR MASTER MOTORIO ANDROID GEO
 
-BO_ 100 HEARTBEAT: 1 MASTER
- SG_ MASTER_HEARTBEAT_cmd : 0|8@1+ (1,0) [0|0] "" SENSOR,MOTORIO
+BO_ 010 HEARTBEAT: 1 ANDROID
+ SG_ ANDROID_HEARTBEAT_cmd : 0|8@1+ (1,0) [0|0] "" MASTER
+ 
+BO_ 280 HEARTBEAT_: 1 MOTORIO
+ SG_ MOTORIO_HEARTBEAT_cmd : 0|8@1+ (1,0) [0|0] "" MASTER
+ 
+BO_ 281 HEARTBEAT: 1 GEO
+ SG_ GEO_HEARTBEAT_cmd : 0|8@1+ (1,0) [0|0] "" MASTER
+ 
+BO_ 283 HEARTBEAT: 1 SENSOR
+ SG_ SENSOR_HEARTBEAT_cmd : 0|8@1+ (1,0) [0|0] "" MASTER
 
 BO_ 210 SONARS: 4 SENSOR
  SG_ SENSOR_SONARS_FrontDistance : 0|8@1+ (1,0) [0|0] "" MASTER,MOTORIO
@@ -45,19 +54,27 @@ BO_ 210 SONARS: 4 SENSOR
  SG_ SENSOR_SONARS_RearDistance : 24|12@1+ (1,0) [0|0] "" MASTER,MOTORIO
 
 BO_ 220 MOTORIO_CMD: 4 MASTER
- SG_ MOTORIO_CMD_leftRightdirection : 0|8@1+ (1,0) [0|0] "" MOTORIO
- SG_ MOTORIO_CMD_levelOfDirection : 8|8@1+ (1,0) [0|0] "" MOTORIO
- SG_ MOTORIO_CMD_frontBackDirection : 16|8@1+(1,0) [0|0] "" MOTORIO
- SG_ MOTORIO_CMD_levelOfSpeed : 24|8@1+ (1,0) [0|0] "" MOTORIO
+ SG_ MOTORIO_CMD_LeftRightdirection : 0|8@1+ (1,0) [0|0] "" MOTORIO
+ SG_ MOTORIO_CMD_LevelOfDirection : 8|8@1+ (1,0) [0|0] "" MOTORIO
+ SG_ MOTORIO_CMD_FrontBackDirection : 16|8@1+ (1,0) [0|0] "" MOTORIO
+ SG_ MOTORIO_CMD_LevelOfSpeed : 24|8@1+ (1,0) [0|0] "" MOTORIO
  
- BO_ 260 TURN_ANGLE_DIRECTION: 4 GEO
+BO_ 250 DISTANCE: 4 GEO
+ SG_ DISTANCE_FinalDistance : 0|16@1+ (1,0) [0|0] "" MASTER
+ SG_ DISTANCE_CheckpointDistance : 16|16@1+ (1,0) [0|0] "" MASTER
+
+BO_ 260 TURN_ANGLE_DIRECTION: 2 GEO
  SG_ TURN_ANGLE_DIRECTION_TurnAngle : 0|8@1+ (1,0) [0|0] "" MASTER
  SG_ TURN_ANGLE_DIRECTION_TurnDirection : 8|8@1+ (1,0) [0|0] "" MASTER
+ 
+BO_ 270 RUN_PAUSE: 1 ANDROID
+ SG_ RUN_PAUSE : 0|8@1+ (1,0) [0|0] "" MASTER
 
 CM_ BU_ NOONE "No node, used to indicate if it's a debug message going to no one";
-CM_ BU_ MASTER "The master controller driving the car";
-CM_ BU_ SENSOR "The sensor controller of the car";
-CM_ BU_ MOTORIO "The MOTORIO controller of the car";
+CM_ BU_ MASTER "The Master controller driving the car";
+CM_ BU_ SENSOR "The Sensor controller of the car";
+CM_ BU_ MOTORIO "The Motor-IO controller of the car";
+CM_ BU_ ANDROID "The Android controller of the car";
 CM_ BO_ 100 "Sync message used to synchronize the controllers";
 
 BA_DEF_  "BusType" STRING ;
