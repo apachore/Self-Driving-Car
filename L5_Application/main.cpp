@@ -19,29 +19,38 @@
 /**
  * @file
  * @brief This is the application entry point.
- * 			FreeRTOS and stdio printf is pre-configured to use uart0_min.h before main() enters.
- * 			@see L0_LowLevel/lpc_sys.h if you wish to override printf/scanf functions.
+ *          FreeRTOS and stdio printf is pre-configured to use uart0_min.h before main() enters.
+ *          @see L0_LowLevel/lpc_sys.h if you wish to override printf/scanf functions.
  *
  */
+#include <source/bluetooth.hpp>
+#include <source/bluetooth.hpp>
 #include "tasks.hpp"
 #include "examples/examples.hpp"
+#include <stdio.h>
+#include "utilities.h"
+#include "io.hpp"
+#include "eint.h"
+#include "gpio.hpp"
+#include "LPC17xx.h"
+#include"light_sensor.hpp"
+#include "uart2.hpp"
+#include "ff.h"
+#include "uart0.hpp"
+#include "uart0_min.h"
+#include "uart3.hpp"
+#include "uart_dev.hpp"
+#include "can.h"
+#include "scheduler_task.hpp"
 
-/**
- * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
- * for details.  There is a very simple example towards the beginning of this class's declaration.
- *
- * @warning SPI #1 bus usage notes (interfaced to SD & Flash):
- *      - You can read/write files from multiple tasks because it automatically goes through SPI semaphore.
- *      - If you are going to use the SPI Bus in a FreeRTOS task, you need to use the API at L4_IO/fat/spi_sem.h
- *
- * @warning SPI #0 usage notes (Nordic wireless)
- *      - This bus is more tricky to use because if FreeRTOS is not running, the RIT interrupt may use the bus.
- *      - If FreeRTOS is running, then wireless task may use it.
- *        In either case, you should avoid using this bus or interfacing to external components because
- *        there is no semaphore configured for this bus and it should be used exclusively by nordic wireless.
- */
+#include "source/can_transmission_reception.h"
+#include "source/bluetooth.hpp"
+
+
 int main(void)
 {
+    CANInitialization();
+
     /**
      * A few basic tasks for this bare-bone system :
      *      1.  Terminal task provides gateway to interact with the board through UART terminal.
@@ -57,13 +66,8 @@ int main(void)
     /* Consumes very little CPU, but need highest priority to handle mesh network ACKs */
     scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
 
-    /* Change "#if 0" to "#if 1" to run period tasks; @see period_callbacks.cpp */
-    #if 0
-    scheduler_add_task(new periodicSchedulerTask());
-    #endif
-
     /* The task for the IR receiver */
-    // scheduler_add_task(new remoteTask  (PRIORITY_LOW));
+    scheduler_add_task(new remoteTask(PRIORITY_LOW));
 
     /* Your tasks should probably used PRIORITY_MEDIUM or PRIORITY_LOW because you want the terminal
      * task to always be responsive so you can poke around in case something goes wrong.
@@ -73,37 +77,37 @@ int main(void)
      * This is a the board demonstration task that can be used to test the board.
      * This also shows you how to send a wireless packets to other boards.
      */
-    #if 0
-        scheduler_add_task(new example_io_demo());
-    #endif
+    //#if 0
+        //scheduler_add_task(new example_io_demo());
+    //#endif
 
     /**
      * Change "#if 0" to "#if 1" to enable examples.
      * Try these examples one at a time.
      */
-    #if 0
-        scheduler_add_task(new example_task());
-        scheduler_add_task(new example_alarm());
-        scheduler_add_task(new example_logger_qset());
-        scheduler_add_task(new example_nv_vars());
-    #endif
+    //#if 0
+        //scheduler_add_task(new example_task());
+        //scheduler_add_task(new example_alarm());
+        //scheduler_add_task(new example_logger_qset());
+        //scheduler_add_task(new example_nv_vars());
+    //#endif
 
     /**
-	 * Try the rx / tx tasks together to see how they queue data to each other.
-	 */
-    #if 0
-        scheduler_add_task(new queue_tx());
-        scheduler_add_task(new queue_rx());
-    #endif
+     * Try the rx / tx tasks together to see how they queue data to each other.
+     */
+    //#if 0
+        //scheduler_add_task(new queue_tx());
+        //scheduler_add_task(new queue_rx());
+    //#endif
 
     /**
      * Another example of shared handles and producer/consumer using a queue.
      * In this example, producer will produce as fast as the consumer can consume.
      */
-    #if 0
-        scheduler_add_task(new producer());
-        scheduler_add_task(new consumer());
-    #endif
+    //#if 0
+        //scheduler_add_task(new producer());
+        //scheduler_add_task(new consumer());
+    //#endif
 
     /**
      * If you have RN-XV on your board, you can connect to Wifi using this task.
@@ -117,12 +121,21 @@ int main(void)
      *     addCommandChannel(Uart3::getInstance(), false);
      * @endcode
      */
-    #if 0
-        Uart3 &u3 = Uart3::getInstance();
-        u3.init(WIFI_BAUD_RATE, WIFI_RXQ_SIZE, WIFI_TXQ_SIZE);
-        scheduler_add_task(new wifiTask(Uart3::getInstance(), PRIORITY_LOW));
-    #endif
+    //#if 0
+       // Uart3 &u3 = Uart3::getInstance();
+        //u3.init(WIFI_BAUD_RATE, WIFI_RXQ_SIZE, WIFI_TXQ_SIZE);
+        //scheduler_add_task(new wifiTask(Uart3::getInstance(), PRIORITY_LOW));
+    //#endif
+   // GPIO p2_wire0;
+   // p2_wire0.setAsInput();
 
-    scheduler_start(); ///< This shouldn't return
-    return -1;
+        //scheduler_start(); ///< This shouldn't return
+        //scheduler_add_task(new CanBus(PRIORITY_MEDIUM)); //for can
+
+    scheduler_add_task(new bluetoothTask(PRIORITY_HIGH));
+
+    //scheduler_add_task(new hw_Task(PRIORITY_HIGH));
+         scheduler_start(); ///< This shouldn't return
+        return -1;
+
 }
