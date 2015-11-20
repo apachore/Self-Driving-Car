@@ -31,16 +31,18 @@ Uart2 &u2 = Uart2 ::getInstance();
 
 void UARTInitialization()
 {
-puts("uart init\n");
+//puts("uart init\n");
    static const int io_rx_q_size = 32;
    static const int io_tx_q_size = 32;
    u2.init(9600, io_rx_q_size, io_tx_q_size);
-   u2.putline("FO");
+   u2.put("FO");
 
 }
 void LCDdisplay()
 {
-    char a1[6],a2[6],a3[6],a4[3],a5[3],a6[3],a7[3],a8[10];
+    char a1[6],a2[6],a3[6],a4[3],a5[3],a6[3],a7[3],a8[10],a11[5];
+    int i;
+    char s=32;
   /*  sensor_data[0] =Message.canReceivedMsg_Sensor.data.bytes[0];
     sensor_data[1] =Message.canReceivedMsg_Sensor.data.bytes[1];
     sensor_data[2] =Message.canReceivedMsg_Sensor.data.bytes[2];
@@ -62,21 +64,29 @@ void LCDdisplay()
     snprintf(a5,4,"%d",sensor_data[1]);
     snprintf(a6,4,"%d",sensor_data[2]);
     snprintf(a7,4,"%d",sensor_data[3]);
-    u2.putline("F_dist");
-    u2.putline(a4);
-    u2.putline("Rr_dist");
-    u2.putline(a5);
-    u2.putline("L_dist");
-    u2.putline(a6);
-    u2.putline("Rt_dist");
-    u2.putline(a7);
-    u2.putline("gps_lat");
-    u2.putline(a1);
-    u2.putline("gps_long");
-    u2.putline(a2);
-    u2.putline("dist_remain");
-    u2.putline(a3);
-
+  //   u2.put("MINION");
+    // u2.putChar(s);
+    u2.put("F:");
+    u2.put(a4);
+    u2.putChar(s);
+    u2.put("B:");
+    u2.put(a5);
+    u2.putChar(s);
+    u2.put("L:");
+    u2.put(a6);
+    u2.putChar(s);
+    u2.put("R:");
+    u2.put(a7);
+    u2.putChar(s);
+    u2.put("LT:");
+    u2.put(a1);
+    u2.putChar(s);
+    u2.put("LG:");
+    u2.put(a2);
+    u2.putChar(s);
+    u2.put("DS:");
+    u2.put(a3);
+    u2.putChar(s);
 }
 
 

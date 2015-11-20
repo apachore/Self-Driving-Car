@@ -45,7 +45,7 @@ const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 void period_1Hz(void)
 {
     //LE.toggle(1);
-    puts("entered 1hz task\n");
+  //  puts("entered 1hz task\n");
     LCDdisplay();
 }
 

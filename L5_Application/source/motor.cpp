@@ -48,14 +48,14 @@ bool MotorTask::run(void *p)
     if (xQueueReceive(receivedDataQueue, &canReceivedData, 0))
     {
 
-       // LE.toggle(4);
+        LE.toggle(4);
         servo_control = canReceivedData.data.bytes[0];
         servo_level = canReceivedData.data.bytes[1];
         DC_control = canReceivedData.data.bytes[2];
         DC_level = canReceivedData.data.bytes[3];
 
-//        printf("\nDC: Control %x, Level %x",DC_control,DC_level);
-//        printf("\nServo: Control %x, Level %x",servo_control,servo_level);
+        printf("\nDC: Control %x, Level %x",servo_control,servo_level);
+        printf("\nServo: Control %x, Level %x",DC_control,DC_level);
 
 #if(0)
         if (just < 5)

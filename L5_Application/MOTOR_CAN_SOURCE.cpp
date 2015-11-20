@@ -102,7 +102,8 @@ void Receiver_message()
     can_msg_t rx_msg;
     if(CAN_rx(can1, &rx_msg, 10))
     {
-        LE.on(1);
+       // LE.on(1);
+      //  puts("can received\n");
         switch(rx_msg.msg_id)
         {
             case 0x210:
@@ -113,14 +114,16 @@ void Receiver_message()
                 sensor_data[2] =rx_msg.data.bytes[2];
                 sensor_data[3] =rx_msg.data.bytes[3];*/
                 Message.canReceivedMsg_Sensor=rx_msg;
+              //  puts(" can 210 received\n");
             break;
             case 0x220:
-            LE.toggle(3);
+         //   LE.toggle(3);
+            puts(" can 220 received\n");
             //printf("%x", rx_msg.msg_id);
             //printf("%x", rx_msg.data.bytes[1]);
             if(!xQueueSend(Master_Motor_q, &rx_msg, 0))
             {
-               // LE.toggle(2);
+                LE.toggle(2);
               //printf("Queue Full\n");
             }
             else
@@ -133,13 +136,14 @@ void Receiver_message()
             /*    memcpy(&gps_latitude,&rx_msg.data.dwords[0],4);
                 memcpy(&gps_longitude,&rx_msg.data.dwords[1],4);*/
                 Message.canReceivedMsg_gps1=rx_msg;
+                puts("sensor can 240 received\n");
 
                break;
             case 0x250:
               //  memcpy(&final_dist_remaining,&rx_msg.data.words[0],2);
                 Message.canReceivedMsg_gps2=rx_msg;
 
-
+                puts("sensor can 250 received\n");
                break;
 
            default:
