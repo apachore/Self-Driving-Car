@@ -38,7 +38,7 @@
 
 /// This is the stack size used for each of the period tasks
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
-int heading;
+uint16_t heading;
 extern uint16_t current_bearing;
 
 /// Called once before the RTOS is started, this is a good place to initialize things once
@@ -74,7 +74,7 @@ void period_10Hz(void)
 void period_100Hz(void)
 {
         heading = compassHeading();
-        current_bearing = 0;
+//        current_bearing = 0;
         masterTurnAngle(heading,current_bearing);
 //    CANReception();
 //    CANMessageProcessing();

@@ -140,12 +140,12 @@ float compassCalibration(float headingNotCalibrated)
 	return headingCalibrated;
 }
 
-void masterTurnAngle(int sourceAngle, int destinationAngle)
+void masterTurnAngle(uint16_t sourceAngle, uint16_t destinationAngle)
 {
 	/*"degree" is the angle to turn the car
 	  if "direction" is 1, car needs to turn anti clockwise
 	  if "direction" is 0, car needs to turn clockwise*/
-	int angle = 0;
+	uint16_t angle = 0;
 	if(destinationAngle > sourceAngle)
 	{
 		angle = destinationAngle - sourceAngle;
@@ -188,6 +188,4 @@ void masterTurnAngle(int sourceAngle, int destinationAngle)
 	{
 	    LE.toggle(3);
 	}
-
-
 }

@@ -13,7 +13,7 @@
 extern bool BootReplySent;
 extern uint8_t Received_Checkpoint_Count;
 extern uint16_t Total_Distance_To_Travel;
-uint16_t current_bearing;
+uint16_t current_bearing=0;
 
 //Commented printf statements are added for testing purpose
 
