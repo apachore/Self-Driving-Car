@@ -9,8 +9,19 @@
 #ifndef L5_APPLICATION_GPS_HPP_
 #define L5_APPLICATION_GPS_HPP_
 
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <stdlib.h>
 #include "scheduler_task.hpp"
 #include "Uart3.hpp"
+#include "eint.h"
+#include "file_logger.h"
+#include "io.hpp"
+#include "storage.hpp"
+#include "handlers.hpp"
+
+#include "source/can_transmission_reception.h"
 
 #define Radius 20902231.64 //feet
 #define gps_uart_BaudRate 38400
@@ -35,6 +46,8 @@ float ToRadians(float);
 float ToDegrees(float);
 
 void GPS_Calculations();
+void copyLogtoMMCard();
+bool crtNewLogFile();
 
 class gpsTask : public scheduler_task
 {

@@ -19,8 +19,10 @@
 
 #include "gps.hpp"
 
+#define TestingWithoutAndroid 1
+
 bool BootReplySent; //Used as indication of system startup flag
-uint8_t Received_Checkpoint_Count;
+uint8_t Received_Checkpoint_Count=0;
 uint16_t Total_Distance_To_Travel;
 
 //CANTransmissionReception::
@@ -53,12 +55,45 @@ void CANInitialization()
     //CAN_bypass_filter_accept_all_msgs();
     CAN_reset_bus(can1);
 
+
+
     // Create a queue which would send the data to wherever received
 //    QueueHandle_t CAN_received_Data_Queue = xQueueCreate(50, sizeof(can_msg_t));
 //    scheduler_task::addSharedObject("CANreceivedMessagesQueue", CAN_received_Data_Queue);
 
     QueueHandle_t Checkpoint_Queue = xQueueCreate(100, sizeof(coordinates));
     scheduler_task::addSharedObject("CheckpointsQueue", Checkpoint_Queue);
+
+    /*Hard coded checkpoint are added to queue
+    instead of adding checkpoints from CAN receiver section*/
+#if TestingWithoutAndroid
+    coordinates checkpoint1[10];
+    uint8_t counter;
+    float lat[6] = {37.336401,37.336504,37.336582,37.336668,37.336767,37.336880};
+    float lon[6] = {-121.881673,-121.881455,-121.881302,-121.881154,-121.880916,-121.880793};
+    for (counter=0;counter<6;counter++)
+    {
+        checkpoint1[counter].latitude = lat[counter];
+        checkpoint1[counter].longitude = lon[counter];
+    }
+
+    for(counter=0;counter<6;counter++)
+    {
+        if (!xQueueSend(Checkpoint_Queue, &checkpoint1[counter], 0))
+        {
+            // unexpected led
+            //LE.toggle(2);//if checkpoints are not sent on queue LED will toggle
+            LOG_ERROR("Checkpoint Queue Send Failed");
+        }
+        else
+        {
+            Received_Checkpoint_Count++;
+            //LE.toggle(3);
+        }
+    }
+    Total_Distance_To_Travel = 350;
+#endif
+
 }
 
 //void CANTransmissionReception::
@@ -78,6 +113,7 @@ bool CANTransmit(uint32_t msg_id , uint8_t * data, uint32_t len)
     return(CAN_tx(can1,&tx,0));
 }
 
+
 //void CANTransmissionReception::
 void CANReception()
 {
@@ -85,7 +121,7 @@ void CANReception()
     can_msg_t canMessageReceivedBlock;
     QueueHandle_t Checkpoint_Queue = scheduler_task::getSharedObject("CheckpointsQueue");
 
-    if(CAN_rx(can1, &canMessageReceivedBlock, 0))
+    while(CAN_rx(can1, &canMessageReceivedBlock, 0))
     {
 
         switch (canMessageReceivedBlock.msg_id)
@@ -99,13 +135,13 @@ void CANReception()
                 if (!xQueueSend(Checkpoint_Queue, &checkpoint, 0))
                 {
                     // unexpected led
-                    LE.toggle(2);//if checkpoints are not sent on queue LED will toggle
+                    //LE.toggle(2);//if checkpoints are not sent on queue LED will toggle
                     LOG_ERROR("Checkpoint Queue Send Failed");
                 }
                 else
                 {
                     Received_Checkpoint_Count++;
-                    LE.toggle(3);
+                    //LE.toggle(3);
                 }
                 break;
 

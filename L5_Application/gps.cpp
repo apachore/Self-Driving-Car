@@ -7,19 +7,8 @@
 =============================================================================================
 */
 
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "gps.hpp"
-#include "eint.h"
-#include "uart3.hpp"
-#include "file_logger.h"
-#include "io.hpp"
-
-#include "source/can_transmission_reception.h"
-
+#include "handlers.hpp"
 
 extern bool BootReplySent;
 extern uint8_t Received_Checkpoint_Count;
@@ -27,6 +16,56 @@ extern uint16_t Total_Distance_To_Travel;
 uint16_t current_bearing;
 
 //Commented printf statements are added for testing purpose
+
+void copyLogtoMMCard()
+{
+    unsigned int readTimeMs = 0;
+    unsigned int writeTimeMs = 0;
+    unsigned int bytesTransferred = 0;
+    FRESULT copyStatus = Storage::copy("0:log.csv", "1:log.csv",
+            &readTimeMs, &writeTimeMs, &bytesTransferred);
+
+    if(FR_OK != copyStatus) {
+        printf("Error %u copying |%s| -> |%s|\n", copyStatus, "0:log.csv", "1:log.csv");
+    }
+    else {
+        printf("Finished!  Read: %u Kb/sec, Write: %u Kb/sec\n",
+                bytesTransferred/(0 == readTimeMs  ? 1 : readTimeMs),
+                bytesTransferred/(0 == writeTimeMs ? 1 : writeTimeMs));
+    }
+    LOG_FLUSH();
+    //printf("Delete '%s' : %s\n","0:log.csv", (FR_OK == f_unlink("0:log.csv")) ? "OK" : "ERROR");
+    //crtNewLogFile();
+
+}
+
+bool crtNewLogFile()
+{
+//    const char end_file = '~';
+//        int timeout_ms = OS_MS(10 * 10);
+
+        FIL file;
+        if (FR_OK != f_open(&file, "log.csv", FA_WRITE | FA_CREATE_ALWAYS)) {
+            printf("Unable to open '%s' to write the file\n", "log.csv");
+            return true;
+        }
+
+        char c = 0;
+        UINT bw = 0;
+        //printf("End the file by using %c character.  %i is the timeout\n", end_file, timeout_ms);
+        //printf("Sorry, no backspace support :(\n");
+
+        //while (getChar(&c, timeout_ms) && c != end_file) {
+            if (FR_OK != f_write(&file, &c, 1, &bw) || 1 != bw) {
+                printf("Error occurred while writing the file\n");
+            }
+//            else {
+//                putChar(c);
+//            }
+//        }
+
+        f_close(&file);
+}
 
 gpsTask::gpsTask(uint8_t priority) : scheduler_task("gps", 4*512, priority),
 gps_uart(Uart3::getInstance()),
@@ -119,7 +158,7 @@ bool gpsTask::run(void *p)
 
         //Get number of satellite locks
         sscanf(GPS_parsed_data[7],"%d",&satelite_connections);
-        LD.setNumber(satelite_connections);
+        //LD.setNumber(satelite_connections);
 
         /* If number satellite locks are valid then only proceed with coordinate
          * conversion to degrees and sending it over queue*/
@@ -183,31 +222,35 @@ void GPS_Calculations()
 {
     //gpsTask gpsTaskInstance()
     QueueHandle_t gps_data_q = scheduler_task::getSharedObject("gps_queue");
-    QueueHandle_t Checkpoint_q = scheduler_task::getSharedObject("CheckpointQueue");
+    QueueHandle_t Checkpoint_q = scheduler_task::getSharedObject("CheckpointsQueue");
     coordinates current_gps_data;
     Distance Current_Distances;
     //uint16_t Current_Checkpoint_Distance,Total_Distance_Remaining;
 
-    static uint16_t Previous_Checkpoint_Distnace,Total_Checkpoint_Distnace,Total_Distance_Traveled;
+    static uint16_t Previous_Checkpoint_Distnace=0;
+    static uint16_t Total_Checkpoint_Distnace=0;
+    static uint16_t Total_Distance_Traveled=0;
     static coordinates checkpoint;
     static bool Fetch_Checkpoint = 1;
     static bool first_after_cp_fetch;
     static uint8_t Fetched_Checkpoint_Count;
 
+    /*printf("Total_Distance_Traveled:%d \nTotal_Checkpoint_Distnace:%d \nPrevious_Checkpoint_Distnace:%d \nTotal_Distance_To_Travel:%d \n",
+            Total_Distance_Traveled,Total_Checkpoint_Distnace,Previous_Checkpoint_Distnace,Total_Distance_To_Travel);*/
     if (NULL == gps_data_q)
     {
         //light_up_the_project_blown_led();
     }
     else if (xQueueReceive(gps_data_q, &current_gps_data, 0))
     {
-        if (BootReplySent)
+        //if (BootReplySent)
         {
-            //LOG_INFO("Latitude: %f  Longitude: %f ",current_gps_data.latitude,current_gps_data.longitude);
+            LOG_INFO("Latitude: %f  Longitude: %f ",current_gps_data.latitude,current_gps_data.longitude);
             //LE.toggle(2);
             //printf("Latitude: %f\n",current_gps_data.latitude);
             //printf("Longitude: %f\n",current_gps_data.longitude);
 
-          CANTransmit(TSourceCoordinates,(uint8_t*)&current_gps_data,sizeof(coordinates));
+            CANTransmit(TSourceCoordinates,(uint8_t*)&current_gps_data,sizeof(coordinates));
 
             if (Fetch_Checkpoint)
             {
@@ -217,14 +260,18 @@ void GPS_Calculations()
                     Fetched_Checkpoint_Count++;
                     first_after_cp_fetch = 1;
                 }
+                else Fetch_Checkpoint = 1;
             }
+            LD.setNumber(Received_Checkpoint_Count-Fetched_Checkpoint_Count);
 
             if(!Fetch_Checkpoint)
             {
                 Current_Distances.Current_Checkpoint_Distance = calculateCheckpointDistance(checkpoint,current_gps_data);
-                //printf("Current Checkpoint Distance: %d feet\n",current_cp_distance);
+                LOG_INFO("Current Distance: %d",Current_Distances.Current_Checkpoint_Distance);
+                printf("Current Checkpoint Distance: %d feet\n",Current_Distances.Current_Checkpoint_Distance);
                 current_bearing = calculateBearing(checkpoint,current_gps_data);
-                //printf("Bearing: %d degrees\n",current_bearing);
+                LOG_INFO("Current Bearing: %d",current_bearing);
+                printf("Current Bearing: %d degrees\n",current_bearing);
                 if (first_after_cp_fetch)
                 {
                     Previous_Checkpoint_Distnace = Current_Distances.Current_Checkpoint_Distance;
@@ -239,8 +286,13 @@ void GPS_Calculations()
                     Fetch_Checkpoint = 1;
 
                 Total_Distance_Traveled = Total_Distance_Traveled + (Previous_Checkpoint_Distnace - Current_Distances.Current_Checkpoint_Distance);
+                LOG_INFO("Total Distance Traveled: %d",Total_Distance_Traveled);
+                printf("Total Distance Traveled: %d",Total_Distance_Traveled);
+
                 Previous_Checkpoint_Distnace = Current_Distances.Current_Checkpoint_Distance;
                 Current_Distances.Total_Distance_Remaining = Total_Distance_To_Travel - Total_Distance_Traveled;
+                LOG_INFO("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
+                printf("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
 
                 CANTransmit(TFinalAndNextCheckpointDistance,(uint8_t*)&Current_Distances,sizeof(Current_Distances));
             }

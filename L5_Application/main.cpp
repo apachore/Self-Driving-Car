@@ -51,6 +51,7 @@ int main(void)
     //canMessageBus.
     CANInitialization();
     compassInitialisation();
+    //copyLogtoMMCard();
     /**
      * A few basic tasks for this bare-bone system :
      *      1.  Terminal task provides gateway to interact with the board through UART terminal.
