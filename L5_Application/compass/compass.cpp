@@ -13,11 +13,13 @@
 #include "io.hpp"
 #include "source\can_communication_ids.h"
 #include "source\can_transmission_reception.h"
+#include "file_logger.h"
 
 
 extern I2C2& i2c;
 void compassInitialisation()
 {
+    void logger_init();
    /*Check if the i2c slave device is ready for operations*/
 	/*if the device is not ready, the onboard LED is switched on*/
 	if((i2c.checkDeviceResponse(DEVICEWRITEADDRESS)) == false)
@@ -31,6 +33,7 @@ void compassInitialisation()
 		i2c.init(I2CBAUDRATE);
 		compassWriteReg();
 	}
+
 }
 
 void compassWriteReg()
@@ -86,6 +89,7 @@ int compassHeading()
 	 headingRadians = headingRadians + MagneticDeclination;
 	 printf("Heading in radians: %f\n",headingRadians);
 
+
 	 /*Calibrate the compass for instrument error*/
 	 headingRadiansCalibrated = compassCalibration(headingRadians);
 
@@ -97,24 +101,41 @@ int compassHeading()
      int heading;
      heading = static_cast<int>(headingDegrees);
      printf("Heading in int: %i\n",heading);
+
+     LD.setNumber(heading);
+     LOG_INFO( "Heading: %d",heading);
 	 return heading;
 }
 
 float compassCalibration(float headingNotCalibrated)
 {
 	float headingCalibrated;
-	headingCalibrated = headingNotCalibrated + 0.267;
-	if(headingCalibrated < 0)
+	headingCalibrated = headingNotCalibrated + 0.050536;
+
+
+	if((headingCalibrated >= -3)&&(headingCalibrated <-2))
 	{
 		headingCalibrated = (headingCalibrated * 1.35)+ M_TWOPI;
+	}
+	else if((headingCalibrated >= -2)&&(headingCalibrated <-1))
+	{
+	    headingCalibrated = (headingCalibrated * 1.4);
+	}
+	else if((headingCalibrated >= -1)&&(headingCalibrated < 0))
+	{
+	        headingCalibrated = (headingCalibrated * 1.35);
 	}
 	else if((headingCalibrated >= 0)&&(headingCalibrated <=1))
 	{
 		return headingCalibrated;
 	}
-	else if(headingCalibrated > 1)
+	else if((headingCalibrated > 1)&&(headingCalibrated <= 2))
 	{
-		headingCalibrated = headingCalibrated * 0.73;
+		headingCalibrated = headingCalibrated * 0.9;
+	}
+	else if((headingCalibrated > 2)&&(headingCalibrated <= 3))
+	{
+	    headingCalibrated = headingCalibrated * 0.78;
 	}
 	return headingCalibrated;
 }
@@ -131,7 +152,7 @@ void masterTurnAngle(int sourceAngle, int destinationAngle)
 		if(angle <= 180)
 		{
 			/*Turn clockwise as the angle is less in clockwise direction*/
-			turn.direction = 0;
+			turn.direction = 2;
 		}
 		else
 		{
@@ -153,7 +174,7 @@ void masterTurnAngle(int sourceAngle, int destinationAngle)
 		{
 			/*Turn clockwise as the angle is less in clockwise direction*/
 			angle = 360 - angle;
-			turn.direction = 0;
+			turn.direction = 2;
 		}
 	}
 	else if(sourceAngle == destinationAngle)
@@ -162,7 +183,7 @@ void masterTurnAngle(int sourceAngle, int destinationAngle)
 	}
 
 	turn.degree = angle;
-
+    LOG_INFO("Turn Angle: %d, Direction: %d", turn.degree,turn.direction);
 	if(!CANTransmit(TTurnAngleToMaster,(uint8_t*)&turn,sizeof(turn)))
 	{
 	    LE.toggle(3);

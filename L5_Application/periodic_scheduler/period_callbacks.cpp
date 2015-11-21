@@ -57,9 +57,7 @@ bool period_reg_tlm(void)
 
 void period_1Hz(void)
 {
-    heading = compassHeading();
-    current_bearing = 0;
-    masterTurnAngle(heading,current_bearing);
+
     //LE.toggle(1);
 }
 
@@ -75,7 +73,9 @@ void period_10Hz(void)
 
 void period_100Hz(void)
 {
-
+        heading = compassHeading();
+        current_bearing = 0;
+        masterTurnAngle(heading,current_bearing);
 //    CANReception();
 //    CANMessageProcessing();
     //LE.toggle(2);
