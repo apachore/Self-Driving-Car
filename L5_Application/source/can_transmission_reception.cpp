@@ -20,6 +20,7 @@
 // XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
 // XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
 
+GeoData geoReceivedData;
 void DataOverCanBuffer(uint32_t param)
 {
     LOG_ERROR("Data over CAN buffer");
@@ -78,15 +79,19 @@ bool CANReception(can_msg_t& canMessageBlock)
                 break;
 
             case RHeadingAndBearingToGeo:
-                GeoData geoReceivedData;
-                geoReceivedData.HeadingAngle = canMessageBlock.data.bytes[0];
-                geoReceivedData.BearingAngle = canMessageBlock.data.bytes[1];
+
+                geoReceivedData.TurningAngle = canMessageBlock.data.bytes[0];
+                geoReceivedData.DirectionByte = canMessageBlock.data.bytes[1];
                 printf("%d %d",canMessageBlock.data.bytes[0],canMessageBlock.data.bytes[1]);
-                GeoDecision(geoReceivedData.HeadingAngle,geoReceivedData.BearingAngle);
+                GeoDecision(geoReceivedData.TurningAngle,geoReceivedData.DirectionByte);
                 break;
             case RKillMessageFromAndroid:
                 SendKillMessageToAllControllers();
                 break;
+
+            case RDistanceFinalAndNextCheckpoint:
+                geoReceivedData.finalDistance=canMessageBlock.data.words[0];
+                  break;
 
             case RBootReplyFromAndroid:
 
