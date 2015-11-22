@@ -31,6 +31,7 @@ void DataOverCanBuffer(uint32_t param)
     printf("DataOverCanBuffer : Error");
 }
 
+
 void Transmit_init()
 {
 
@@ -41,8 +42,8 @@ void Receive_init()
     CAN_init(can1, 100, 100, 100, *BusOffCb,*DataOverCanBuffer);/*Initializing CAN bus*/
     CAN_reset_bus(can1);          /*Reset CAN bus*/
 
-    const can_std_id_t slist[]  { CAN_gen_sid(can1, 0x210), CAN_gen_sid(can1, 0x220), CAN_gen_sid(can1, 0x240),
-            CAN_gen_sid(can1, 0x610), CAN_gen_sid(can1, 0x250), CAN_gen_sid(can1, 0x410)};    /*CAN standard ID list*/
+    const can_std_id_t slist[]  {CAN_gen_sid(can1, 0x220), CAN_gen_sid(can1, 0x240),
+            CAN_gen_sid(can1, 0x610), CAN_gen_sid(can1, 0x250), CAN_gen_sid(can1, 0x410),CAN_gen_sid(can1, 0x420)};    /*CAN standard ID list*/
 
     /*Motor Control message from Master : 0x220 */
     /*Boot Request message from Master : 0x610 */
@@ -72,21 +73,21 @@ void Transmitter_message()
 
     if(flag)
     {
-        printf("Heart Beat message 0x220 sent successfully \n ");
+//        printf("Heart Beat message 0x220 sent successfully \n ");
         LOG_INFO("Heart Beat message  0x220 sent successfully \n");
     }
     else
     {
         LOG_ERROR("Heart Beat message NOT 0x220 sent successfully \n");
-        printf("Heart Beat message NOT 0x220 sent successfully \n ");
+//        printf("Heart Beat message NOT 0x220 sent successfully \n ");
     }
 
     if(CAN_rx(can1,&check_0x610,1000))
     {
 
-        printf("Boot request message 0x610 received successfully \n ");
+//        printf("Boot request message 0x610 received successfully \n ");
         CAN_tx(can1,&Boot_send,1000);
-        printf("Boot response message 0x620 sent successfully \n ");
+//        printf("Boot response message 0x620 sent successfully \n ");
         LOG_INFO("Boot response message 0x620 sent successfully \n");
     }
     else
@@ -95,18 +96,19 @@ void Transmitter_message()
     }
 }
 
-
+int CAN_Receive;
 
 void Receiver_message()
 {
     can_msg_t rx_msg;
     if(CAN_rx(can1, &rx_msg, 10))
     {
+    	CAN_Receive = 0;
        // LE.on(1);
       //  puts("can received\n");
         switch(rx_msg.msg_id)
         {
-            case 0x210:
+            case 0x420:
                /* sensor_data[0] =rx_msg.data.bytes[0];
                 sensor_data[1] =rx_msg.data.bytes[1];
                 puts("sensor data received");
@@ -118,7 +120,7 @@ void Receiver_message()
             break;
             case 0x220:
          //   LE.toggle(3);
-            puts(" can 220 received\n");
+//            puts(" can 220 received\n");
             //printf("%x", rx_msg.msg_id);
             //printf("%x", rx_msg.data.bytes[1]);
             if(!xQueueSend(Master_Motor_q, &rx_msg, 0))
@@ -136,14 +138,14 @@ void Receiver_message()
             /*    memcpy(&gps_latitude,&rx_msg.data.dwords[0],4);
                 memcpy(&gps_longitude,&rx_msg.data.dwords[1],4);*/
                 Message.canReceivedMsg_gps1=rx_msg;
-                puts("sensor can 240 received\n");
+//                puts("sensor can 240 received\n");
 
                break;
             case 0x250:
               //  memcpy(&final_dist_remaining,&rx_msg.data.words[0],2);
                 Message.canReceivedMsg_gps2=rx_msg;
 
-                puts("sensor can 250 received\n");
+//                puts("sensor can 250 received\n");
                break;
 
            default:
@@ -154,7 +156,8 @@ void Receiver_message()
     }
     else
     {
-        puts("No message received\n");
+//        puts("No message received\n");
+    	CAN_Receive = 1;
         LE.toggle(4);
     }
     //printf("This is Motor RX function\n");

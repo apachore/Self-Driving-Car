@@ -31,6 +31,24 @@
 #include "can.h"
 #include "MOTOR_CAN_HEADER.hpp"
 #include "IOmodule.hpp"
+#include "LPC17xx.h"
+#include "lpc_timers.h"
+#include "eint.h"
+
+//int timer_val,speed_pulse = 0,time_diff,rps_actual;
+int speed_pulse_cnt = 0;
+//static int timer_val_last;
+void Spd_Pls()
+{
+
+//    timer_val = lpc_timer_get_value(lpc_timer2);
+//    time_diff = timer_val - timer_val_last;
+//    rps_actual = 1000000/time_diff;
+//    printf("\nrps: %d",rps_actual);
+
+//    timer_val_last = timer_val;
+    speed_pulse_cnt++;
+}
 
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
@@ -62,6 +80,8 @@ int main(void)
 
     /* Consumes very little CPU, but need highest priority to handle mesh network ACKs */
 //    scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
+
+    eint3_enable_port2(4,eint_rising_edge,Spd_Pls);
 
     CANInitialization();
     UARTInitialization();

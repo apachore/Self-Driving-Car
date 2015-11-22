@@ -16,6 +16,8 @@
 void Bus_Off();
 void Data_Over_Run();
 
+void Speed_Pulse_Count();
+
 class MotorTask: public scheduler_task
 {
     public:
@@ -30,7 +32,7 @@ class MotorTask: public scheduler_task
         PWM pwm1; /* set pw1 for servo motor */
         int count_init;
         int count_rev;
-        int just;
+//        int just;
 };
 
 #endif /* MOTOR_HPP_ */

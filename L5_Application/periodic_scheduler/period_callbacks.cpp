@@ -31,7 +31,7 @@
 #include <stdint.h>
 #include "io.hpp"
 #include "periodic_callback.h"
-#include "Motor.hpp"
+#include "motor.hpp"
 #include "MOTOR_CAN_HEADER.hpp"
 #include "IOmodule.hpp"
 
@@ -46,18 +46,22 @@ void period_1Hz(void)
 {
     //LE.toggle(1);
   //  puts("entered 1hz task\n");
+	Speed_Pulse_Count();
+
     LCDdisplay();
 }
 
 void period_10Hz(void)
 {
     /*Calling the Motor control */
-    Receiver_message();
+
 	//LE.toggle(2);
 }
 
 void period_100Hz(void)
 {
+//	Speed_Pulse_Cnt();
+    Receiver_message();
     //LE.toggle(3);
 }
 
