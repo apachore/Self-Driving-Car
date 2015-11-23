@@ -18,6 +18,6 @@ void compassWriteReg();
 bool compassReadReg();
 int compassHeading();
 float compassCalibration(float headingNotCalibrated);
-void masterTurnAngle(int sourceAngle, int destinationAngle);
+void masterTurnAngle(uint16_t sourceAngle, uint16_t destinationAngle);
 
 #endif /* L5_APPLICATION_COMPASS_HPP_ */
