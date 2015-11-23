@@ -145,7 +145,7 @@ void masterTurnAngle(uint16_t sourceAngle, uint16_t destinationAngle)
 	/*"degree" is the angle to turn the car
 	  if "direction" is 1, car needs to turn anti clockwise
 	  if "direction" is 0, car needs to turn clockwise*/
-	uint16_t angle = 0;
+	int16_t angle = 0;
 	if(destinationAngle > sourceAngle)
 	{
 		angle = destinationAngle - sourceAngle;
