@@ -11,11 +11,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -24,7 +21,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
@@ -34,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.xml.transform.Source;
+
 
 public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallback {
 
@@ -42,6 +43,9 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     private boolean startflag=false;
     private float latitude_s=0;
     private float longitude_s=0;
+    private String source=null;
+    private String lon_string;
+    private String lat_string;
 
     BluetoothAdapter bluetoothAdapter;
     ArrayList<BluetoothDevice> pairedDeviceArrayList;
@@ -49,6 +53,12 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     TextView textInfo;
     ListView listViewPairedDevice;
     LinearLayout inputPane;
+
+    ToggleButton runstop_btn;
+    Button monitor_btn;
+    Button kill_btn;
+    Button set_btn;
+    Button get_btn;
 
     ArrayAdapter<BluetoothDevice> pairedDeviceAdapter;
     private UUID myUUID;
@@ -67,6 +77,12 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
         listViewPairedDevice = (ListView)findViewById(R.id.pairedlist);
         inputPane = (LinearLayout)findViewById(R.id.inputpane);
 
+        runstop_btn=(ToggleButton)findViewById(R.id.run_stop_toggle);
+        monitor_btn=(Button)findViewById(R.id.monitor);
+        kill_btn=(Button)findViewById(R.id.kill);
+        set_btn=(Button)findViewById(R.id.setdest);
+        get_btn=(Button)findViewById(R.id.getSource);
+
         View.OnClickListener handler = new View.OnClickListener(){
             public void onClick(View view) {
                 //Switching action to be performed
@@ -83,6 +99,8 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
                         break;
                     case R.id.setdest:
                         setDest();
+                    case R.id.getSource:
+                        getSource();
                         break;
                 }
             }
@@ -93,6 +111,8 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
         findViewById(R.id.monitor).setOnClickListener(handler);
         findViewById(R.id.kill).setOnClickListener(handler);
         findViewById(R.id.setdest).setOnClickListener(handler);
+        findViewById(R.id.getSource).setOnClickListener(handler);
+
 
         //monitor=(Button)findViewById(R.id.monitor);
 
@@ -189,6 +209,7 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     }
 
 
+
     /**
      * This is where we can add markers or lines, add listeners or move the camera. In this case, we
      * just add a marker near Africa.
@@ -230,10 +251,25 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
 
         myThreadConnected.write(coordinateBytes);
 
+        get_btn.setVisibility(View.GONE);
+        set_btn.setVisibility(View.GONE);
+        runstop_btn.setVisibility(View.VISIBLE);
+        kill_btn.setVisibility(View.VISIBLE);
+        monitor_btn.setVisibility(View.VISIBLE);
         Toast.makeText(this, "Destination Set", Toast.LENGTH_SHORT).show();
 
     }
 
+    public void getSource(){
+
+        String getId="g";
+        //String coordinate=destId;
+
+        byte[] getIdBytes = getId.getBytes();
+        myThreadConnected.write(getIdBytes);
+        Toast.makeText(this, "Source request send", Toast.LENGTH_SHORT).show();
+
+    }
 
     @Override
     protected void onStart() {
@@ -357,27 +393,23 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
             }
 
             if(success){
-                //connect successful
-     /*           final String msgconnected = "connect successful:\n"
-                        + "BluetoothSocket: " + bluetoothSocket + "\n"
-                        + "BluetoothDevice: " + bluetoothDevice;
-*/
                 runOnUiThread(new Runnable() {
 
                     @Override
                     public void run() {
-                        //textStatus.setText("");
-                        //textByteCnt.setText("");
-                        //Toast.makeText(MainActivity.this, msgconnected, Toast.LENGTH_LONG).show();
+                        final LatLng latLng_source=new LatLng(37.336079,-121.880453);
+
+                        final Marker marker= mMap.addMarker(new MarkerOptions()
+                                .position(latLng_source)
+                                .title("Current")
+                                .icon(BitmapDescriptorFactory
+                                        .fromResource(R.drawable.marker)));
 
                         Toast.makeText(MapsActivity1.this,"Paired successfully",Toast.LENGTH_SHORT).show();
-
-                        //listViewPairedDevice.setVisibility(View.GONE);
-                        //textInfo.setVisibility(View.GONE);
-                        //inputPane.setVisibility(View.VISIBLE);
-                        //dashboard.setVisibility(View.VISIBLE);
+                        marker.showInfoWindow();
                     }
                 });
+
 
                 startThreadConnected(bluetoothSocket);
 
@@ -441,14 +473,15 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
                 try {
                     bytes = connectedInputStream.read(buffer);
                     final String strReceived = new String(buffer, 0, bytes);
-                    final String strByteCnt = String.valueOf(bytes) + " bytes received.\n";
+                    source=strReceived;
+
 
                     runOnUiThread(new Runnable(){
 
                         @Override
                         public void run() {
-                            //textStatus.append(strReceived);
-                            //textByteCnt.append(strByteCnt);
+
+                            Toast.makeText(MapsActivity1.this,strReceived,Toast.LENGTH_SHORT).show();
                         }});
 
                 } catch (IOException e) {
