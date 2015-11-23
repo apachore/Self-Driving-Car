@@ -1,11 +1,11 @@
- /*
-  * This file has all the Master Algorithm needed to drive the car.
-  * To drive the car, this file has algorithm for detecting sensor data and taking
-  * appropriate decision.
-  *
-  * Authored : Gaurao Chaudhari
-  * Date     : 10/18/2015
-  */
+/*
+ * This file has all the Master Algorithm needed to drive the car.
+ * To drive the car, this file has algorithm for detecting sensor data and taking
+ * appropriate decision.
+ *
+ * Authored : Gaurao Chaudhari
+ * Date     : 10/18/2015
+ */
 
 #include "stdio.h"
 #include "string.h"
@@ -15,6 +15,8 @@
 #include "can_transmission_reception.h"
 #include "file_logger.h"
 //#include "motorDrive.cpp"
+
+GeoData geoReceivedData;
 
 #define straightSensorDangerDistance    50
 #define turnSensorDangerDistance        30
@@ -298,108 +300,109 @@ void GetBootReplyFromModule()
 
 void GeoDecision(uint8_t angle,uint8_t turn)
 {
- /* sensor_obstruction is the globally declared flag which is set by Sensor Algorithm to indicate Geo_decision Algorithm about the
+    /* sensor_obstruction is the globally declared flag which is set by Sensor Algorithm to indicate Geo_decision Algorithm about the
     obstruction, if there is an obstruction Geo Algorithm is bypassed and Car moves according to Sensor Algorithm.*/
-   uint8_t levelOfSpeed = 0, levelOfDirection = 0;
-   bool frontMotor = false;
-   bool leftMotor = false;
-   bool rightMotor = false;
-   bool reverseMotor = false;
-   bool brakeFlag = false;
+
+    uint8_t levelOfSpeed = 0, levelOfDirection = 0;
+    bool frontMotor = false;
+    bool leftMotor = false;
+    bool rightMotor = false;
+    bool reverseMotor = false;
+    bool brakeFlag = false;
     if(1)    //(sensor_obstruction)
-      {
-          if(geoReceivedData.finalDistance>10)  //(distance check)
-          {
-             if(angle>10)
-              {
-                  if(angle>=90)
-                    {
-                       if(turn==0)
-                       {
-                          puts("\nturn left with level 3");       // Turn left or right according to the data received with level 3.
-                          leftMotor=true;
-                          frontMotor=true;
-                          levelOfDirection=3;
-                          levelOfSpeed=1;
-
-                       }
-                        else
-                        {
-                            puts("\nturn right with level 3");
-                            rightMotor=true;
-                            frontMotor=true;
-                            levelOfDirection=3;
-                            levelOfSpeed=1;
-                        }
-                    }
-                  else if(angle>=45&&angle<90)
-                    {
-                       if(turn==0)
-                       {
-                          puts("\nturn left with level 2");       // Turn left or right according to the data received with level 2.
-                          leftMotor=true;
-                          frontMotor=true;
-                          levelOfDirection=2;
-                          levelOfSpeed=1;
-
-                       }
-                       else
-                       {
-                          puts("\nturn right with level 2");
-                          rightMotor=true;
-                          frontMotor=true;
-                          levelOfDirection=2;
-                          levelOfSpeed=1;
-
-                       }
-                    }
-                  else
-                     {
-                       if(turn==0)
-                       {
-                          puts("\nturn left with level 1");       // Turn left or right according to the data received with level 1.
-                          leftMotor=true;
-                          frontMotor=true;
-                          levelOfDirection=1;
-                          levelOfSpeed=1;
-
-                       }
-                       else
-                       {
-                          puts("\nturn right with level 1");
-                          rightMotor=true;
-                          frontMotor=true;
-                          levelOfDirection=1;
-                          levelOfSpeed=1;
-
-                       }
-                     }
-              }
-
-              else
-                 {
-                    puts("\nGo straight");     //  go straight.
-                    frontMotor=true;
-                    levelOfSpeed=2;
-
-                 }
-          }
-          else
+    {
+        if(geoReceivedData.finalDistance >10)  //(distance check)
+        {
+            if(angle>10)
+            {
+                if(angle>=90)
                 {
-                  if(geoReceivedData.finalDistance==0)//(total_distance==0)
-                  {
-                      puts("\nStop the Car");        // Stop the Car;
-                      brakeFlag=true;
-                      levelOfSpeed=0;
-                  }
-                  else
-                   {
-                        puts("\nMove slowly");      // Move with lower speed;
+                    if(turn==0)
+                    {
+                        puts("\nturn left with level 3");       // Turn left or right according to the data received with level 3.
+                        leftMotor=true;
+                        frontMotor=true;
+                        levelOfDirection=3;
                         levelOfSpeed=1;
-                   }
-                }
 
-          MotorDriveFromSensors(frontMotor, reverseMotor, leftMotor, rightMotor, brakeFlag, levelOfSpeed, levelOfDirection);
-      }
+                    }
+                    else
+                    {
+                        puts("\nturn right with level 3");
+                        rightMotor=true;
+                        frontMotor=true;
+                        levelOfDirection=3;
+                        levelOfSpeed=1;
+                    }
+                }
+                else if(angle>=45&&angle<90)
+                {
+                    if(turn==0)
+                    {
+                        puts("\nturn left with level 2");       // Turn left or right according to the data received with level 2.
+                        leftMotor=true;
+                        frontMotor=true;
+                        levelOfDirection=2;
+                        levelOfSpeed=1;
+
+                    }
+                    else
+                    {
+                        puts("\nturn right with level 2");
+                        rightMotor=true;
+                        frontMotor=true;
+                        levelOfDirection=2;
+                        levelOfSpeed=1;
+
+                    }
+                }
+                else
+                {
+                    if(turn==0)
+                    {
+                        puts("\nturn left with level 1");       // Turn left or right according to the data received with level 1.
+                        leftMotor=true;
+                        frontMotor=true;
+                        levelOfDirection=1;
+                        levelOfSpeed=1;
+
+                    }
+                    else
+                    {
+                        puts("\nturn right with level 1");
+                        rightMotor=true;
+                        frontMotor=true;
+                        levelOfDirection=1;
+                        levelOfSpeed=1;
+
+                    }
+                }
+            }
+
+            else
+            {
+                puts("\nGo straight");     //  go straight.
+                frontMotor=true;
+                levelOfSpeed=2;
+
+            }
+        }
+        else
+        {
+            if(geoReceivedData.finalDistance==0)//(total_distance==0)
+            {
+                puts("\nStop the Car");        // Stop the Car;
+                brakeFlag=true;
+                levelOfSpeed=0;
+            }
+            else
+            {
+                puts("\nMove slowly");      // Move with lower speed;
+                levelOfSpeed=1;
+            }
+        }
+
+        MotorDriveFromSensors(frontMotor, reverseMotor, leftMotor, rightMotor, brakeFlag, levelOfSpeed, levelOfDirection);
+    }
     //  cout<<endl;
 }

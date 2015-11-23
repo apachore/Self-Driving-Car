@@ -22,7 +22,7 @@
 
 static bool run = false;
 static bool stop = false;
-GeoData geoReceivedData;
+extern GeoData geoReceivedData;
 
 void DataOverCanBuffer(uint32_t param)
 {
@@ -84,8 +84,8 @@ bool CANReception(can_msg_t& canMessageBlock)
                 if(run && !stop)
                 {
                     GeoData geoReceivedData;
-                    geoReceivedData.HeadingAngle = canMessageBlock.data.bytes[0];
-                    geoReceivedData.BearingAngle = canMessageBlock.data.bytes[1];
+                    geoReceivedData.DirectionByte = canMessageBlock.data.bytes[0];
+                    geoReceivedData.TurningAngle = canMessageBlock.data.bytes[1];
                     //printf("%d %d",canMessageBlock.data.bytes[0],canMessageBlock.data.bytes[1]);
                     //GeoDecision(geoReceivedData.HeadingAngle,geoReceivedData.BearingAngle);
                 }
@@ -108,7 +108,7 @@ bool CANReception(can_msg_t& canMessageBlock)
                 break;
 
             case RDistanceFinalAndNextCheckpoint:
-                geoReceivedData.finalDistance=canMessageBlock.data.words[0];
+                geoReceivedData.finalDistance = canMessageBlock.data.words[0];
                   break;
 
             case RBootReplyFromAndroid:
