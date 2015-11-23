@@ -308,7 +308,7 @@ void GeoDecision(uint8_t angle,uint8_t turn)
    bool brakeFlag = false;
     if(1)    //(sensor_obstruction)
       {
-          if(1)  //(distance check)
+          if(geoReceivedData.finalDistance>10)  //(distance check)
           {
              if(angle>10)
               {
@@ -386,7 +386,7 @@ void GeoDecision(uint8_t angle,uint8_t turn)
           }
           else
                 {
-                  if(1)//(total_distance==0)
+                  if(geoReceivedData.finalDistance==0)//(total_distance==0)
                   {
                       puts("\nStop the Car");        // Stop the Car;
                       brakeFlag=true;

@@ -22,7 +22,7 @@
 
 static bool run = false;
 static bool stop = false;
-//SensorData receivedSensorData;
+GeoData geoReceivedData;
 
 void DataOverCanBuffer(uint32_t param)
 {
@@ -106,6 +106,10 @@ bool CANReception(can_msg_t& canMessageBlock)
             case RKillMessageFromAndroid:
                 SendKillMessageToAllControllers();
                 break;
+
+            case RDistanceFinalAndNextCheckpoint:
+                geoReceivedData.finalDistance=canMessageBlock.data.words[0];
+                  break;
 
             case RBootReplyFromAndroid:
                 GetBootReplyFromModule();
