@@ -18,7 +18,6 @@ class bluetoothTask : public scheduler_task
         //char message_type[10];
         bluetoothTask(uint8_t priority);
         bool init(void);
-        //void parse_gps_string(void);
         bool run(void *p);
 
 };

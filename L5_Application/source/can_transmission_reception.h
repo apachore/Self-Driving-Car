@@ -12,6 +12,8 @@
 #include "stdlib.h"
 #include "can.h"
 #include "io.hpp"
+#include "uart3.hpp"
+#include "uart_dev.hpp"
 
 
 #include "can_communication_ids.h"
@@ -26,11 +28,8 @@ typedef struct
 
         void CANInitialization();
         bool CANTransmit(uint32_t , uint8_t * , uint32_t);
-        void CANReception(/*can_msg_t canMessageBlock*/);
-
-        // This function would be needed later in development
+        void CANReception(char ,Uart3);
         void CANSetupFilter();
-
         void CANMessageProcessing();
 
 

@@ -77,37 +77,37 @@ int main(void)
      * This is a the board demonstration task that can be used to test the board.
      * This also shows you how to send a wireless packets to other boards.
      */
-    //#if 0
-        //scheduler_add_task(new example_io_demo());
-    //#endif
+    #if 0
+        scheduler_add_task(new example_io_demo());
+    #endif
 
     /**
      * Change "#if 0" to "#if 1" to enable examples.
      * Try these examples one at a time.
      */
-    //#if 0
-        //scheduler_add_task(new example_task());
-        //scheduler_add_task(new example_alarm());
-        //scheduler_add_task(new example_logger_qset());
-        //scheduler_add_task(new example_nv_vars());
-    //#endif
+    #if 0
+        scheduler_add_task(new example_task());
+        scheduler_add_task(new example_alarm());
+        scheduler_add_task(new example_logger_qset());
+        scheduler_add_task(new example_nv_vars());
+    #endif
 
     /**
      * Try the rx / tx tasks together to see how they queue data to each other.
      */
-    //#if 0
-        //scheduler_add_task(new queue_tx());
-        //scheduler_add_task(new queue_rx());
-    //#endif
+    #if 0
+        scheduler_add_task(new queue_tx());
+        scheduler_add_task(new queue_rx());
+    #endif
 
     /**
      * Another example of shared handles and producer/consumer using a queue.
      * In this example, producer will produce as fast as the consumer can consume.
      */
-    //#if 0
-        //scheduler_add_task(new producer());
-        //scheduler_add_task(new consumer());
-    //#endif
+    #if 0
+        scheduler_add_task(new producer());
+        scheduler_add_task(new consumer());
+    #endif
 
     /**
      * If you have RN-XV on your board, you can connect to Wifi using this task.
@@ -121,13 +121,16 @@ int main(void)
      *     addCommandChannel(Uart3::getInstance(), false);
      * @endcode
      */
-    //#if 0
-       // Uart3 &u3 = Uart3::getInstance();
-        //u3.init(WIFI_BAUD_RATE, WIFI_RXQ_SIZE, WIFI_TXQ_SIZE);
-        //scheduler_add_task(new wifiTask(Uart3::getInstance(), PRIORITY_LOW));
-    //#endif
-   // GPIO p2_wire0;
-   // p2_wire0.setAsInput();
+    #if 0
+        Uart3 &u3 = Uart3::getInstance();
+        u3.init(WIFI_BAUD_RATE, WIFI_RXQ_SIZE, WIFI_TXQ_SIZE);
+        scheduler_add_task(new wifiTask(Uart3::getInstance(), PRIORITY_LOW));
+    #endif
+
+
+   #if 1
+        scheduler_add_task(new periodicSchedulerTask());
+   #endif
 
         //scheduler_start(); ///< This shouldn't return
         //scheduler_add_task(new CanBus(PRIORITY_MEDIUM)); //for can

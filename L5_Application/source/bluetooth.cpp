@@ -15,6 +15,7 @@
 #include "uart3.hpp"
 #include "uart_dev.hpp"
 
+
 bluetoothTask::bluetoothTask(uint8_t priority) :scheduler_task("bluetooth", 2000,priority)
 {
 
@@ -30,7 +31,8 @@ bool bluetoothTask::init(void) {
 
 bool bluetoothTask::run(void *p)
 {
-    char recChar[128];
+
+    char recChar[1];
     char *parsed_coordinates[3];
     int i=0;
     coordinates checkpoint;
@@ -45,40 +47,27 @@ bool bluetoothTask::run(void *p)
             CANTransmit(TStartToMaster,0,0);
                     printf("Message send %s\n", recChar);
                     recChar[0]='0';
-
             break;
 
         case 'b':
             CANTransmit(TStartToMaster,0,0);
                     printf("Message send %s\n", recChar);
                     recChar[0]='0';
-
             break;
 
         case 'c':
             CANTransmit(TStopToMaster,0,0);
                     printf("Message send %s\n", recChar);
                     recChar[0]='0';
-
-                    break;
+            break;
 
         case 'd':
             CANTransmit(TKillToMaster,0,0);
                     printf("Message send %s\n", recChar);
                     recChar[0]='0';
-
-                    break;
-
-        case 'e':
-            //Reception call
-            printf("Message received %s\n", recChar);
-
-
-            recChar[0]='0';
-
             break;
+
         case 'f':
-            //printf("%s\n", recChar);
             char *token;
 
             token=strtok(recChar,",");
@@ -99,11 +88,15 @@ bool bluetoothTask::run(void *p)
 
             break;
 
+        case 'g':
+
+            CANReception(recChar[0],u3);
+            recChar[0]='0';
+            break;
     }
 
     vTaskDelay(100);
 
     return true;
 }
-
 

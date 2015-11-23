@@ -17,12 +17,11 @@
 #include "queue.h"
 #include "file_logger.h"
 
-
 void CANInitialization()
 {
     CAN_init(can1, 100, 30, 30, NULL, NULL);
 
-    if(CAN_setup_filter(canMessagesFilterList , 2, NULL, 0, NULL, 0, NULL, 0))
+    if(CAN_setup_filter(canMessagesFilterList , 8, NULL, 0, NULL, 0, NULL, 0))
     CAN_reset_bus(can1);
 
 }
@@ -44,28 +43,66 @@ bool CANTransmit(uint32_t msg_id , uint8_t * data, uint32_t len)
     return(CAN_tx(can1,&tx,0));
 }
 
-//void CANTransmissionReception::
-void CANReception()
-{
-    coordinates checkpoint;
-    //LE.toggle(2);
+void CANReception(char rec_bluetooth,Uart3 u3){
+
     can_msg_t canMessageReceivedBlock;
-    //QueueHandle_t Checkpoint_Queue = scheduler_task::getSharedObject("CheckpointsQueue");
+    coordinates checkpoint;
+    char source_coordinates[20];
+
+    //temporary code for static source coordinates
+    if(rec_bluetooth=='g'){
+
+        checkpoint.latitude=27.12312;
+        checkpoint.longitude=-121.12434;
+        sprintf(source_coordinates,"la%9.6f,lo%9.6f",checkpoint.latitude,checkpoint.longitude);
+        u3.put(source_coordinates);
+
+    }
+
 
     if(CAN_rx(can1, &canMessageReceivedBlock, 0))
     {
-
         switch (canMessageReceivedBlock.msg_id)
         {
             case RSourceFromGeo:
 
-                memcpy(&checkpoint,&canMessageReceivedBlock.data,sizeof(coordinates));
+                if(rec_bluetooth=='g'){
+
+                    memcpy(&checkpoint,&canMessageReceivedBlock.data,sizeof(coordinates));
+                    sprintf(source_coordinates,"%9.6f,%9.6f", checkpoint.latitude,checkpoint.longitude);
+                    u3.put(source_coordinates);
+                }
 
                 break;
 
-        }
-    }
-}
+            case RBatteryStatFromMotor:
+                //Send battery status to android
+                break;
 
+            case RBootReqFromMaster:
+                //Send boot reply to Master after receiving message
+                break;
+
+            case RBootStatReqFromMaster:
+                 //Send boot status from Master to Android for re-alinging user controls
+                break;
+
+            case RDestReachedFromMaster:
+                //Send to Android for displaying destination reached message
+                break;
+
+            case RSensorDataFromSensors:
+                //Receive sensor data and send it to Android
+                break;
+
+            case RKillFromMaster:
+                //Perform system reboot after receiving message
+                break;
+
+        }
+
+    }
+
+}
 
 
