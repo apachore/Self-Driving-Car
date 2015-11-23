@@ -13,10 +13,11 @@
 #include "can.h"
 #include "io.hpp"
 
+//extern SensorData receivedSensorData;
 /* This function would initialize the CAN bus. It will setup the filter that is to be used for receiving
    messages. */
 void CANInitialization();
-void CANTransmission(/*can_msg_t canMessageBlock*/uint32_t msg_id, uint8_t* data, uint32_t length);
+void CANTransmission(can_msg_t canMessageBlock/*uint32_t msg_id, uint8_t* data, uint32_t length*/);
 //void CANTransmission(can_msg_t canMessageBlock);
 bool CANReception(can_msg_t& canMessageBlock);
 

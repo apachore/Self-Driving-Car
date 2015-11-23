@@ -20,6 +20,10 @@
 // XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
 // XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
 
+static bool run = false;
+static bool stop = false;
+//SensorData receivedSensorData;
+
 void DataOverCanBuffer(uint32_t param)
 {
     LOG_ERROR("Data over CAN buffer");
@@ -31,24 +35,20 @@ void CANInitialization()
     CAN_init(can1, 100, 500, 500, NULL, *DataOverCanBuffer);
     CAN_reset_bus(can1);
 
-    // Create a queue which would send the data to wherever received
-    /*receivedDataQueue = xQueueCreate(10, sizeof(can_msg_t));
-    scheduler_task::addSharedObject("receivedMessagesQueue", receivedDataQueue);*/
-
     //Any message with 0xffff would disable the message
     //CAN_bypass_filter_accept_all_msgs();
     CAN_setup_filter(canMessagesFilterList, 8, groupList, 2, NULL, 0, NULL, 0);
 }
 
 
-void CANTransmission(uint32_t msg_id, uint8_t* data, uint32_t length)
+void CANTransmission(can_msg_t canMessageBlock/*uint32_t msg_id, uint8_t* data, uint32_t length*/)
 {
-    can_msg_t canMessageBlock = {0};
-    uint8_t i;
+    //can_msg_t canMessageBlock = {0};
+/*    uint8_t i;
     canMessageBlock.msg_id = msg_id;
     canMessageBlock.frame_fields.is_29bit = 0;
     canMessageBlock.frame_fields.data_len = length;
-    canMessageBlock.data.bytes[0] = data[0];
+    canMessageBlock.data.bytes[0] = data[0];*/
     //canMessageBlock.data.qword = data[0];
 
     CAN_tx(can1,&canMessageBlock, 0);
@@ -64,45 +64,74 @@ bool CANReception(can_msg_t& canMessageBlock)
         switch (canMessageBlock.msg_id)
         {
             case RSensorDataFromSensor:
-                SensorData receivedSensorData;
-/*                receivedSensorData.FrontDistance    = canMessageBlock.data.words[0];
-                receivedSensorData.LeftDistance     = canMessageBlock.data.words[1];
-                receivedSensorData.RightDistance    = canMessageBlock.data.words[2];
-                receivedSensorData.RearDistance     = canMessageBlock.data.words[3];*/
-                receivedSensorData.FrontDistance    = canMessageBlock.data.bytes[0];
-                receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
-                receivedSensorData.RightDistance    = canMessageBlock.data.bytes[2];
-                receivedSensorData.RearDistance     = canMessageBlock.data.bytes[3];
-                memcpy(&receivedSensorData, &canMessageBlock.data, sizeof(receivedSensorData));
-                SensorProcessingAlgorithm(receivedSensorData);
+                if(run && !stop)
+                {
+                    SensorData receivedSensorData;
+                    /*receivedSensorData.FrontDistance    = canMessageBlock.data.words[0];
+                    receivedSensorData.LeftDistance     = canMessageBlock.data.words[1];
+                    receivedSensorData.RightDistance    = canMessageBlock.data.words[2];
+                    receivedSensorData.RearDistance     = canMessageBlock.data.words[3];*/
+                    receivedSensorData.FrontDistance    = canMessageBlock.data.bytes[0];
+                    receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
+                    receivedSensorData.RightDistance    = canMessageBlock.data.bytes[2];
+                    receivedSensorData.RearDistance     = canMessageBlock.data.bytes[3];
+                    SensorProcessingAlgorithm(receivedSensorData);
+                    //memcpy(&receivedSensorData, &canMessageBlock.data, sizeof(receivedSensorData));
+                }
                 break;
 
             case RHeadingAndBearingToGeo:
-                GeoData geoReceivedData;
-                geoReceivedData.HeadingAngle = canMessageBlock.data.bytes[0];
-                geoReceivedData.BearingAngle = canMessageBlock.data.bytes[1];
-                printf("%d %d",canMessageBlock.data.bytes[0],canMessageBlock.data.bytes[1]);
-                GeoDecision(geoReceivedData.HeadingAngle,geoReceivedData.BearingAngle);
+                if(run && !stop)
+                {
+                    GeoData geoReceivedData;
+                    geoReceivedData.HeadingAngle = canMessageBlock.data.bytes[0];
+                    geoReceivedData.BearingAngle = canMessageBlock.data.bytes[1];
+                    //printf("%d %d",canMessageBlock.data.bytes[0],canMessageBlock.data.bytes[1]);
+                    //GeoDecision(geoReceivedData.HeadingAngle,geoReceivedData.BearingAngle);
+                }
                 break;
+
+            case RRunAndPauseCommandFromAndroid:
+                printf("Run received");
+                run = true;
+                stop = false;
+                break;
+
+            case RStopMessageFromAndroid:
+                printf("Stop received");
+                run = false;
+                stop = true;
+                break;
+
             case RKillMessageFromAndroid:
                 SendKillMessageToAllControllers();
                 break;
 
             case RBootReplyFromAndroid:
-
+                GetBootReplyFromModule();
                 break;
 
             case RBootReplyFromGeo:
+                GetBootReplyFromModule();
                 break;
 
             case RBootReplyFromMotor:
+                GetBootReplyFromModule();
                 break;
 
             case RBootReplyFromSensor:
+                GetBootReplyFromModule();
                 break;
 
             default:
-                MotorDriveFromSensors(true, false, false, false, false, SpeedLevel3, 0);
+                if(run)
+                {
+                    MotorDriveFromSensors(true, false, false, false, false, SpeedLevel3, 0);
+                }
+                else if(stop)
+                {
+                    MotorDriveFromSensors(false, false, false, false, false, 0, 0);
+                }
                 break;
         }
         return true;
