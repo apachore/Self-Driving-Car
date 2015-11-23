@@ -19,10 +19,7 @@
 //        uint64_t back:8;
 //}sensor_data_t;
 //sensor_data_t sensor_data_obj;
-#define trig_front 0
-#define trig_back 2
-#define trig_left 4
-#define trig_right 6
+
 
 bool sensor_init();
 bool sensor_compute();

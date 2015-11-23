@@ -64,11 +64,7 @@ void period_10Hz(void)
         //  LE.toggle(2);
     }
     sensor_compute();  //LE.on(1);//sensorTask_run();
-    sensor_compute();
-    sensor_compute();
-    sensor_compute();
-    sensor_compute();
-    sensor_compute();
+
 }
 
 void period_100Hz(void)
