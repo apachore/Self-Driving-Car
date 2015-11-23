@@ -11,7 +11,7 @@
 #include "string.h"
 #include "can.h"
 #include "io.hpp"
-
+#include "lpc_sys.h"       //sys_reboot()
 #include "source/can_transmission_reception.h"
 #include "scheduler_task.hpp"
 #include "queue.h"
@@ -22,6 +22,7 @@
 #define TestingWithoutAndroid 1
 
 bool BootReplySent; //Used as indication of system startup flag
+bool reboot = 0; // Used to indicate the reboot status
 uint8_t Received_Checkpoint_Count=0;
 uint16_t Total_Distance_To_Travel;
 
@@ -127,6 +128,8 @@ void CANReception()
         switch (canMessageReceivedBlock.msg_id)
         {
             case RKillMessageFromMaster:
+                // Reboot the system if Kill message is received from master
+                sys_reboot();
                 break;
 
             case RCheckpointsFromAndroid:
