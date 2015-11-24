@@ -97,7 +97,7 @@ void Transmitter_message()
 }
 
 int CAN_Receive;
-
+can_msg_t canReceivedData;
 void Receiver_message()
 {
     can_msg_t rx_msg;
@@ -123,15 +123,19 @@ void Receiver_message()
 //            puts(" can 220 received\n");
             //printf("%x", rx_msg.msg_id);
             //printf("%x", rx_msg.data.bytes[1]);
-            if(!xQueueSend(Master_Motor_q, &rx_msg, 0))
-            {
-                LE.toggle(2);
-              //printf("Queue Full\n");
-            }
-            else
-            {
 
-            }
+            canReceivedData = rx_msg;
+
+
+//            if(!xQueueSend(Master_Motor_q, &rx_msg, 0))
+//            {
+//                LE.toggle(2);
+//              //printf("Queue Full\n");
+//            }
+//            else
+//            {
+//
+//            }
 
            break;
             case 0x240:
