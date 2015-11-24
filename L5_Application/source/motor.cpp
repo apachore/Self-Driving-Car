@@ -49,13 +49,13 @@ bool MotorTask::run(void *p)
 //	speed_pulse_prev = speed_pulse_current;
 
 	int servo_control, servo_level, DC_control, DC_level;
-    float speed_factor, speed_offset, PWM_value_DC, PWM_value_servo;
+    float speed_factor, speed_offset, PWM_value_DC, PWM_value_servo, speed_correction;
     static float PWM_value_DC_last, PWM_value_servo_last;
 //    static QueueHandle_t receivedDataQueue = scheduler_task::getSharedObject("MasterMotorQueue");
     extern can_msg_t canReceivedData;
-    int speed_pls_exp,speed_pls_act;
-    static uint32_t speed_miss;
-    static int DC_level_last,speed_miss_cont;
+    int speed_pls_exp,speed_pls_act,speed_pls_diff;
+    static uint32_t speed_miss,speed_miss_cont;
+    static int DC_level_last;
 
     if (count_init)
     {
@@ -66,7 +66,7 @@ bool MotorTask::run(void *p)
     if (/*xQueueReceive(receivedDataQueue, &canReceivedData, 0)*/1)
     {
 
-        LE.toggle(4);
+//        LE.toggle(4);
         servo_control = canReceivedData.data.bytes[0];
         servo_level = canReceivedData.data.bytes[1];
         DC_control = canReceivedData.data.bytes[2];
@@ -194,29 +194,66 @@ bool MotorTask::run(void *p)
         }
         PWM_value_servo = 15.0 + (speed_factor)*(servo_level) + speed_offset;
 
-
-        if(-3<=(speed_pulse_cnt_sec - speed_pls_exp<=3))
+        speed_pls_diff = speed_pulse_cnt_sec - speed_pls_exp;
+        if((-3<=speed_pls_diff) && (speed_pls_diff<=3))
         {
-        	speed_miss--;
+//        	speed_miss--;
+//        	speed_miss_cont--;
+//        	if(speed_miss<0)
+//        	{
+        		speed_miss = 0;
+        		speed_miss_cont = 0;
+//        	}
         }
         else
         {
         	speed_miss++;
+        	speed_miss_cont++;
         }
-//        speed_miss_cont = speed_miss;
+//        speed_miss_cont = 5;
+
+    	printf("\nspeed_miss  : %d",speed_miss);
+    	printf("\nspeed_miss_cont  : %d",speed_miss_cont);
+    	speed_correction = (speed_miss_cont/20)*0.05;
 
         if(speed_miss > 5)
         {
-        	speed_miss_cont++;
+//        	speed_miss_cont++;
         	if(speed_pulse_cnt_sec < speed_pls_exp)
         	{
-        		PWM_value_DC = PWM_value_DC + (/*speed_miss_cont*/0.1);
+//        		printf("\nspeed_miss_cont  : %d",speed_miss_cont);
+        		if(DC_control==1)
+        			{
+        			PWM_value_DC = PWM_value_DC + speed_correction;
+        	        printf("\nDC_value_actual : %f",PWM_value_DC);
+        			}
+        		else if(DC_control==2)
+        		{
+        			PWM_value_DC = PWM_value_DC - speed_correction;
+        		}
+        		else
+        		{
+        			PWM_value_DC = PWM_value_DC;
+        		}
+
         		speed_miss = 0;
         	}
         	else if(speed_pulse_cnt_sec > speed_pls_exp)
         	{
+        		if(DC_control==1)
+        			{
+        			PWM_value_DC = PWM_value_DC - speed_correction;
+        			}
+        		else if(DC_control==2)
+        		{
+        			PWM_value_DC = PWM_value_DC + speed_correction;
+        		}
+        		else
+        		{
+        			PWM_value_DC = PWM_value_DC;
+        		}
+
         		speed_miss = 0;
-        		PWM_value_DC = PWM_value_DC - (/*speed_miss_cont*/0.1);
         	}
         	else
         	{
@@ -233,6 +270,7 @@ bool MotorTask::run(void *p)
         pwm1.set(PWM_value_servo);
         pwm2.set(PWM_value_DC);
         printf("\nDC_value_actual : %f",PWM_value_DC);
+//        printf("\nspeed_miss_cont  : %d",speed_miss_cont);
 
         DC_level_last = DC_level;
 

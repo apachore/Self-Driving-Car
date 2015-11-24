@@ -160,8 +160,8 @@ void Receiver_message()
     }
     else
     {
-//        puts("No message received\n");
-    	CAN_Receive = 1;
+//        puts("\n220 not message received\n");
+//    	canReceivedData.data.bytes[3] = 0;
         LE.toggle(4);
     }
     //printf("This is Motor RX function\n");
