@@ -119,24 +119,7 @@ void Receiver_message()
               //  puts(" can 210 received\n");
             break;
             case 0x220:
-         //   LE.toggle(3);
-//            puts(" can 220 received\n");
-            //printf("%x", rx_msg.msg_id);
-            //printf("%x", rx_msg.data.bytes[1]);
-
-            canReceivedData = rx_msg;
-
-
-//            if(!xQueueSend(Master_Motor_q, &rx_msg, 0))
-//            {
-//                LE.toggle(2);
-//              //printf("Queue Full\n");
-//            }
-//            else
-//            {
-//
-//            }
-
+                canReceivedData = rx_msg;
            break;
             case 0x240:
             /*    memcpy(&gps_latitude,&rx_msg.data.dwords[0],4);

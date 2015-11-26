@@ -13,7 +13,11 @@
 #include "tasks.hpp"
 #include "file_logger.h"
 #include "can_comms.hpp"
+#include "stdlib.h"
+#include "stdio.h"
+#include "can_comms.hpp"
 #include "uart2.hpp"
+#include "task.h"
 
 
 void UARTInitialization();

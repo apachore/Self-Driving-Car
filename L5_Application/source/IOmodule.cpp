@@ -16,26 +16,29 @@
  *
  *
  */
-#include "stdlib.h"
-#include "stdio.h"
 #include "IOmodule.hpp"
-#include "can_comms.hpp"
+
 
 float gps_latitude;
 float gps_longitude;
 int final_dist_remaining;
 extern Can_msg Message;
 uint8_t sensor_data[4];
+char a13[80];
+int clear_index;
 
 Uart2 &u2 = Uart2 ::getInstance();
 
 void UARTInitialization()
 {
-//puts("uart init\n");
    static const int io_rx_q_size = 32;
    static const int io_tx_q_size = 32;
    u2.init(9600, io_rx_q_size, io_tx_q_size);
    u2.put("FO");
+   for(clear_index=0;clear_index<80;clear_index++)
+   {
+       a13[clear_index]=32;
+   }
 
 }
 void LCDdisplay()
@@ -43,7 +46,7 @@ void LCDdisplay()
     char a1[6],a2[6],a3[6],a4[3],a5[3],a6[3],a7[3],a8[10],a11[5];
     int i;
     char s=32;
-  /*  sensor_data[0] =Message.canReceivedMsg_Sensor.data.bytes[0];
+ /* sensor_data[0] =Message.canReceivedMsg_Sensor.data.bytes[0];
     sensor_data[1] =Message.canReceivedMsg_Sensor.data.bytes[1];
     sensor_data[2] =Message.canReceivedMsg_Sensor.data.bytes[2];
     sensor_data[3] =Message.canReceivedMsg_Sensor.data.bytes[3];*/
@@ -51,7 +54,7 @@ void LCDdisplay()
     sensor_data[1]=126;
     sensor_data[2]=9;
     sensor_data[3]=8;
-   /* gps_latitude=Message.canReceivedMsg_gps1.data.dwords[0];
+ /* gps_latitude=Message.canReceivedMsg_gps1.data.dwords[0];
     gps_longitude=Message.canReceivedMsg_gps1.data.dwords[1];
     final_dist_remaining=Message.canReceivedMsg_gps2.data.words[0];*/
     gps_longitude =24.45;
@@ -64,8 +67,7 @@ void LCDdisplay()
     snprintf(a5,4,"%d",sensor_data[1]);
     snprintf(a6,4,"%d",sensor_data[2]);
     snprintf(a7,4,"%d",sensor_data[3]);
-  //   u2.put("MINION");
-    // u2.putChar(s);
+    u2.put("MINION");
     u2.put("F:");
     u2.put(a4);
     u2.putChar(s);
@@ -87,6 +89,8 @@ void LCDdisplay()
     u2.put("DS:");
     u2.put(a3);
     u2.putChar(s);
+    vTaskDelay(900);
+    u2.put(a13);
 }
 
 
