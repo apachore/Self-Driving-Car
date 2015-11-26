@@ -95,20 +95,20 @@ const can_std_grp_id_t groupList[] =
 typedef struct
 {
         // Message 0x220 (4 bytes)
-        uint8_t leftRightdirection      :   8;
-        uint8_t levelOfDirection        :   8;
-        uint8_t frontBackDirection      :   8;
-        uint8_t levelOfSpeed            :   8;
+        uint8_t leftRightdirection;
+        uint8_t levelOfDirection;
+        uint8_t frontBackDirection;
+        uint8_t levelOfSpeed;
 } MotorData;
 
 // Struct for Sensor Data
 typedef struct
 {
         // Message 0x210 (4 bytes)
-        uint8_t FrontDistance           :   8;          // Forward distance in cms
-        uint8_t RearDistance            :   8;           // Rear distance in cms
-        uint8_t LeftDistance            :   8;           // Left distance in cms
-        uint8_t RightDistance           :   8;          // Right distance in cms
+        uint8_t FrontDistance;          // Forward distance in cms
+        uint8_t RearDistance;           // Rear distance in cms
+        uint8_t LeftDistance;           // Left distance in cms
+        uint8_t RightDistance;          // Right distance in cms
 } SensorData;
 
 // Struct for Geo Data
