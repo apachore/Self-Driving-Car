@@ -119,11 +119,11 @@ float compassCalibration(float headingNotCalibrated)
 	}
 	else if((headingCalibrated >= -2)&&(headingCalibrated <-1))
 	{
-	    headingCalibrated = (headingCalibrated * 1.4);
+	    headingCalibrated = (headingCalibrated * 1.4)+ M_TWOPI;
 	}
 	else if((headingCalibrated >= -1)&&(headingCalibrated < 0))
 	{
-	        headingCalibrated = (headingCalibrated * 1.35);
+	        headingCalibrated = (headingCalibrated * 1.35)+ M_TWOPI;
 	}
 	else if((headingCalibrated >= 0)&&(headingCalibrated <=1))
 	{
