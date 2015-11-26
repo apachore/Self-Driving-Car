@@ -31,30 +31,34 @@
 #include <stdint.h>
 #include "io.hpp"
 #include "periodic_callback.h"
+#include "source/can_transmission_reception.h"
+#include "source/can_communication_ids.h"
+#include "uart3.hpp"
+#include "uart_dev.hpp"
 
 
 
 /// This is the stack size used for each of the period tasks
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
-
-
+Uart3& u3 = Uart3::getInstance();
 
 void period_1Hz(void)
 {
-    LE.toggle(1);
+
 }
 
 void period_10Hz(void)
 {
-    LE.toggle(2);
+    CANReception('0',u3);
+
 }
 
 void period_100Hz(void)
 {
-    LE.toggle(3);
+
 }
 
 void period_1000Hz(void)
 {
-    LE.toggle(4);
+
 }
