@@ -23,18 +23,18 @@ GeoData geoReceivedData;
 #define lowestDangerDistance            20
 
 #define fDanger                 40
-#define fLow                    70
+#define fLow                    40
 #define fLevel1                 130
 #define fLevel2                 190
 
-#define lDanger                 50
-#define lLow                    50              // Need to look at the levels carefully
-#define lLevel1                 100
+#define lDanger                 40
+#define lLow                    70              // Need to look at the levels carefully
+#define lLevel1                 120
 #define lLevel2                 150
 
-#define rDanger                 50
-#define rLow                    50
-#define rLevel1                 100
+#define rDanger                 40
+#define rLow                    70      //
+#define rLevel1                 120     // 100
 #define rLevel2                 150
 
 
@@ -51,7 +51,6 @@ void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, b
     canMessage.data.bytes[1] = 0x0;
     canMessage.data.bytes[2] = 0x0;
     canMessage.data.bytes[3] = 0x0;
-
 
     if(frontMotor)
     {
@@ -91,22 +90,29 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
     //printf("%d  %d  %d  %d\n", receivedSensorData.FrontDistance, receivedSensorData.LeftDistance, receivedSensorData.RightDistance, receivedSensorData.RearDistance);
 
     bool F1 = (receivedSensorData.FrontDistance < fLow) ? true : false;
-    bool F2 = (receivedSensorData.FrontDistance < fLevel1 && receivedSensorData.FrontDistance > fLow) ? true : false;
-    bool F3 = (receivedSensorData.FrontDistance < fLevel2 && receivedSensorData.FrontDistance > fLevel1) ? true : false;
+    bool F2 = (receivedSensorData.FrontDistance < fLevel1 && receivedSensorData.FrontDistance >= fLow) ? true : false;
+    bool F3 = (receivedSensorData.FrontDistance < fLevel2 && receivedSensorData.FrontDistance >= fLevel1) ? true : false;
 
     bool LDanger = (receivedSensorData.LeftDistance < lDanger) ? true : false;
-    bool L1 = (receivedSensorData.LeftDistance < lLow) ? true : false;
-    bool L2 = (receivedSensorData.LeftDistance < lLevel1 && receivedSensorData.LeftDistance > lLow) ? true : false;
-    bool L3 = (receivedSensorData.LeftDistance < lLevel2 && receivedSensorData.LeftDistance > lLevel1) ? true : false;
+    bool L1 = (receivedSensorData.LeftDistance < lLow && receivedSensorData.LeftDistance >= lDanger) ? true : false;
+    bool L2 = (receivedSensorData.LeftDistance < lLevel1 && receivedSensorData.LeftDistance >= lLow) ? true : false;
+    bool L3 = (receivedSensorData.LeftDistance < lLevel2 && receivedSensorData.LeftDistance >= lLevel1) ? true : false;
 
-    bool RDanger = (receivedSensorData.RightDistance < rDanger) ? true : false;
-    bool Rt1 = (receivedSensorData.RightDistance < rLow) ? true : false;
-    bool Rt2 = (receivedSensorData.RightDistance < rLevel1 && receivedSensorData.RightDistance > rLow) ? true : false;
-    bool Rt3 = (receivedSensorData.RightDistance < rLevel2 && receivedSensorData.RightDistance > rLevel1) ? true : false;
+    bool RtDanger = (receivedSensorData.RightDistance < rDanger) ? true : false;
+    bool Rt1 = (receivedSensorData.RightDistance < rLow && receivedSensorData.RightDistance >= rDanger) ? true : false;
+    bool Rt2 = (receivedSensorData.RightDistance < rLevel1 && receivedSensorData.RightDistance >= rLow) ? true : false;
+    bool Rt3 = (receivedSensorData.RightDistance < rLevel2 && receivedSensorData.RightDistance >= rLevel1) ? true : false;
 
     bool Reverse = (receivedSensorData.RearDistance < 60) ? true : false;
 
-    if(!F1 && !F2 && !L1 && !L2 && !Rt1 && !Rt2) {
+    bool LeftRightOpen = false;
+    if(!F1 && !F2 && !L1 && !L2 && !Rt1 && !Rt2)
+    {
+        LeftRightOpen = true;
+    }
+
+    if(!F1 && !F2 && !F3 && !LDanger && !L1 && !L2 && !L3 && !RtDanger && !Rt1 && !Rt2 && !Rt3) {
+
         frontMotor = true;
         levelOfSpeed = SpeedLevel3;
     }
@@ -117,7 +123,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
         if (!Reverse) {
             LE.toggle(4);
             reverseMotor = true;
-            levelOfSpeed = SpeedLevel2;
+            levelOfSpeed = SpeedLevel1;
             if (receivedSensorData.LeftDistance > receivedSensorData.RightDistance) {
                 rightMotor = true;
                 levelOfDirection = DirectionLevel5;
@@ -136,17 +142,21 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
         LE.toggle(1);
         frontMotor = true;
         levelOfSpeed = SpeedLevel2;
-        if (L1 && !Rt1 /*&& !Rt2*/) {
+        ///XXX: Need to check again for this Rt2 needed or not?
+        if (L1 && !RtDanger && !Rt1 /*&& !Rt2*/) {
             // Extreme Right;
             LE.toggle(2);
+            frontMotor = true;
             rightMotor = true;
             levelOfDirection = DirectionLevel4;
             levelOfSpeed = SpeedLevel1;
             LD.setRightDigit('R');
         }
-        else if (L2 && !Rt1/* && !Rt2*/) {
+        ///XXX: // Need to check this again whether sharp direction is needed or not
+        else if (L2 && !RtDanger && !Rt1/* && !Rt2*/) {
             // Less level of right
             LE.toggle(2);
+            frontMotor = true;
             rightMotor = true;
             levelOfDirection = DirectionLevel2;
             levelOfSpeed = SpeedLevel2;
@@ -160,89 +170,129 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             levelOfSpeed = SpeedLevel2;
             levelOfDirection = DirectionLevel5;
         }
+        // XXX: If in F2 and L1 and R1 or less than that - Consider this case after testing. This will be a rare condition
+        //  Still have a look at this.
 
-        else if (Rt1 && !L1/* && !L2*/) {
+        else if (Rt1 && !LDanger && !L1/* && !L2*/) {
             // Extreme Left;
             LE.toggle(3);
+            frontMotor = true;
             leftMotor = true;
             levelOfDirection = DirectionLevel4;
             levelOfSpeed = SpeedLevel1;
             LD.setRightDigit('L');
         }
-        else if (Rt2 && !L1 /*&& !L2*/) {
+        else if (Rt2 && !LDanger && !L1 /*&& !L2*/) {
             // Less level of left;
             LE.toggle(3);
+            frontMotor = true;
             leftMotor = true;
             levelOfDirection = DirectionLevel2;
             levelOfSpeed = SpeedLevel2;
             LD.setRightDigit('L');
         }
-        else if(RDanger && !Reverse) {
+        else if(RtDanger && !Reverse) {
             LE.toggle(4);
             frontMotor = false;
             reverseMotor = true;
             rightMotor = true;
-            levelOfSpeed = SpeedLevel2;
+            levelOfSpeed = SpeedLevel1;
             levelOfDirection = DirectionLevel5;
+        }
+        //XXX: To check again (Written now)
+        else if (LDanger && RtDanger && !Reverse) {
+            reverseMotor = true;
+            levelOfSpeed = SpeedLevel1;
+            if (receivedSensorData.LeftDistance > receivedSensorData.RightDistance) {
+                rightMotor = true;
+                levelOfDirection = DirectionLevel5;
+                LD.setRightDigit('R');
+            }
+            else if (receivedSensorData.RightDistance > receivedSensorData.LeftDistance) {
+                leftMotor = true;
+                levelOfDirection = DirectionLevel5;
+                LD.setRightDigit('L');
+            }
         }
     }
     //XXX: Have some low level where you wont be able to go ahead in any case and then stop or take a right.
-    else if (L1 || L2) {
+    else if (L1 || L2 || LDanger) {
         LE.toggle(2);
-        frontMotor = true;
-        if (L1 && !Rt1 && !Rt2) {
+        if (L1 && !RtDanger && !Rt1 /*&& !Rt2*/) {
             // Extreme right;
+            frontMotor = true;
             rightMotor = true;
             levelOfDirection = DirectionLevel4;
             levelOfSpeed = SpeedLevel1;
             LD.setRightDigit('R');
             LD.setRightDigit('1');
         }
-        else if (L2 && !Rt1 && !Rt2) {
+        else if (L2 && !RtDanger && !Rt1 /*&& !Rt2*/) {
             // Less level of right;
+            frontMotor = true;
             rightMotor = true;
             levelOfDirection = DirectionLevel2;
             levelOfSpeed = SpeedLevel2;
             LD.setRightDigit('R');
             LD.setRightDigit('2');
         }
-        else if (LDanger){
-            frontMotor = false;
-            reverseMotor = true;
-            rightMotor = true;
-            levelOfSpeed = SpeedLevel2;
-            levelOfDirection = DirectionLevel4;
-        }
-    }
-    //XXX: Have some low level where you wont be able to go ahead in any case and then stop or take a right.
-    else if (Rt1 || Rt2) {
-        LE.toggle(3);
-        frontMotor = true;
-        levelOfSpeed = 1;
-        if (Rt1 && !L1 && !L2) {
+        ///XXX : Added now. Check this condition in testing now.
+        else if (Rt1 && !LDanger && !L1 /*&& !L2*/) {
             // Extreme left;
+            frontMotor = true;
             leftMotor = true;
             levelOfDirection = DirectionLevel4;
             levelOfSpeed = SpeedLevel1;
         }
-        else if (Rt2 && !L1 && !L2) {
+        else if (LDanger) {
+            LE.toggle(4);
+            frontMotor = false;
+            reverseMotor = true;
+            rightMotor = true;
+            levelOfSpeed = SpeedLevel1;
+            levelOfDirection = DirectionLevel4;
+        }
+    }
+    //XXX: Have some low level where you wont be able to go ahead in any case and then stop or take a right.
+    else if (Rt1 || Rt2 || RtDanger) {
+        LE.toggle(3);
+        levelOfSpeed = 1;
+        if (Rt1 && !LDanger && !L1 /*&& !L2*/) {
+            // Extreme left;
+            frontMotor = true;
+            leftMotor = true;
+            levelOfDirection = DirectionLevel4;
+            levelOfSpeed = SpeedLevel1;
+        }
+        else if (Rt2 && !LDanger && !L1 /*&& !L2*/) {
             // Less level of left;
+            frontMotor = true;
             leftMotor = true;
             levelOfDirection = DirectionLevel2;
             levelOfSpeed = SpeedLevel2;
         }
-        else if (RDanger){
+        if (L1 && !RtDanger && !Rt1 /*&& !Rt2*/) {
+            // Extreme right;
+            frontMotor = true;
+            rightMotor = true;
+            levelOfDirection = DirectionLevel4;
+            levelOfSpeed = SpeedLevel1;
+            LD.setRightDigit('R');
+            LD.setRightDigit('1');
+        }
+        else if (RtDanger){
+            LE.toggle(4);
             frontMotor = false;
             reverseMotor = true;
             leftMotor = true;
-            levelOfSpeed = SpeedLevel2;
+            levelOfSpeed = SpeedLevel1;
             levelOfDirection = DirectionLevel4;
         }
     }
-    if(F3 || L3 || Rt3)
+    else if(F3 || L3 || Rt3)
     {
-        //frontMotor = true;
-        levelOfSpeed = SpeedLevel2;
+        frontMotor = true;
+        levelOfSpeed = SpeedLevel1;
     }
 
     MotorDriveFromSensors(frontMotor, reverseMotor, leftMotor, rightMotor, brakeFlag, levelOfSpeed, levelOfDirection);
@@ -324,7 +374,6 @@ void GeoDecision(uint8_t angle,uint8_t turn)
                         frontMotor=true;
                         levelOfDirection=3;
                         levelOfSpeed=1;
-
                     }
                     else
                     {
