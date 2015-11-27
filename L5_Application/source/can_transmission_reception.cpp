@@ -20,14 +20,14 @@
 // XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
 // XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
 
-static bool run = false;
+static bool run = true;
 static bool stop = false;
-extern GeoData geoReceivedData;
+GeoData geoReceivedData;
+bool isSensorObstruction = false;
 
 void DataOverCanBuffer(uint32_t param)
 {
     LOG_ERROR("Data over CAN buffer");
-    /*CAN_reset_bus(can1);*/
 }
 
 void CANInitialization()
@@ -36,69 +36,66 @@ void CANInitialization()
     CAN_reset_bus(can1);
 
     //Any message with 0xffff would disable the message
-    //CAN_bypass_filter_accept_all_msgs();
     CAN_setup_filter(canMessagesFilterList, 8, groupList, 2, NULL, 0, NULL, 0);
 }
 
 
 void CANTransmission(can_msg_t canMessageBlock/*uint32_t msg_id, uint8_t* data, uint32_t length*/)
 {
-    //can_msg_t canMessageBlock = {0};
-/*    uint8_t i;
-    canMessageBlock.msg_id = msg_id;
-    canMessageBlock.frame_fields.is_29bit = 0;
-    canMessageBlock.frame_fields.data_len = length;
-    canMessageBlock.data.bytes[0] = data[0];*/
-    //canMessageBlock.data.qword = data[0];
-
     CAN_tx(can1,&canMessageBlock, 0);
-
-    //LOG_ERROR("Message %d not transmitted", canMessageBlock.msg_id);
 }
 
 bool CANReception(can_msg_t& canMessageBlock)
 {
-    // XXX: Cannot block from the periodic function
-    if(CAN_rx(can1, &canMessageBlock, 0))
+    bool receptionSuccessful = false;
+    // XXX: Empty out all the messages in the queue
+    // Empty all messages that have arrived within last 10ms
+    bool sentStartFromAndroid = run && !stop;
+    bool sentStopFromAndroid = !run && stop;
+    while (CAN_rx(can1, &canMessageBlock, 0))
     {
         switch (canMessageBlock.msg_id)
         {
             case RSensorDataFromSensor:
-                if(run && !stop)
+            {
+                if(sentStartFromAndroid)
                 {
                     SensorData receivedSensorData;
-                    /*receivedSensorData.FrontDistance    = canMessageBlock.data.words[0];
-                    receivedSensorData.LeftDistance     = canMessageBlock.data.words[1];
-                    receivedSensorData.RightDistance    = canMessageBlock.data.words[2];
-                    receivedSensorData.RearDistance     = canMessageBlock.data.words[3];*/
                     receivedSensorData.FrontDistance    = canMessageBlock.data.bytes[0];
                     receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
                     receivedSensorData.RightDistance    = canMessageBlock.data.bytes[2];
                     receivedSensorData.RearDistance     = canMessageBlock.data.bytes[3];
                     SensorProcessingAlgorithm(receivedSensorData);
-                    //memcpy(&receivedSensorData, &canMessageBlock.data, sizeof(receivedSensorData));
                 }
+                else
+                {
+                    MotorDriveFromSensors(false, false, false, false, false, 0, 0);
+                }
+                break;
+            }
+
+            case RDistanceFinalAndNextCheckpoint:
+                //printf("%d   %d\n", geoReceivedData.FinalDistance, geoReceivedData.NextCheckpointDistance);
+                geoReceivedData.FinalDistance = canMessageBlock.data.words[0];
+                geoReceivedData.NextCheckpointDistance = canMessageBlock.data.words[1];
                 break;
 
             case RHeadingAndBearingToGeo:
-                if(run && !stop)
-                {
-                    GeoData geoReceivedData;
-                    geoReceivedData.DirectionByte = canMessageBlock.data.bytes[0];
-                    geoReceivedData.TurningAngle = canMessageBlock.data.bytes[1];
-                    //printf("%d %d",canMessageBlock.data.bytes[0],canMessageBlock.data.bytes[1]);
-                    //GeoDecision(geoReceivedData.HeadingAngle,geoReceivedData.BearingAngle);
-                }
+                //printf("%d   %d\n", geoReceivedData.TurningAngle, geoReceivedData.TurnDirection);
+                    geoReceivedData.TurningAngle = canMessageBlock.data.bytes[0];
+                    geoReceivedData.TurnDirection = canMessageBlock.data.bytes[1];
                 break;
 
             case RRunAndPauseCommandFromAndroid:
                 printf("Run received");
+                MotorDriveFromSensors(false, false, false, false, false, 0, 0);
                 run = true;
                 stop = false;
                 break;
 
             case RStopMessageFromAndroid:
                 printf("Stop received");
+                MotorDriveFromSensors(false, false, false, false, false, 0, 0);
                 run = false;
                 stop = true;
                 break;
@@ -106,10 +103,6 @@ bool CANReception(can_msg_t& canMessageBlock)
             case RKillMessageFromAndroid:
                 SendKillMessageToAllControllers();
                 break;
-
-            case RDistanceFinalAndNextCheckpoint:
-                geoReceivedData.finalDistance = canMessageBlock.data.words[0];
-                  break;
 
             case RBootReplyFromAndroid:
                 GetBootReplyFromModule();
@@ -127,23 +120,19 @@ bool CANReception(can_msg_t& canMessageBlock)
                 GetBootReplyFromModule();
                 break;
 
+                // XXX: Why do this in the default case?
             default:
                 if(run)
                 {
-                    MotorDriveFromSensors(true, false, false, false, false, SpeedLevel3, 0);
+                    //MotorDriveFromSensors(true, false, false, false, false, SpeedLevel3, 0);
                 }
                 else if(stop)
                 {
-                    MotorDriveFromSensors(false, false, false, false, false, 0, 0);
+                    //MotorDriveFromSensors(false, false, false, false, false, 0, 0);
                 }
                 break;
         }
-        return true;
+        receptionSuccessful = true;
     }
-    else
-    {
-        /*LOG_ERROR("CAN not receiving messages");*/
-        return false;
-    }
-
+    return receptionSuccessful;
 }

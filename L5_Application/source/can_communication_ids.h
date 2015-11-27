@@ -115,12 +115,12 @@ typedef struct
 typedef struct
 {
         //Message 0x250 (8 bytes)
-        uint16_t finalDistance          :   16;          // Final distance to the destination
-     //   uint32_t nextCheckpointDistance :   8; // Next checkpoint distance to the destination
+        uint32_t FinalDistance          :   16;          // Final distance to the destination
+        uint32_t NextCheckpointDistance :   8; // Next checkpoint distance to the destination
 
         //Message 0x260 (4 bytes)
-        uint8_t TurningAngle           :   8;           // Turning Angle
-        uint8_t DirectionByte           :   8;           // Byte indicating in which direction to turn.
+        uint32_t TurningAngle            :   8;           // Turning Angle
+        uint32_t TurnDirection           :   8;           // Byte indicating in which direction to turn.
 } GeoData;
 
 typedef struct
