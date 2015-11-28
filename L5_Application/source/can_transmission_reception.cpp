@@ -105,13 +105,10 @@ bool CANReception(can_msg_t& canMessageBlock)
 
             case RHeadingAndBearingToGeo:
                 //printf("%d   %d\n", geoReceivedData.TurningAngle, geoReceivedData.TurnDirection);
-<<<<<<< HEAD
+
                 memcpy(&receivedTurnData,&canMessageBlock.data,sizeof(GeoTurnData));
 
-=======
-                geoReceivedData.TurningAngle = canMessageBlock.data.bytes[0];
-                geoReceivedData.TurnDirection = canMessageBlock.data.bytes[1];
->>>>>>> ed532dc56d72185c467e3a8dc294bcce7a6c8736
+
                 break;
 
 
