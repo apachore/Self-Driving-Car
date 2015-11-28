@@ -45,7 +45,11 @@ const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 void period_1Hz(void)
 {
     //LE.toggle(1);
-  //  puts("entered 1hz task\n");
+  //  puts("entered 1hz task\n");    //Recover from CAN Bus off at 10Hz
+    if (CAN_is_bus_off(can1))
+    {
+        CAN_reset_bus(can1);
+    }
 	Speed_Pulse_Count();
 
     LCDdisplay();

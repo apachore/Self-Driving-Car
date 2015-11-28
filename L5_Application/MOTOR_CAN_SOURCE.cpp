@@ -42,8 +42,8 @@ void Receive_init()
     CAN_init(can1, 100, 100, 100, *BusOffCb,*DataOverCanBuffer);/*Initializing CAN bus*/
     CAN_reset_bus(can1);          /*Reset CAN bus*/
 
-    const can_std_id_t slist[]  {CAN_gen_sid(can1, 0x220), CAN_gen_sid(can1, 0x240),
-            CAN_gen_sid(can1, 0x610), CAN_gen_sid(can1, 0x250), CAN_gen_sid(can1, 0x410),CAN_gen_sid(can1, 0x420)};    /*CAN standard ID list*/
+    const can_std_id_t slist[]  {CAN_gen_sid(can1, 0x220), CAN_gen_sid(can1, 0x240), CAN_gen_sid(can1, 0x250), CAN_gen_sid(can1, 0x410),CAN_gen_sid(can1, 0x420),
+            CAN_gen_sid(can1, 0x610)};    /*CAN standard ID list*/
 
     /*Motor Control message from Master : 0x220 */
     /*Boot Request message from Master : 0x610 */
@@ -119,6 +119,7 @@ void Receiver_message()
               //  puts(" can 210 received\n");
             break;
             case 0x220:
+                LE.toggle(2);
                 canReceivedData = rx_msg;
            break;
             case 0x240:
@@ -144,7 +145,8 @@ void Receiver_message()
     else
     {
 //        puts("\n220 not message received\n");
-//    	canReceivedData.data.bytes[3] = 0;
+    	canReceivedData.data.bytes[2] = 0;
+    	canReceivedData.data.bytes[3] = 0;
         LE.toggle(4);
     }
     //printf("This is Motor RX function\n");

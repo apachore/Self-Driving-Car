@@ -56,6 +56,9 @@ bool MotorTask::run(void *p)
     int speed_pls_exp,speed_pls_act,speed_pls_diff;
     static uint32_t speed_miss,speed_miss_cont;
     static int DC_level_last;
+    extern int Mstr_Mtr_cmd;
+
+//    printf("\nMstr_Mtr_cmd : %d",Mstr_Mtr_cmd);
 
     if (count_init)
     {
@@ -71,6 +74,7 @@ bool MotorTask::run(void *p)
         servo_level = canReceivedData.data.bytes[1];
         DC_control = canReceivedData.data.bytes[2];
         DC_level = canReceivedData.data.bytes[3];
+        LD.setNumber(DC_control*10 + DC_level);
 
         printf("\nDC: Control %x, Level_exp %x",DC_control,DC_level);
 //        printf("\nServo: Control %x, Level %x",servo_control,servo_level);
@@ -128,18 +132,23 @@ bool MotorTask::run(void *p)
             	{
             		pwm2.set(15);
             		vTaskDelay(25);
-            		pwm2.set(13);
+            		pwm2.set(12);
                     vTaskDelay(100);
                     speed_offset = 0;
                     LD.setNumber(13);
                     speed_factor =0;
             	}
+
+
+
+
+
             speed_offset = 0;
             speed_factor =0;
             count_rev = 1;
             break;
             case 1:
-            speed_offset = 0.5;
+            speed_offset = 0.4;
             speed_factor = 0.2;
             count_rev = 1;
             break;
@@ -161,13 +170,13 @@ bool MotorTask::run(void *p)
         	speed_pls_exp = 0;
         	break;
         case 1:
-        	speed_pls_exp = 10;
+        	speed_pls_exp = 8;
         	break;
         case 2:
-        	speed_pls_exp = 20;
+        	speed_pls_exp = 13;
         	break;
         case 3:
-        	speed_pls_exp = 30;
+        	speed_pls_exp = 25;
 			break;
         default:
         	speed_pls_exp = 0;
@@ -212,11 +221,11 @@ bool MotorTask::run(void *p)
         }
 //        speed_miss_cont = 5;
 
-    	printf("\nspeed_miss  : %d",speed_miss);
+//    	printf("\nspeed_miss  : %d",speed_miss);
     	printf("\nspeed_miss_cont  : %d",speed_miss_cont);
-    	speed_correction = (speed_miss_cont/20)*0.05;
+    	speed_correction = (speed_miss_cont/20)*0.3;
 
-        if(speed_miss > 5)
+        if(speed_miss > 1)
         {
 //        	speed_miss_cont++;
         	if(speed_pulse_cnt_sec < speed_pls_exp)
