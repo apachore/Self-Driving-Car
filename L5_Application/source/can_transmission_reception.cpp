@@ -21,12 +21,19 @@
 // XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
 // XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
 
+<<<<<<< HEAD
 
 static bool run = true;
+=======
+static bool run = false;
+>>>>>>> ed532dc56d72185c467e3a8dc294bcce7a6c8736
 static bool stop = false;
 GeoTurnData receivedTurnData;
 GeoDistanceData receivedDistanceData;
 bool isSensorObstruction = false;
+static bool SensorActivate = true;
+bool sentStartFromAndroid = true;
+bool sentStopFromAndroid;
 
 
 void DataOverCanBuffer(uint32_t param)
@@ -56,8 +63,10 @@ bool CANReception(can_msg_t& canMessageBlock)
     bool receptionSuccessful = false;
     // XXX: Empty out all the messages in the queue
     // Empty all messages that have arrived within last 10ms
-    bool sentStartFromAndroid = run && !stop;
-    bool sentStopFromAndroid = !run && stop;
+
+    sentStartFromAndroid = run && !stop;
+    sentStopFromAndroid = !run && stop;
+
     while (CAN_rx(can1, &canMessageBlock, 0))
     {
         switch (canMessageBlock.msg_id)
@@ -66,7 +75,15 @@ bool CANReception(can_msg_t& canMessageBlock)
 
 
             {
-                if(sentStartFromAndroid)
+/*                if (SW.getSwitch(2))
+                {
+                    if(!SensorActivate)
+                        SensorActivate = true;
+                    else
+                        SensorActivate = false;
+                    LD.setNumber(11);
+                }*/
+                if(sentStartFromAndroid && SensorActivate)
                 {
                     SensorData receivedSensorData;
                     memcpy(&receivedSensorData,&canMessageBlock.data,sizeof(SensorData));
@@ -88,8 +105,13 @@ bool CANReception(can_msg_t& canMessageBlock)
 
             case RHeadingAndBearingToGeo:
                 //printf("%d   %d\n", geoReceivedData.TurningAngle, geoReceivedData.TurnDirection);
+<<<<<<< HEAD
                 memcpy(&receivedTurnData,&canMessageBlock.data,sizeof(GeoTurnData));
 
+=======
+                geoReceivedData.TurningAngle = canMessageBlock.data.bytes[0];
+                geoReceivedData.TurnDirection = canMessageBlock.data.bytes[1];
+>>>>>>> ed532dc56d72185c467e3a8dc294bcce7a6c8736
                 break;
 
 
