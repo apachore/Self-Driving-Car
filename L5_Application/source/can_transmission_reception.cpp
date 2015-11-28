@@ -17,10 +17,10 @@
 #include "file_logger.h"
 #include "string.h"
 
+GeoData geoReceivedData;
 // XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
 // XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
 
-GeoData geoReceivedData;
 void DataOverCanBuffer(uint32_t param)
 {
     LOG_ERROR("Data over CAN buffer");
@@ -42,8 +42,9 @@ void CANInitialization()
 }
 
 
-void CANTransmission(uint32_t msg_id, uint8_t* data, uint32_t length)
+void CANTransmission(/*uint32_t msg_id, uint8_t* data, uint32_t length*/can_msg_t canMessageBlock)
 {
+/*
     can_msg_t canMessageBlock = {0};
     uint8_t i;
     canMessageBlock.msg_id = msg_id;
@@ -51,6 +52,7 @@ void CANTransmission(uint32_t msg_id, uint8_t* data, uint32_t length)
     canMessageBlock.frame_fields.data_len = length;
     canMessageBlock.data.bytes[0] = data[0];
     //canMessageBlock.data.qword = data[0];
+*/
 
     CAN_tx(can1,&canMessageBlock, 0);
 
@@ -74,7 +76,7 @@ bool CANReception(can_msg_t& canMessageBlock)
                 receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
                 receivedSensorData.RightDistance    = canMessageBlock.data.bytes[2];
                 receivedSensorData.RearDistance     = canMessageBlock.data.bytes[3];
-                memcpy(&receivedSensorData, &canMessageBlock.data, sizeof(receivedSensorData));
+                //memcpy(&receivedSensorData, &canMessageBlock.data, sizeof(receivedSensorData));
                 SensorProcessingAlgorithm(receivedSensorData);
                 break;
 
@@ -82,7 +84,8 @@ bool CANReception(can_msg_t& canMessageBlock)
 
                 geoReceivedData.TurningAngle = canMessageBlock.data.bytes[0];
                 geoReceivedData.DirectionByte = canMessageBlock.data.bytes[1];
-                printf("%d %d",canMessageBlock.data.bytes[0],canMessageBlock.data.bytes[1]);
+                LD.setNumber(geoReceivedData.TurningAngle);
+            //    printf("%d %d",canMessageBlock.data.bytes[0],canMessageBlock.data.bytes[1]);
                 GeoDecision(geoReceivedData.TurningAngle,geoReceivedData.DirectionByte);
                 break;
             case RKillMessageFromAndroid:

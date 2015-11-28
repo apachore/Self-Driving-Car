@@ -94,42 +94,42 @@ const can_std_grp_id_t groupList[] =
 // Struct for Motor Data
 typedef struct
 {
-        // Message 0x220 (4 bytes)
-        uint8_t leftRightdirection      :   8;
-        uint8_t levelOfDirection        :   8;
-        uint8_t frontBackDirection      :   8;
-        uint8_t levelOfSpeed            :   8;
+
+        uint8_t leftRightdirection;
+        uint8_t levelOfDirection;
+        uint8_t frontBackDirection;
+        uint8_t levelOfSpeed;
 } MotorData;
 
 // Struct for Sensor Data
 typedef struct
 {
         // Message 0x210 (4 bytes)
-        uint8_t FrontDistance           :   8;          // Forward distance in cms
-        uint8_t RearDistance            :   8;           // Rear distance in cms
-        uint8_t LeftDistance            :   8;           // Left distance in cms
-        uint8_t RightDistance           :   8;          // Right distance in cms
+        uint8_t FrontDistance;          // Forward distance in cms
+        uint8_t RearDistance;           // Rear distance in cms
+        uint8_t LeftDistance;           // Left distance in cms
+        uint8_t RightDistance;          // Right distance in cms
 } SensorData;
 
 // Struct for Geo Data
 typedef struct
 {
         //Message 0x250 (8 bytes)
-        uint16_t finalDistance          :   16;          // Final distance to the destination
-     //   uint32_t nextCheckpointDistance :   8; // Next checkpoint distance to the destination
+        uint16_t finalDistance;          // Final distance to the destination
+        uint16_t nextCheckpointDistance; // Next checkpoint distance to the destination
 
         //Message 0x260 (4 bytes)
-        uint8_t TurningAngle           :   8;           // Turning Angle
-        uint8_t DirectionByte           :   8;           // Byte indicating in which direction to turn.
+        uint8_t TurningAngle;           // Turning Angle
+        uint8_t DirectionByte;           // Byte indicating in which direction to turn.
 } GeoData;
 
 typedef struct
 {
-        uint8_t Hour                    :   8;
-        uint8_t Minutes                 :   8;
-        uint8_t Day                     :   8;
-        uint8_t Month                   :   8;
-        uint8_t Year                    :   8;
+        uint8_t Hour;
+        uint8_t Minutes;
+        uint8_t Day;
+        uint8_t Month;
+        uint8_t Year;
 } BootReply;
 
 // Struct for Motor Speed Levels

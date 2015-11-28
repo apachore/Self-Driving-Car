@@ -73,8 +73,8 @@ void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, b
     }
 
     printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
-    //CANTransmission(canMessage);
-    CANTransmission(canMessage.msg_id, &canMessage.data.bytes[0], 4);
+    CANTransmission(canMessage);
+    //CANTransmission(canMessage.msg_id, &canMessage.data.bytes[0], 4);
 }
 
 void SensorProcessingAlgorithm(SensorData receivedSensorData)
@@ -110,7 +110,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
     }
     else if (F1) {
         LD.setLeftDigit('F');
-        //LE.toggle(1);
+        LE.toggle(1);
         if (!Reverse) {
             LE.toggle(4);
             reverseMotor = true;
@@ -118,12 +118,12 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             if (receivedSensorData.LeftDistance > receivedSensorData.RightDistance) {
                 rightMotor = true;
                 levelOfDirection = DirectionLevel5;
-                LD.setRightDigit('R');
+                //LD.setRightDigit('R');
             }
             else if (receivedSensorData.RightDistance > receivedSensorData.LeftDistance) {
                 leftMotor = true;
                 levelOfDirection = DirectionLevel5;
-                LD.setRightDigit('L');
+                //LD.setRightDigit('L');
             }
         }
     }
@@ -137,14 +137,14 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             rightMotor = true;
             levelOfDirection = DirectionLevel5;
             levelOfSpeed = SpeedLevel1;
-            LD.setRightDigit('R');
+            //LD.setRightDigit('R');
         }
         else if (L2 && !Rt1 && !Rt2) {
             LE.toggle(2);
             rightMotor = true;
             levelOfDirection = DirectionLevel3;
             levelOfSpeed = SpeedLevel2;
-            LD.setRightDigit('R');
+            //LD.setRightDigit('R');
             // Less level of right
         }
         else if (Rt1 && !L1 && !L2) {
@@ -153,7 +153,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             leftMotor = true;
             levelOfDirection = DirectionLevel5;
             levelOfSpeed = SpeedLevel1;
-            LD.setRightDigit('L');
+            //LD.setRightDigit('L');
         }
         else if (Rt2 && !L1 && !L2) {
             // Less level of left;
@@ -161,7 +161,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             leftMotor = true;
             levelOfDirection = DirectionLevel3;
             levelOfSpeed = SpeedLevel2;
-            LD.setRightDigit('L');
+            //LD.setRightDigit('L');
         }
     }
     //XXX: Have some low level where you wont be able to go ahead in any case and then stop or take a right.
@@ -270,13 +270,13 @@ void GeoDecision(uint8_t angle,uint8_t turn)
    bool brakeFlag = false;
     if(1)    //(sensor_obstruction)
       {
-          if(geoReceivedData.finalDistance>10)  //(distance check)
+          if(1)               //geoReceivedData.finalDistance>10)  //(distance check)
           {
              if(angle>10)
               {
                   if(angle>=90)
                     {
-                       if(turn==0)
+                       if(turn==1)
                        {
                           puts("\nturn left with level 3");       // Turn left or right according to the data received with level 3.
                           leftMotor=true;
@@ -296,7 +296,7 @@ void GeoDecision(uint8_t angle,uint8_t turn)
                     }
                   else if(angle>=45&&angle<90)
                     {
-                       if(turn==0)
+                       if(turn==1)
                        {
                           puts("\nturn left with level 2");       // Turn left or right according to the data received with level 2.
                           leftMotor=true;
@@ -317,7 +317,7 @@ void GeoDecision(uint8_t angle,uint8_t turn)
                     }
                   else
                      {
-                       if(turn==0)
+                       if(turn==1)
                        {
                           puts("\nturn left with level 1");       // Turn left or right according to the data received with level 1.
                           leftMotor=true;
@@ -348,7 +348,7 @@ void GeoDecision(uint8_t angle,uint8_t turn)
           }
           else
                 {
-                  if(geoReceivedData.finalDistance==0)//(total_distance==0)
+                  if(geoReceivedData.finalDistance == 0)//(total_distance==0)
                   {
                       puts("\nStop the Car");        // Stop the Car;
                       brakeFlag=true;
@@ -363,5 +363,9 @@ void GeoDecision(uint8_t angle,uint8_t turn)
 
           MotorDriveFromSensors(frontMotor, reverseMotor, leftMotor, rightMotor, brakeFlag, levelOfSpeed, levelOfDirection);
       }
+    else
+    {
+        MotorDriveFromSensors(true, false, false, false, false, SpeedLevel3, 0);
+    }
     //  cout<<endl;
 }
