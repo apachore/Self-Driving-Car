@@ -68,19 +68,21 @@ void CANInitialization()
     /*Hard coded checkpoint are added to queue
     instead of adding checkpoints from CAN receiver section*/
 #if TestingWithoutAndroid
-    coordinates checkpoint1[10];
+    coordinates checkpoint1/*[10]*/;
     uint8_t counter;
-    float lat[6] = {37.336401,37.336504,37.336582,37.336668,37.336767,37.336880};
-    float lon[6] = {-121.881673,-121.881455,-121.881302,-121.881154,-121.880916,-121.880793};
-    for (counter=0;counter<6;counter++)
+    //float lat[6] = {37.336401,37.336504,37.336582,37.336668,37.336767,37.336880};
+    //float lon[6] = {-121.881673,-121.881455,-121.881302,-121.881154,-121.880916,-121.880793};
+    float lat = 37.334781;
+    float lon = -121.880913;
+    //for (counter=0;counter<6;counter++)
     {
-        checkpoint1[counter].latitude = lat[counter];
-        checkpoint1[counter].longitude = lon[counter];
+        checkpoint1/*[counter]*/.latitude = lat/*[counter]*/;
+        checkpoint1/*[counter]*/.longitude = lon/*[counter]*/;
     }
 
-    for(counter=0;counter<6;counter++)
+//    for(counter=0;counter<6;counter++)
     {
-        if (!xQueueSend(Checkpoint_Queue, &checkpoint1[counter], 0))
+        if (!xQueueSend(Checkpoint_Queue, &checkpoint1/*[counter]*/, 0))
         {
             // unexpected led
             //LE.toggle(2);//if checkpoints are not sent on queue LED will toggle

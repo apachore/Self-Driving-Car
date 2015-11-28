@@ -247,7 +247,7 @@ void GPS_Calculations()
         {
             LOG_INFO("Latitude: %f  Longitude: %f ",current_gps_data.latitude,current_gps_data.longitude);
             //LE.toggle(2);
-            //printf("Latitude: %f\n",current_gps_data.latitude);
+            printf("%f  %f\n",current_gps_data.latitude,current_gps_data.longitude);
             //printf("Longitude: %f\n",current_gps_data.longitude);
 
             CANTransmit(TSourceCoordinates,(uint8_t*)&current_gps_data,sizeof(coordinates));
@@ -268,10 +268,10 @@ void GPS_Calculations()
             {
                 Current_Distances.Current_Checkpoint_Distance = calculateCheckpointDistance(checkpoint,current_gps_data);
                 LOG_INFO("Current Distance: %d",Current_Distances.Current_Checkpoint_Distance);
-                printf("Current Checkpoint Distance: %d feet\n",Current_Distances.Current_Checkpoint_Distance);
+                //printf("Current Checkpoint Distance: %d feet\n",Current_Distances.Current_Checkpoint_Distance);
                 current_bearing = calculateBearing(checkpoint,current_gps_data);
                 LOG_INFO("Current Bearing: %d",current_bearing);
-                printf("Current Bearing: %d degrees\n",current_bearing);
+                //printf("Current Bearing: %d degrees\n",current_bearing);
                 if (first_after_cp_fetch)
                 {
                     Previous_Checkpoint_Distnace = Current_Distances.Current_Checkpoint_Distance;
@@ -287,12 +287,15 @@ void GPS_Calculations()
 
                 Total_Distance_Traveled = Total_Distance_Traveled + (Previous_Checkpoint_Distnace - Current_Distances.Current_Checkpoint_Distance);
                 LOG_INFO("Total Distance Traveled: %d",Total_Distance_Traveled);
-                printf("Total Distance Traveled: %d",Total_Distance_Traveled);
+                //printf("Total Distance Traveled: %d",Total_Distance_Traveled);
 
                 Previous_Checkpoint_Distnace = Current_Distances.Current_Checkpoint_Distance;
                 Current_Distances.Total_Distance_Remaining = Total_Distance_To_Travel - Total_Distance_Traveled;
                 LOG_INFO("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
-                printf("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
+                //printf("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
+
+                printf("%d  %d  %d\n",Current_Distances.Total_Distance_Remaining,
+                        Current_Distances.Current_Checkpoint_Distance,current_bearing);
 
                 CANTransmit(TFinalAndNextCheckpointDistance,(uint8_t*)&Current_Distances,sizeof(Current_Distances));
             }

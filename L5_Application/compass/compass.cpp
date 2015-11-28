@@ -87,7 +87,7 @@ int compassHeading()
 	 /*Compass points to magnetic north. Declination is Angle between true north and magnetic north
 	 Magnetic declination at San Francisco is 13.53  degrees east*/
 	 headingRadians = headingRadians + MagneticDeclination;
-	 printf("Heading in radians: %f\n",headingRadians);
+	 //printf("Heading in radians: %f\n",headingRadians);
 
 
 	 /*Calibrate the compass for instrument error*/
@@ -100,7 +100,7 @@ int compassHeading()
      /*Conversion from float to integer*/
      int heading;
      heading = static_cast<int>(headingDegrees);
-     printf("Heading in int: %i\n",heading);
+     //printf("Heading in int: %i\n",heading);
 
      LD.setNumber(heading);
      LOG_INFO( "Heading: %d",heading);
@@ -184,6 +184,9 @@ void masterTurnAngle(uint16_t sourceAngle, uint16_t destinationAngle)
 
 	turn.degree = angle;
     LOG_INFO("Turn Angle: %d, Direction: %d", turn.degree,turn.direction);
+
+    printf("%d  %d  %d\n",sourceAngle,turn.degree,turn.direction);
+
 	if(!CANTransmit(TTurnAngleToMaster,(uint8_t*)&turn,sizeof(turn)))
 	{
 	    LE.toggle(3);
