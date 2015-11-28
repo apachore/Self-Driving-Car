@@ -17,14 +17,15 @@
 #include "file_logger.h"
 #include "string.h"
 
-GeoData geoReceivedData;
+
 // XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
 // XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
 
 
 static bool run = true;
 static bool stop = false;
-GeoData geoReceivedData;
+GeoTurnData receivedTurnData;
+GeoDistanceData receivedDistanceData;
 bool isSensorObstruction = false;
 
 
@@ -68,10 +69,7 @@ bool CANReception(can_msg_t& canMessageBlock)
                 if(sentStartFromAndroid)
                 {
                     SensorData receivedSensorData;
-                    receivedSensorData.FrontDistance    = canMessageBlock.data.bytes[0];
-                    receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
-                    receivedSensorData.RightDistance    = canMessageBlock.data.bytes[2];
-                    receivedSensorData.RearDistance     = canMessageBlock.data.bytes[3];
+                    memcpy(&receivedSensorData,&canMessageBlock.data,sizeof(SensorData));
                     SensorProcessingAlgorithm(receivedSensorData);
                 }
                 else
@@ -82,16 +80,16 @@ bool CANReception(can_msg_t& canMessageBlock)
             }
 
             case RDistanceFinalAndNextCheckpoint:
+
                 //printf("%d   %d\n", geoReceivedData.FinalDistance, geoReceivedData.NextCheckpointDistance);
-                geoReceivedData.FinalDistance = canMessageBlock.data.words[0];
-                geoReceivedData.NextCheckpointDistance = canMessageBlock.data.words[1];
+                memcpy(&receivedDistanceData,&canMessageBlock.data,sizeof(GeoDistanceData));
 
                 break;
 
             case RHeadingAndBearingToGeo:
                 //printf("%d   %d\n", geoReceivedData.TurningAngle, geoReceivedData.TurnDirection);
-                    geoReceivedData.TurningAngle = canMessageBlock.data.bytes[0];
-                    geoReceivedData.TurnDirection = canMessageBlock.data.bytes[1];
+                memcpy(&receivedTurnData,&canMessageBlock.data,sizeof(GeoTurnData));
+
                 break;
 
 

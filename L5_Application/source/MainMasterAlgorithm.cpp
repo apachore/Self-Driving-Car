@@ -16,7 +16,8 @@
 #include "file_logger.h"
 //#include "motorDrive.cpp"
 
-extern GeoData geoReceivedData;
+extern GeoDistanceData receivedDistanceData;
+extern GeoTurnData receivedTurnData;
 extern bool isSensorObstruction;
 
 #define straightSensorDangerDistance    50
@@ -376,10 +377,10 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
     bool reverseMotor = false;
     bool brakeFlag = true;
 
-    uint32_t finalDistance = geoReceivedData.FinalDistance;
-    uint32_t nextCheckPointDistance = geoReceivedData.NextCheckpointDistance;
-    uint32_t turningAngle = geoReceivedData.TurningAngle;
-    uint32_t turnDirection = geoReceivedData.TurnDirection;
+    uint16_t finalDistance = receivedDistanceData.FinalDistance;
+    uint16_t nextCheckPointDistance = receivedDistanceData.NextCheckpointDistance;
+    uint8_t turningAngle = receivedTurnData.TurningAngle;
+    uint8_t turnDirection = receivedTurnData.TurnDirection;
 
     //printf("%d  %d  %d  %d\n", finalDistance, nextCheckPointDistance, turningAngle, turnDirection);
     LD.setNumber((char)turningAngle);

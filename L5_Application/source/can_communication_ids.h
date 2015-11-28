@@ -106,10 +106,10 @@ typedef struct
 typedef struct
 {
         // Message 0x210 (4 bytes)
-        uint8_t FrontDistance;          // Forward distance in cms
-        uint8_t RearDistance;           // Rear distance in cms
-        uint8_t LeftDistance;           // Left distance in cms
-        uint8_t RightDistance;          // Right distance in cms
+        uint32_t FrontDistance         : 8;          // Forward distance in cms
+        uint32_t LeftDistance          : 8;           // Rear distance in cms
+        uint32_t RightDistance         : 8;           // Left distance in cms
+        uint32_t RearDistance          : 8;          // Right distance in cms
 } SensorData;
 
 // Struct for Geo Data
@@ -118,13 +118,16 @@ typedef struct
         //Message 0x250 (8 bytes)
 
         uint32_t FinalDistance          :   16;          // Final distance to the destination
-        uint32_t NextCheckpointDistance :   8; // Next checkpoint distance to the destination
+        uint32_t NextCheckpointDistance :   16; // Next checkpoint distance to the destination
+}GeoDistanceData;
 
+typedef struct
+{
         //Message 0x260 (4 bytes)
-        uint32_t TurningAngle            :   8;           // Turning Angle
-        uint32_t TurnDirection           :   8;           // Byte indicating in which direction to turn.
+        uint16_t TurningAngle            :   8;           // Turning Angle
+        uint16_t TurnDirection           :   8;           // Byte indicating in which direction to turn.
 
-} GeoData;
+} GeoTurnData;
 
 typedef struct
 {
