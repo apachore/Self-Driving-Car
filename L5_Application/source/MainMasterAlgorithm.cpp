@@ -18,6 +18,7 @@
 
 extern GeoData geoReceivedData;
 extern bool isSensorObstruction;
+bool firstDistanceMessage = true;
 
 #define straightSensorDangerDistance    50
 #define turnSensorDangerDistance        30
@@ -74,7 +75,7 @@ void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, b
         canMessage.data.bytes[1] = levelOfDirection;
     }
 
-    //printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
+    printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
     CANTransmission(canMessage);
     //CANTransmission(canMessage.msg_id, &canMessage.data.bytes[0], 4);
 }
@@ -87,8 +88,6 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
     bool leftMotor = false;
     bool rightMotor = false;
     bool brakeFlag = false;
-
-    printf("%d  %d  %d  %d\n", receivedSensorData.FrontDistance, receivedSensorData.LeftDistance, receivedSensorData.RightDistance, receivedSensorData.RearDistance);
 
     bool F1 = (receivedSensorData.FrontDistance < fLow) ? true : false;
     bool F2 = (receivedSensorData.FrontDistance < fLevel1 && receivedSensorData.FrontDistance >= fLow) ? true : false;
@@ -109,15 +108,19 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
     if(F1 || F2 || F3 || LDanger || L1 || L2 || L3 || RtDanger || Rt1 || Rt2 || Rt3) {
         isSensorObstruction = true;
     }
-    else{
-        isSensorObstruction = false;
+    else {
+        isSensorObstruction = false;     // Adjustment for now
         return;
     }
 
-    bool LeftRightOpen = false;
-    if(!F1 && !F2 && !L1 && !L2 && !Rt1 && !Rt2)
+    printf("%d  %d  %d  %d\n", receivedSensorData.FrontDistance, receivedSensorData.LeftDistance, receivedSensorData.RightDistance, receivedSensorData.RearDistance);
+
+    if(F3 && L3 && Rt3)
     {
-        LeftRightOpen = true;
+        LE.toggle(1);
+        LE.toggle(2);
+        LE.toggle(3);
+        LE.toggle(4);
     }
 
     if(!F1 && !F2 && !F3 && !LDanger && !L1 && !L2 && !L3 && !RtDanger && !Rt1 && !Rt2 && !Rt3) {
@@ -126,8 +129,8 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
         levelOfSpeed = SpeedLevel2;
     }
     else if (F1) {
-        LD.setLeftDigit('F');
-        LD.setRightDigit('1');
+/*        LD.setLeftDigit('F');
+        LD.setRightDigit('1');*/
         LE.toggle(1);
         if (!Reverse) {
             LE.toggle(4);
@@ -136,18 +139,18 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             if (receivedSensorData.LeftDistance > receivedSensorData.RightDistance) {
                 rightMotor = true;
                 levelOfDirection = DirectionLevel5;
-                LD.setRightDigit('R');
+                //LD.setRightDigit('R');
             }
             else if (receivedSensorData.RightDistance > receivedSensorData.LeftDistance) {
                 leftMotor = true;
                 levelOfDirection = DirectionLevel5;
-                LD.setRightDigit('L');
+                //LD.setRightDigit('L');
             }
         }
     }
     else if (F2) {
-        LD.setLeftDigit('F');
-        LD.setRightDigit('2');
+        /*LD.setLeftDigit('F');
+        LD.setRightDigit('2');*/
         LE.toggle(1);
         frontMotor = true;
         levelOfSpeed = SpeedLevel2;
@@ -159,7 +162,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             rightMotor = true;
             levelOfDirection = DirectionLevel4;
             levelOfSpeed = SpeedLevel1;
-            LD.setRightDigit('R');
+//            LD.setRightDigit('R');
         }
         ///XXX: // Need to check this again whether sharp direction is needed or not
         else if (L2 && !RtDanger && !Rt1/* && !Rt2*/) {
@@ -169,7 +172,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             rightMotor = true;
             levelOfDirection = DirectionLevel2;
             levelOfSpeed = SpeedLevel2;
-            LD.setRightDigit('R');
+//            LD.setRightDigit('R');
         }
         else if(LDanger && !Reverse) {
             LE.toggle(4);
@@ -189,7 +192,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             leftMotor = true;
             levelOfDirection = DirectionLevel4;
             levelOfSpeed = SpeedLevel1;
-            LD.setRightDigit('L');
+//            LD.setRightDigit('L');
         }
         else if (Rt2 && !LDanger && !L1 /*&& !L2*/) {
             // Less level of left;
@@ -198,7 +201,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             leftMotor = true;
             levelOfDirection = DirectionLevel2;
             levelOfSpeed = SpeedLevel2;
-            LD.setRightDigit('L');
+//            LD.setRightDigit('L');
         }
         else if(RtDanger && !Reverse) {
             LE.toggle(4);
@@ -215,12 +218,12 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             if (receivedSensorData.LeftDistance > receivedSensorData.RightDistance) {
                 rightMotor = true;
                 levelOfDirection = DirectionLevel5;
-                LD.setRightDigit('R');
+//                LD.setRightDigit('R');
             }
             else if (receivedSensorData.RightDistance > receivedSensorData.LeftDistance) {
                 leftMotor = true;
                 levelOfDirection = DirectionLevel5;
-                LD.setRightDigit('L');
+//                LD.setRightDigit('L');
             }
         }
     }
@@ -233,8 +236,8 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             rightMotor = true;
             levelOfDirection = DirectionLevel4;
             levelOfSpeed = SpeedLevel1;
-            LD.setRightDigit('R');
-            LD.setRightDigit('1');
+            /*LD.setRightDigit('R');
+            LD.setRightDigit('1');*/
         }
         else if (L2 && !RtDanger && !Rt1 /*&& !Rt2*/) {
             // Less level of right;
@@ -242,8 +245,8 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             rightMotor = true;
             levelOfDirection = DirectionLevel2;
             levelOfSpeed = SpeedLevel2;
-            LD.setRightDigit('R');
-            LD.setRightDigit('2');
+         /*   LD.setRightDigit('R');
+            LD.setRightDigit('2');*/
         }
         ///XXX : Added now. Check this condition in testing now.
         else if (Rt1 && !LDanger && !L1 /*&& !L2*/) {
@@ -286,8 +289,8 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             rightMotor = true;
             levelOfDirection = DirectionLevel4;
             levelOfSpeed = SpeedLevel1;
-            LD.setRightDigit('R');
-            LD.setRightDigit('1');
+            /*LD.setRightDigit('R');
+            LD.setRightDigit('1');*/
         }
         else if (RtDanger){
             LE.toggle(4);
@@ -301,7 +304,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
     else if(F3 || L3 || Rt3)
     {
         frontMotor = true;
-        levelOfSpeed = SpeedLevel1;
+        levelOfSpeed = SpeedLevel2;
     }
 
     MotorDriveFromSensors(frontMotor, reverseMotor, leftMotor, rightMotor, brakeFlag, levelOfSpeed, levelOfDirection);
@@ -373,13 +376,20 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
     uint32_t nextCheckPointDistance = geoReceivedData.NextCheckpointDistance;
     uint32_t turningAngle = geoReceivedData.TurningAngle;
     uint32_t turnDirection = geoReceivedData.TurnDirection;
+    static int totalInitialDistance;
 
-    //printf("%d  %d  %d  %d\n", finalDistance, nextCheckPointDistance, turningAngle, turnDirection);
-    LD.setNumber((char)turningAngle);
+    if(firstDistanceMessage)
+    {
+        totalInitialDistance = finalDistance;
+        firstDistanceMessage = false;
+    }
+
+    LD.setNumber((char)(nextCheckPointDistance));
     // Changed the flag from here to
     if(!isSensorObstruction)
     {
-        if(/*nextCheckPointDistance >10*/1)  //(distance check)
+        printf("%d  %d  %d  %d\n", finalDistance, nextCheckPointDistance, turningAngle, turnDirection);
+        if(nextCheckPointDistance >10)  //(distance check)
         {
             if(turningAngle > 10)
             {
@@ -436,7 +446,7 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
                         leftMotor = true;
                         frontMotor = true;
                         levelOfDirection = DirectionLevel1;
-                        levelOfSpeed = SpeedLevel2;
+                        levelOfSpeed = SpeedLevel3;
                     }
                     else if(turnDirection == 2)
                     {
@@ -445,7 +455,7 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
                         rightMotor = true;
                         frontMotor = true;
                         levelOfDirection = DirectionLevel1;
-                        levelOfSpeed = SpeedLevel2;
+                        levelOfSpeed = SpeedLevel3;
                     }
                 }
             }
@@ -454,13 +464,13 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
                 LE.toggle(1);
                 //  go straight.
                 frontMotor = true;
-                levelOfSpeed = SpeedLevel2;
+                levelOfSpeed = SpeedLevel3;
             }
         }
         else
         {
-            if(finalDistance == 0)//(total_distance==0)
-            {
+            /*if(finalDistance == 0)//(total_distance==0)
+            {*/
                 // Stop the Car;
                 frontMotor = false;
                 leftMotor = false;
@@ -468,14 +478,14 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
                 reverseMotor = false;
                 levelOfDirection = 0;
                 levelOfSpeed = 0;
-            }
+            /*}
             else
             {
                 LE.toggle(1);
                 // Move with lower speed;
                 frontMotor = true;
                 levelOfSpeed = SpeedLevel1;
-            }
+            }*/
         }
         MotorDriveFromSensors(frontMotor, reverseMotor, leftMotor, rightMotor, brakeFlag, levelOfSpeed, levelOfDirection);
     }

@@ -20,10 +20,13 @@
 // XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
 // XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
 
-static bool run = true;
+static bool run = false;
 static bool stop = false;
 GeoData geoReceivedData;
 bool isSensorObstruction = false;
+static bool SensorActivate = true;
+bool sentStartFromAndroid = true;
+bool sentStopFromAndroid;
 
 void DataOverCanBuffer(uint32_t param)
 {
@@ -50,15 +53,25 @@ bool CANReception(can_msg_t& canMessageBlock)
     bool receptionSuccessful = false;
     // XXX: Empty out all the messages in the queue
     // Empty all messages that have arrived within last 10ms
-    bool sentStartFromAndroid = run && !stop;
-    bool sentStopFromAndroid = !run && stop;
+
+    sentStartFromAndroid = run && !stop;
+    sentStopFromAndroid = !run && stop;
+
     while (CAN_rx(can1, &canMessageBlock, 0))
     {
         switch (canMessageBlock.msg_id)
         {
             case RSensorDataFromSensor:
             {
-                if(sentStartFromAndroid)
+/*                if (SW.getSwitch(2))
+                {
+                    if(!SensorActivate)
+                        SensorActivate = true;
+                    else
+                        SensorActivate = false;
+                    LD.setNumber(11);
+                }*/
+                if(sentStartFromAndroid && SensorActivate)
                 {
                     SensorData receivedSensorData;
                     receivedSensorData.FrontDistance    = canMessageBlock.data.bytes[0];
@@ -82,8 +95,8 @@ bool CANReception(can_msg_t& canMessageBlock)
 
             case RHeadingAndBearingToGeo:
                 //printf("%d   %d\n", geoReceivedData.TurningAngle, geoReceivedData.TurnDirection);
-                    geoReceivedData.TurningAngle = canMessageBlock.data.bytes[0];
-                    geoReceivedData.TurnDirection = canMessageBlock.data.bytes[1];
+                geoReceivedData.TurningAngle = canMessageBlock.data.bytes[0];
+                geoReceivedData.TurnDirection = canMessageBlock.data.bytes[1];
                 break;
 
             case RRunAndPauseCommandFromAndroid:
