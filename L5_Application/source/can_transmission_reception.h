@@ -14,7 +14,9 @@
 #include "io.hpp"
 #include "can_communication_ids.h"
 
-extern GeoData geoReceivedData;
+
+//extern SensorData receivedSensorData;
+
 /* This function would initialize the CAN bus. It will setup the filter that is to be used for receiving
    messages. */
 void CANInitialization();

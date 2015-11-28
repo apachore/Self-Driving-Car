@@ -94,6 +94,7 @@ const can_std_grp_id_t groupList[] =
 // Struct for Motor Data
 typedef struct
 {
+        // Message 0x220 (4 bytes)
 
         uint8_t leftRightdirection;
         uint8_t levelOfDirection;
@@ -115,12 +116,14 @@ typedef struct
 typedef struct
 {
         //Message 0x250 (8 bytes)
-        uint16_t finalDistance;          // Final distance to the destination
-        uint16_t nextCheckpointDistance; // Next checkpoint distance to the destination
+
+        uint32_t FinalDistance          :   16;          // Final distance to the destination
+        uint32_t NextCheckpointDistance :   8; // Next checkpoint distance to the destination
 
         //Message 0x260 (4 bytes)
-        uint8_t TurningAngle;           // Turning Angle
-        uint8_t DirectionByte;           // Byte indicating in which direction to turn.
+        uint32_t TurningAngle            :   8;           // Turning Angle
+        uint32_t TurnDirection           :   8;           // Byte indicating in which direction to turn.
+
 } GeoData;
 
 typedef struct

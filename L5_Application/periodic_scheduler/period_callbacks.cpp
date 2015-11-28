@@ -35,8 +35,10 @@
 #include "source/can_communication_ids.h"
 #include "can.h"
 #include "source/MainMasterAlgorithm.h"
+#include "string.h"
 
-int count = 0;
+static int count = 0;
+SensorData receivedSensorData;
 
 /// This is the stack size used for each of the period tasks
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
@@ -49,15 +51,6 @@ void period_1Hz(void)
 
 void period_10Hz(void)
 {
-    can_msg_t canMessage;
-    bool received = CANReception(canMessage);
-
-    if(!received) {
-        if(!canMessage.msg_id == RSensorDataFromSensor) {
-            MotorDriveFromSensors(true, false, false, false, false, SpeedLevel3, 0);
-        }
-    }
-    //DecisionAlgorithm(canMessage);
 
     //Recover from CAN Bus off at 10Hz
     if (CAN_is_bus_off(can1))
@@ -68,7 +61,17 @@ void period_10Hz(void)
 
 void period_100Hz(void)
 {
+    can_msg_t canMessage;
+    bool received = CANReception(canMessage);
 
+    // Continuously go and check the GEO.
+    GeoDecision();       // Need to look at this. Present adjustment
+
+    if(!received) {
+        if(canMessage.msg_id != RSensorDataFromSensor) {
+            MotorDriveFromSensors(true, false, false, false, false, SpeedLevel1, 0);
+        }
+    }
 }
 
 void period_1000Hz(void)
