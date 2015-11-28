@@ -112,6 +112,7 @@ bool CANTransmit(uint32_t msg_id , uint8_t * data, uint32_t len)
         tx.data.bytes[i] = data[i];
     }
 
+    LE.toggle(4);
     //printf("Transmitted ID: %x\n",tx.msg_id);
     return(CAN_tx(can1,&tx,0));
 }
