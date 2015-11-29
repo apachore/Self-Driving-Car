@@ -46,7 +46,7 @@ bool crtNewLogFile()
 
         FIL file;
         if (FR_OK != f_open(&file, "log.csv", FA_WRITE | FA_CREATE_ALWAYS)) {
-            printf("Unable to open '%s' to write the file\n", "log.csv");
+           // printf("Unable to open '%s' to write the file\n", "log.csv");
             return true;
         }
 
@@ -57,7 +57,7 @@ bool crtNewLogFile()
 
         //while (getChar(&c, timeout_ms) && c != end_file) {
             if (FR_OK != f_write(&file, &c, 1, &bw) || 1 != bw) {
-                printf("Error occurred while writing the file\n");
+                //printf("Error occurred while writing the file\n");
             }
 //            else {
 //                putChar(c);
@@ -243,11 +243,11 @@ void GPS_Calculations()
     }
     else if (xQueueReceive(gps_data_q, &current_gps_data, 0))
     {
-        if (BootReplySent)
+       // if (BootReplySent)
         {
             LOG_INFO("Latitude: %f  Longitude: %f ",current_gps_data.latitude,current_gps_data.longitude);
             //LE.toggle(2);
-            printf("%f  %f\n",current_gps_data.latitude,current_gps_data.longitude);
+           // printf("%f  %f\n",current_gps_data.latitude,current_gps_data.longitude);
             //printf("Longitude: %f\n",current_gps_data.longitude);
 
             CANTransmit(TSourceCoordinates,(uint8_t*)&current_gps_data,sizeof(coordinates));
@@ -262,7 +262,7 @@ void GPS_Calculations()
                 }
                 else Fetch_Checkpoint = 1;
             }
-            LD.setNumber(Received_Checkpoint_Count-Fetched_Checkpoint_Count);
+            //LD.setNumber(Received_Checkpoint_Count-Fetched_Checkpoint_Count);
 
             if(!Fetch_Checkpoint)
             {
@@ -294,8 +294,8 @@ void GPS_Calculations()
                 LOG_INFO("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
                 //printf("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
 
-                printf("%d  %d  %d\n",Current_Distances.Total_Distance_Remaining,
-                        Current_Distances.Current_Checkpoint_Distance,current_bearing);
+               printf("%d  %d  %d\n",Current_Distances.Total_Distance_Remaining,
+                       Current_Distances.Current_Checkpoint_Distance,current_bearing);
 
                 CANTransmit(TFinalAndNextCheckpointDistance,(uint8_t*)&Current_Distances,sizeof(Current_Distances));
             }

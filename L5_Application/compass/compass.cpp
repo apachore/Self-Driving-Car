@@ -110,7 +110,7 @@ int compassHeading()
 float compassCalibration(float headingNotCalibrated)
 {
 	float headingCalibrated;
-	headingCalibrated = headingNotCalibrated + 0.050536;
+	headingCalibrated = headingNotCalibrated + 0.077187;
 
 
 	if((headingCalibrated >= -3)&&(headingCalibrated <-2))
@@ -119,23 +119,27 @@ float compassCalibration(float headingNotCalibrated)
 	}
 	else if((headingCalibrated >= -2)&&(headingCalibrated <-1))
 	{
-	    headingCalibrated = (headingCalibrated * 1.4)+ M_TWOPI;
+	    headingCalibrated = (headingCalibrated * 1.44)+ M_TWOPI;
 	}
 	else if((headingCalibrated >= -1)&&(headingCalibrated < 0))
 	{
-	        headingCalibrated = (headingCalibrated * 1.35)+ M_TWOPI;
+	        headingCalibrated = (headingCalibrated * 1.39)+ M_TWOPI;
 	}
 	else if((headingCalibrated >= 0)&&(headingCalibrated <=1))
 	{
-		return headingCalibrated;
+		  headingCalibrated = (headingCalibrated * 1.2);
 	}
-	else if((headingCalibrated > 1)&&(headingCalibrated <= 2))
+	else if((headingCalibrated > 1)&&(headingCalibrated <= 1.5))
 	{
-		headingCalibrated = headingCalibrated * 0.9;
+		headingCalibrated = headingCalibrated * 1.02;
+	}
+	else if((headingCalibrated > 1.5)&&(headingCalibrated <= 2))
+	{
+	    headingCalibrated = headingCalibrated * 0.9;
 	}
 	else if((headingCalibrated > 2)&&(headingCalibrated <= 4))
 	{
-	    headingCalibrated = headingCalibrated * 0.78;
+	    headingCalibrated = headingCalibrated * 0.79;
 	}
 	return headingCalibrated;
 }
@@ -185,10 +189,10 @@ void masterTurnAngle(uint16_t sourceAngle, uint16_t destinationAngle)
 	turn.degree = angle;
     LOG_INFO("Turn Angle: %d, Direction: %d", turn.degree,turn.direction);
 
-    printf("%d  %d  %d\n",sourceAngle,turn.degree,turn.direction);
+    //printf("%d  %d  %d\n",sourceAngle,turn.degree,turn.direction);
 
 	if(!CANTransmit(TTurnAngleToMaster,(uint8_t*)&turn,sizeof(turn)))
 	{
-	    //LE.toggle(3);
+	    LE.toggle(3);
 	}
 }
