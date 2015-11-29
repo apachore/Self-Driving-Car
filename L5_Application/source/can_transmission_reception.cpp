@@ -21,12 +21,7 @@
 // XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
 // XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
 
-<<<<<<< HEAD
-
 static bool run = true;
-=======
-static bool run = false;
->>>>>>> ed532dc56d72185c467e3a8dc294bcce7a6c8736
 static bool stop = false;
 GeoTurnData receivedTurnData;
 GeoDistanceData receivedDistanceData;
@@ -72,8 +67,6 @@ bool CANReception(can_msg_t& canMessageBlock)
         switch (canMessageBlock.msg_id)
         {
             case RSensorDataFromSensor:
-
-
             {
 /*                if (SW.getSwitch(2))
                 {
@@ -86,6 +79,10 @@ bool CANReception(can_msg_t& canMessageBlock)
                 if(sentStartFromAndroid && SensorActivate)
                 {
                     SensorData receivedSensorData;
+                    /*receivedSensorData.FrontDistance    = canMessageBlock.data.bytes[0];
+                    receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
+                    receivedSensorData.RightDistance    = canMessageBlock.data.bytes[2];
+                    receivedSensorData.RearDistance     = canMessageBlock.data.bytes[3];*/
                     memcpy(&receivedSensorData,&canMessageBlock.data,sizeof(SensorData));
                     SensorProcessingAlgorithm(receivedSensorData);
                 }
@@ -97,15 +94,17 @@ bool CANReception(can_msg_t& canMessageBlock)
             }
 
             case RDistanceFinalAndNextCheckpoint:
-
                 //printf("%d   %d\n", geoReceivedData.FinalDistance, geoReceivedData.NextCheckpointDistance);
+                /*receivedDistanceData.FinalDistance = canMessageBlock.data.words[0];
+                receivedDistanceData.NextCheckpointDistance = canMessageBlock.data.words[1];*/
                 memcpy(&receivedDistanceData,&canMessageBlock.data,sizeof(GeoDistanceData));
 
                 break;
 
             case RHeadingAndBearingToGeo:
                 //printf("%d   %d\n", geoReceivedData.TurningAngle, geoReceivedData.TurnDirection);
-
+                /*receivedTurnData.TurningAngle = canMessageBlock.data.bytes[0];
+                receivedTurnData.TurnDirection = canMessageBlock.data.bytes[1];*/
                 memcpy(&receivedTurnData,&canMessageBlock.data,sizeof(GeoTurnData));
 
 
