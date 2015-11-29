@@ -16,7 +16,8 @@
 #include "file_logger.h"
 //#include "motorDrive.cpp"
 
-extern GeoData geoReceivedData;
+extern GeoDistanceData receivedDistanceData;
+extern GeoTurnData receivedTurnData;
 extern bool isSensorObstruction;
 bool firstDistanceMessage = true;
 
@@ -75,7 +76,13 @@ void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, b
         canMessage.data.bytes[1] = levelOfDirection;
     }
 
+<<<<<<< HEAD
+
+    //printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
+
+=======
     printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
+>>>>>>> ed532dc56d72185c467e3a8dc294bcce7a6c8736
     CANTransmission(canMessage);
     //CANTransmission(canMessage.msg_id, &canMessage.data.bytes[0], 4);
 }
@@ -129,8 +136,15 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
         levelOfSpeed = SpeedLevel2;
     }
     else if (F1) {
+<<<<<<< HEAD
+        LD.setLeftDigit('F');
+
+        LD.setRightDigit('1');
+
+=======
 /*        LD.setLeftDigit('F');
         LD.setRightDigit('1');*/
+>>>>>>> ed532dc56d72185c467e3a8dc294bcce7a6c8736
         LE.toggle(1);
         if (!Reverse) {
             LE.toggle(4);
@@ -162,7 +176,11 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             rightMotor = true;
             levelOfDirection = DirectionLevel4;
             levelOfSpeed = SpeedLevel1;
+<<<<<<< HEAD
+            //LD.setRightDigit('R');
+=======
 //            LD.setRightDigit('R');
+>>>>>>> ed532dc56d72185c467e3a8dc294bcce7a6c8736
         }
         ///XXX: // Need to check this again whether sharp direction is needed or not
         else if (L2 && !RtDanger && !Rt1/* && !Rt2*/) {
@@ -172,7 +190,13 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             rightMotor = true;
             levelOfDirection = DirectionLevel2;
             levelOfSpeed = SpeedLevel2;
+<<<<<<< HEAD
+
+            LD.setRightDigit('R');
+
+=======
 //            LD.setRightDigit('R');
+>>>>>>> ed532dc56d72185c467e3a8dc294bcce7a6c8736
         }
         else if(LDanger && !Reverse) {
             LE.toggle(4);
@@ -192,7 +216,11 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             leftMotor = true;
             levelOfDirection = DirectionLevel4;
             levelOfSpeed = SpeedLevel1;
+<<<<<<< HEAD
+            //LD.setRightDigit('L');
+=======
 //            LD.setRightDigit('L');
+>>>>>>> ed532dc56d72185c467e3a8dc294bcce7a6c8736
         }
         else if (Rt2 && !LDanger && !L1 /*&& !L2*/) {
             // Less level of left;
@@ -201,7 +229,11 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             leftMotor = true;
             levelOfDirection = DirectionLevel2;
             levelOfSpeed = SpeedLevel2;
+<<<<<<< HEAD
+            //LD.setRightDigit('L');
+=======
 //            LD.setRightDigit('L');
+>>>>>>> ed532dc56d72185c467e3a8dc294bcce7a6c8736
         }
         else if(RtDanger && !Reverse) {
             LE.toggle(4);
@@ -365,6 +397,7 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
     /* sensor_obstruction is the globally declared flag which is set by Sensor Algorithm to indicate Geo_decision Algorithm about the
     obstruction, if there is an obstruction GEO Algorithm is bypassed and Car moves according to Sensor Algorithm.*/
 
+
     uint8_t levelOfSpeed = 0, levelOfDirection = 0;
     bool frontMotor = false;
     bool leftMotor = false;
@@ -372,11 +405,18 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
     bool reverseMotor = false;
     bool brakeFlag = true;
 
+<<<<<<< HEAD
+    uint16_t finalDistance = receivedDistanceData.FinalDistance;
+    uint16_t nextCheckPointDistance = receivedDistanceData.NextCheckpointDistance;
+    uint8_t turningAngle = receivedTurnData.TurningAngle;
+    uint8_t turnDirection = receivedTurnData.TurnDirection;
+=======
     uint32_t finalDistance = geoReceivedData.FinalDistance;
     uint32_t nextCheckPointDistance = geoReceivedData.NextCheckpointDistance;
     uint32_t turningAngle = geoReceivedData.TurningAngle;
     uint32_t turnDirection = geoReceivedData.TurnDirection;
     static int totalInitialDistance;
+>>>>>>> ed532dc56d72185c467e3a8dc294bcce7a6c8736
 
     if(firstDistanceMessage)
     {
@@ -404,9 +444,11 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
                         frontMotor = true;
                         levelOfDirection = DirectionLevel4;
                         levelOfSpeed = SpeedLevel1;
+
                     }
                     else if(turnDirection == 2)
                     {
+
                         LE.toggle(3);
                         // Turn right with level 3
                         rightMotor = true;
@@ -489,4 +531,5 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
         }
         MotorDriveFromSensors(frontMotor, reverseMotor, leftMotor, rightMotor, brakeFlag, levelOfSpeed, levelOfDirection);
     }
+
 }

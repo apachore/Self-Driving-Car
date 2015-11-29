@@ -17,16 +17,24 @@
 #include "file_logger.h"
 #include "string.h"
 
+
 // XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
 // XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
 
+<<<<<<< HEAD
+
+static bool run = true;
+=======
 static bool run = false;
+>>>>>>> ed532dc56d72185c467e3a8dc294bcce7a6c8736
 static bool stop = false;
-GeoData geoReceivedData;
+GeoTurnData receivedTurnData;
+GeoDistanceData receivedDistanceData;
 bool isSensorObstruction = false;
 static bool SensorActivate = true;
 bool sentStartFromAndroid = true;
 bool sentStopFromAndroid;
+
 
 void DataOverCanBuffer(uint32_t param)
 {
@@ -43,8 +51,10 @@ void CANInitialization()
 }
 
 
+
 void CANTransmission(can_msg_t canMessageBlock/*uint32_t msg_id, uint8_t* data, uint32_t length*/)
 {
+
     CAN_tx(can1,&canMessageBlock, 0);
 }
 
@@ -62,6 +72,8 @@ bool CANReception(can_msg_t& canMessageBlock)
         switch (canMessageBlock.msg_id)
         {
             case RSensorDataFromSensor:
+
+
             {
 /*                if (SW.getSwitch(2))
                 {
@@ -74,10 +86,7 @@ bool CANReception(can_msg_t& canMessageBlock)
                 if(sentStartFromAndroid && SensorActivate)
                 {
                     SensorData receivedSensorData;
-                    receivedSensorData.FrontDistance    = canMessageBlock.data.bytes[0];
-                    receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
-                    receivedSensorData.RightDistance    = canMessageBlock.data.bytes[2];
-                    receivedSensorData.RearDistance     = canMessageBlock.data.bytes[3];
+                    memcpy(&receivedSensorData,&canMessageBlock.data,sizeof(SensorData));
                     SensorProcessingAlgorithm(receivedSensorData);
                 }
                 else
@@ -88,22 +97,27 @@ bool CANReception(can_msg_t& canMessageBlock)
             }
 
             case RDistanceFinalAndNextCheckpoint:
+
                 //printf("%d   %d\n", geoReceivedData.FinalDistance, geoReceivedData.NextCheckpointDistance);
-                geoReceivedData.FinalDistance = canMessageBlock.data.words[0];
-                geoReceivedData.NextCheckpointDistance = canMessageBlock.data.words[1];
+                memcpy(&receivedDistanceData,&canMessageBlock.data,sizeof(GeoDistanceData));
+
                 break;
 
             case RHeadingAndBearingToGeo:
                 //printf("%d   %d\n", geoReceivedData.TurningAngle, geoReceivedData.TurnDirection);
-                geoReceivedData.TurningAngle = canMessageBlock.data.bytes[0];
-                geoReceivedData.TurnDirection = canMessageBlock.data.bytes[1];
+
+                memcpy(&receivedTurnData,&canMessageBlock.data,sizeof(GeoTurnData));
+
+
                 break;
+
 
             case RRunAndPauseCommandFromAndroid:
                 printf("Run received");
                 MotorDriveFromSensors(false, false, false, false, false, 0, 0);
                 run = true;
                 stop = false;
+
                 break;
 
             case RStopMessageFromAndroid:
