@@ -79,12 +79,12 @@ void period_100Hz(void)
     }*/
 
     // Continuously go and check the GEO.
-    if(GEOActivate && sentStartFromAndroid)
-        GeoDecision();       // Need to look at this. Present adjustment
+    if(GEOActivate && sentStartFromAndroid){}
+        //GeoDecision();       // Need to look at this. Present adjustment
 
     if(!received) {
         if(canMessage.msg_id != RSensorDataFromSensor) {
-            MotorDriveFromSensors(true, false, false, false, false, SpeedLevel3, 0);
+            MotorDriveFromSensors(true, false, false, false, false, SpeedLevel2, 0);
         }
     }
 }

@@ -114,7 +114,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
         return;
     }
 
-    //printf("%d  %d  %d  %d\n", receivedSensorData.FrontDistance, receivedSensorData.LeftDistance, receivedSensorData.RightDistance, receivedSensorData.RearDistance);
+//    printf("%d  %d  %d  %d\n", receivedSensorData.FrontDistance, receivedSensorData.LeftDistance, receivedSensorData.RightDistance, receivedSensorData.RearDistance);
 
     if(F3 && L3 && Rt3)
     {
@@ -363,7 +363,6 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
 {
     /* sensor_obstruction is the globally declared flag which is set by Sensor Algorithm to indicate Geo_decision Algorithm about the
     obstruction, if there is an obstruction GEO Algorithm is bypassed and Car moves according to Sensor Algorithm.*/
-
 
     uint8_t levelOfSpeed = 0, levelOfDirection = 0;
     bool frontMotor = false;
