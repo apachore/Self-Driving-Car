@@ -72,25 +72,25 @@ void right_rise_edge()
 void front_fall_edge()
 {
     front_echo_width = lpc_timer_get_value(lpc_timer0) - front_start_time;
-    front = (front_echo_width*2.54)/147;
+    front = front_echo_width/58;
     portYIELD_FROM_ISR(yield);
 }
 void back_fall_edge()
 {
     back_echo_width = lpc_timer_get_value(lpc_timer0) - back_start_time;
-    back = (back_echo_width * 0.017) - 7;
+    back = back_echo_width/58;
     portYIELD_FROM_ISR(yield);
 }
 void left_fall_edge()
 {
     left_echo_width = lpc_timer_get_value(lpc_timer0) - left_start_time;
-    left = (left_echo_width* 0.017) - 7;
+    left = left_echo_width/58;
     portYIELD_FROM_ISR(yield);
 }
 void right_fall_edge()
 {
     right_echo_width = lpc_timer_get_value(lpc_timer0) - right_start_time;
-    right =(right_echo_width* 0.017) - 7;
+    right =right_echo_width/58;
     portYIELD_FROM_ISR(yield);
 
 }
@@ -107,17 +107,21 @@ void interrupt_init()
        eint3_enable_port2(port2_7, eint_falling_edge, right_fall_edge);
 }
 
-void config_trigger()
+void config_sensor_pins()
 {
     LPC_GPIO2->FIODIR |= (1 << 0);
     LPC_GPIO2->FIODIR |= (1 << 2);
     LPC_GPIO2->FIODIR |= (1 << 4);
     LPC_GPIO2->FIODIR |= (1 << 6);
+    LPC_GPIO2->FIODIR &= ~(1 << 1);
+    LPC_GPIO2->FIODIR &= ~(1 << 3);
+    LPC_GPIO2->FIODIR &= ~(1 << 5);
+    LPC_GPIO2->FIODIR &= ~(1 << 7);
 }
 bool sensor_init(void)
 {
 
-    config_trigger();
+    config_sensor_pins();
     interrupt_init();
     lpc_timer_enable(lpc_timer0, 1);
     can_Tx_Rx_init();
@@ -126,15 +130,12 @@ bool sensor_init(void)
 }
 bool sensor_compute()
 {
-    sensor_trig_MB1010(0); //Trigger first sensor
-delay_ms(25);
-sensor_trig_MB1010(6);
-delay_ms(25);
-sensor_trig_HCSR04(4);
-
-delay_ms(25);
-sensor_trig_HCSR04b(2);
-delay_ms(15);
+    sensor_trig_MB1010(0); //Trigger front sensor
+    sensor_trig_HCSR04b(2); //Trigger back sensor
+    delay_ms(55);
+    sensor_trig_MB1010(6); //Trigger right sensor
+    sensor_trig_HCSR04(4); //Trigger left sensor
+    delay_ms(40);
 
   //  LE.setAll(0);
     //can_msg_t msgRx;
@@ -155,7 +156,7 @@ delay_ms(15);
     if(left>255){left=255;}
 
         can_Tx_Sensor_data();
-        front = 0; back = 0; right = 0; left = 0;
+     //   front = 0; back = 0; right = 0; left = 0;
 
   if(CAN_is_bus_off(can1))
   {
