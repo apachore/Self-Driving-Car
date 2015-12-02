@@ -102,7 +102,7 @@ int compassHeading()
      heading = static_cast<int>(headingDegrees);
      //printf("Heading in int: %i\n",heading);
 
-     LD.setNumber(heading);
+     //LD.setNumber(heading);
      LOG_INFO( "Heading: %d",heading);
 	 return heading;
 }
@@ -187,12 +187,14 @@ void masterTurnAngle(uint16_t sourceAngle, uint16_t destinationAngle)
 	}
 
 	turn.degree = angle;
-    LOG_INFO("Turn Angle: %d, Direction: %d", turn.degree,turn.direction);
 
-    //printf("%d  %d  %d\n",sourceAngle,turn.degree,turn.direction);
+	LD.setNumber(turn.degree);
+
+    LOG_INFO("Turn Angle: %d, Direction: %d", turn.degree,turn.direction);
+    printf("%d  %d  %d\n",sourceAngle,turn.degree,turn.direction);
 
 	if(!CANTransmit(TTurnAngleToMaster,(uint8_t*)&turn,sizeof(turn)))
 	{
-	    LE.toggle(3);
+	    //LE.toggle(3);
 	}
 }

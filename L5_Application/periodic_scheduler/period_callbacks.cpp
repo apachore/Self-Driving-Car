@@ -63,7 +63,9 @@ void period_1Hz(void)
 
 void period_10Hz(void)
 {
-    GPS_Calculations();
+    Distance_Data Current_Distances;
+    Current_Distances = GPS_Calculations();
+    CANTransmit(TFinalAndNextCheckpointDistance,(uint8_t*)&Current_Distances,sizeof(Current_Distances));
 
     //Check if CAN bus is off... if yes then reset CAN bus
     if(CAN_is_bus_off(can1))

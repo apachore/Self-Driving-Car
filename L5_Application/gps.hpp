@@ -37,7 +37,8 @@ typedef struct
 {
         uint16_t Total_Distance_Remaining;
         uint16_t Current_Checkpoint_Distance;
-}Distance;
+        uint8_t is_last_checkpoint;
+}Distance_Data;
 
 
 uint16_t calculateBearing(coordinates,coordinates);
@@ -45,7 +46,7 @@ uint16_t calculateCheckpointDistance(coordinates,coordinates);
 float ToRadians(float);
 float ToDegrees(float);
 
-void GPS_Calculations();
+Distance_Data GPS_Calculations();
 void copyLogtoMMCard();
 bool crtNewLogFile();
 

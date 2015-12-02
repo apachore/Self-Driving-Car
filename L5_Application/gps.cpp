@@ -10,10 +10,13 @@
 #include "gps.hpp"
 #include "handlers.hpp"
 
+#define FetchCheckpointDistance 20
+
 extern bool BootReplySent;
 extern uint8_t Received_Checkpoint_Count;
 extern uint16_t Total_Distance_To_Travel;
-uint16_t current_bearing=0;
+uint16_t current_bearing = 0;
+
 
 //Commented printf statements are added for testing purpose
 
@@ -80,7 +83,6 @@ bool gpsTask::init(void)
     void logger_init();
     gps_data_q = xQueueCreate(2, sizeof(coordinates));
     addSharedObject("gps_queue", gps_data_q);
-
     return (NULL != gps_data_q);
 }
 
@@ -147,15 +149,6 @@ bool gpsTask::run(void *p)
             i++;
         }
 
-//        for(i=0;i<14;i++)
-//        {
-//            printf("%d : %s\n",i,GPS_parsed_data[i]);
-//        }
-
-//        Previously function for parsing implemented but later parsing was implemented in run
-//        parse_gps_string();
-//        //sscanf(GPS_Data_Receive, "%s,%*s,%f,%c,%f,%c",&message_type, &current_gps_data.latitude,&North_South_Hemisphere, &current_gps_data.longitude,&East_West_Hemisphere);
-
         //Get number of satellite locks
         sscanf(GPS_parsed_data[7],"%d",&satelite_connections);
         //LD.setNumber(satelite_connections);
@@ -197,17 +190,13 @@ bool gpsTask::run(void *p)
 //                printf("Latitude: %f\n",current_gps_data.latitude);
 //                printf("Longitude: %f\n",current_gps_data.longitude);
 
+                CANTransmit(TSourceCoordinates,(uint8_t*)&current_gps_data,sizeof(coordinates));
+
                 if (!xQueueSend(gps_data_q, &current_gps_data, 0))
                 {
                 // unexpected led
                    LOG_ERROR("Error in Writing current GPS data to queue\n");
                 }
-
-//            }
-//            else
-//            {
-//                printf("Message Other than GPGGA\n");
-//            }
         }
 
     }
@@ -218,13 +207,14 @@ bool gpsTask::run(void *p)
 }
 
 
-void GPS_Calculations()
+
+Distance_Data GPS_Calculations()
 {
     //gpsTask gpsTaskInstance()
     QueueHandle_t gps_data_q = scheduler_task::getSharedObject("gps_queue");
     QueueHandle_t Checkpoint_q = scheduler_task::getSharedObject("CheckpointsQueue");
     coordinates current_gps_data;
-    Distance Current_Distances;
+    Distance_Data Current_Distances;
     //uint16_t Current_Checkpoint_Distance,Total_Distance_Remaining;
 
     static uint16_t Previous_Checkpoint_Distnace=0;
@@ -247,10 +237,8 @@ void GPS_Calculations()
         {
             LOG_INFO("Latitude: %f  Longitude: %f ",current_gps_data.latitude,current_gps_data.longitude);
             //LE.toggle(2);
-           // printf("%f  %f\n",current_gps_data.latitude,current_gps_data.longitude);
+              printf("%f  %f\n",current_gps_data.latitude,current_gps_data.longitude);
             //printf("Longitude: %f\n",current_gps_data.longitude);
-
-            CANTransmit(TSourceCoordinates,(uint8_t*)&current_gps_data,sizeof(coordinates));
 
             if (Fetch_Checkpoint)
             {
@@ -262,9 +250,11 @@ void GPS_Calculations()
                 }
                 else Fetch_Checkpoint = 1;
             }
-            //LD.setNumber(Received_Checkpoint_Count-Fetched_Checkpoint_Count);
+            //LD.setNumber(Received_Checkpoint_Count/*-Fetched_Checkpoint_Count*/);
+            if((Received_Checkpoint_Count - Fetched_Checkpoint_Count) == 0)
+                Current_Distances.is_last_checkpoint = 1;
 
-            if(!Fetch_Checkpoint)
+            if((checkpoint.latitude != 0.0) && (checkpoint.longitude != 0.0))
             {
                 Current_Distances.Current_Checkpoint_Distance = calculateCheckpointDistance(checkpoint,current_gps_data);
                 LOG_INFO("Current Distance: %d",Current_Distances.Current_Checkpoint_Distance);
@@ -280,9 +270,7 @@ void GPS_Calculations()
                 }
 
                 //printf("Total Checkpoint Distance: %d feet\n",previous_checkpoint_distnace);
-                //printf("Fetched_Checkpoint_Count: %d\n",Fetched_Checkpoint_Count);
-                //printf("Received Checkpoint Count: %d\n",Received_Checkpoint_Count);
-                if (Current_Distances.Current_Checkpoint_Distance <  0.25*Total_Checkpoint_Distnace)
+                if (Current_Distances.Current_Checkpoint_Distance < FetchCheckpointDistance)
                     Fetch_Checkpoint = 1;
 
                 Total_Distance_Traveled = Total_Distance_Traveled + (Previous_Checkpoint_Distnace - Current_Distances.Current_Checkpoint_Distance);
@@ -294,10 +282,11 @@ void GPS_Calculations()
                 LOG_INFO("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
                 //printf("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
 
-               printf("%d  %d  %d\n",Current_Distances.Total_Distance_Remaining,
+                printf("%d  %d  %d\n",Current_Distances.Total_Distance_Remaining,
                        Current_Distances.Current_Checkpoint_Distance,current_bearing);
 
-                CANTransmit(TFinalAndNextCheckpointDistance,(uint8_t*)&Current_Distances,sizeof(Current_Distances));
+                return Current_Distances;
+                //CANTransmit(TFinalAndNextCheckpointDistance,(uint8_t*)&Current_Distances,sizeof(Current_Distances));
             }
         }
     }

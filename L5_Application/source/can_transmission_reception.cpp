@@ -19,7 +19,7 @@
 
 #include "gps.hpp"
 
-#define TestingWithoutAndroid 1
+#define TestingWithoutAndroid 0
 
 bool BootReplySent; //Used as indication of system startup flag
 bool reboot = 0; // Used to indicate the reboot status
@@ -147,7 +147,7 @@ void CANReception()
                 else
                 {
                     Received_Checkpoint_Count++;
-                    //LE.toggle(3);
+                    LE.toggle(3);
                 }
                 break;
 
