@@ -11,6 +11,7 @@
 #include "can.h"
 #include "io.hpp"
 #include "can_comms.hpp"
+#include "gpio.hpp"
 static int speed_pulse_cnt_sec;
 void Speed_Pulse_Count()
 {
@@ -18,11 +19,12 @@ void Speed_Pulse_Count()
 	extern int speed_pulse_cnt,speed_pulse_cnt_100ms;
 	speed_pulse_cnt_sec = speed_pulse_cnt;
 	speed_pulse_cnt = 0;
-	printf("\n\nperiodic spd Pul cnt: %d\n",speed_pulse_cnt_sec);
+//	printf("\n\nperiodic spd Pul cnt: %d\n",speed_pulse_cnt_sec);
 }
 
 MotorTask::MotorTask(uint8_t priority) :
-        scheduler_task("MotorTask", 512 * 4, priority), pwm2(PWM::pwm2, 100), pwm1(PWM::pwm1, 100)
+        scheduler_task("MotorTask", 512 * 4, priority), pwm2(PWM::pwm2, 100), pwm1(PWM::pwm1, 100),
+        p2_pin6(LPC1758_GPIO_Type::P2_6),p2_pin7(LPC1758_GPIO_Type::P2_7)
 {
     count_init = 1;
     count_rev = 1;
@@ -36,6 +38,11 @@ bool MotorTask::init(void)
     delay_ms(100);
     pwm1.set(15);
     delay_ms(100);
+    p2_pin6.setAsOutput();
+    p2_pin7.setAsOutput();
+    p2_pin6.setLow();
+    p2_pin7.setLow();
+
     return true;
 }
 
@@ -76,7 +83,7 @@ bool MotorTask::run(void *p)
         DC_level = canReceivedData.data.bytes[3];
         LD.setNumber(DC_control*10 + DC_level);
 
-        printf("\nDC: Control %x, Level_exp %x",DC_control,DC_level);
+       // printf("\nDC: Control %x, Level_exp %x",DC_control,DC_level);
 //        printf("\nServo: Control %x, Level %x",servo_control,servo_level);
 
 #if(0)
@@ -139,9 +146,8 @@ bool MotorTask::run(void *p)
                     speed_factor =0;
             	}
 
-
-
-
+            	p2_pin6.setLow();
+            	p2_pin7.setLow();
 
             speed_offset = 0;
             speed_factor =0;
@@ -151,15 +157,21 @@ bool MotorTask::run(void *p)
             speed_offset = 0.4;
             speed_factor = 0.2;
             count_rev = 1;
+            p2_pin6.setHigh();
+            p2_pin7.setLow();
             break;
             case 2:
             speed_offset = -0.6;
             speed_factor = -0.2;
+            p2_pin6.setLow();
+            p2_pin7.setHigh();
             break;
             default:
             speed_offset = 0;
             speed_factor =0;
             count_rev = 1;
+            p2_pin6.setLow();
+            p2_pin7.setLow();
             break;
         }
         PWM_value_DC = 15 + (speed_factor)*(DC_level) + speed_offset;
@@ -222,7 +234,7 @@ bool MotorTask::run(void *p)
 //        speed_miss_cont = 5;
 
 //    	printf("\nspeed_miss  : %d",speed_miss);
-    	printf("\nspeed_miss_cont  : %d",speed_miss_cont);
+//    	printf("\nspeed_miss_cont  : %d",speed_miss_cont);
     	speed_correction = (speed_miss_cont/20)*0.3;
 
         if(speed_miss > 1)
@@ -234,7 +246,7 @@ bool MotorTask::run(void *p)
         		if(DC_control==1)
         			{
         			PWM_value_DC = PWM_value_DC + speed_correction;
-        	        printf("\nDC_value_actual : %f",PWM_value_DC);
+//        	        printf("\nDC_value_actual : %f",PWM_value_DC);
         			}
         		else if(DC_control==2)
         		{
@@ -278,7 +290,7 @@ bool MotorTask::run(void *p)
 
         pwm1.set(PWM_value_servo);
         pwm2.set(PWM_value_DC);
-        printf("\nDC_value_actual : %f",PWM_value_DC);
+//        printf("\nDC_value_actual : %f",PWM_value_DC);
 //        printf("\nspeed_miss_cont  : %d",speed_miss_cont);
 
         DC_level_last = DC_level;

@@ -42,7 +42,7 @@ void Receive_init()
     CAN_init(can1, 100, 100, 100, *BusOffCb,*DataOverCanBuffer);/*Initializing CAN bus*/
     CAN_reset_bus(can1);          /*Reset CAN bus*/
 
-    const can_std_id_t slist[]  {CAN_gen_sid(can1, 0x220), CAN_gen_sid(can1, 0x240), CAN_gen_sid(can1, 0x250), CAN_gen_sid(can1, 0x410),CAN_gen_sid(can1, 0x420),
+    const can_std_id_t slist[]  {CAN_gen_sid(can1, 0x210),CAN_gen_sid(can1, 0x220), CAN_gen_sid(can1, 0x240), CAN_gen_sid(can1, 0x250),CAN_gen_sid(can1, 0x420),
             CAN_gen_sid(can1, 0x610)};    /*CAN standard ID list*/
 
     /*Motor Control message from Master : 0x220 */
@@ -101,39 +101,23 @@ can_msg_t canReceivedData;
 void Receiver_message()
 {
     can_msg_t rx_msg;
-    if(CAN_rx(can1, &rx_msg, 10))
+    if(CAN_rx(can1, &rx_msg, 0))
     {
     	CAN_Receive = 0;
-       // LE.on(1);
-      //  puts("can received\n");
         switch(rx_msg.msg_id)
         {
-            case 0x420:
-               /* sensor_data[0] =rx_msg.data.bytes[0];
-                sensor_data[1] =rx_msg.data.bytes[1];
-                puts("sensor data received");
-                LE.toggle(2);
-                sensor_data[2] =rx_msg.data.bytes[2];
-                sensor_data[3] =rx_msg.data.bytes[3];*/
+            case 0x210:
                 Message.canReceivedMsg_Sensor=rx_msg;
-              //  puts(" can 210 received\n");
             break;
             case 0x220:
                 LE.toggle(2);
                 canReceivedData = rx_msg;
            break;
             case 0x240:
-            /*    memcpy(&gps_latitude,&rx_msg.data.dwords[0],4);
-                memcpy(&gps_longitude,&rx_msg.data.dwords[1],4);*/
                 Message.canReceivedMsg_gps1=rx_msg;
-//                puts("sensor can 240 received\n");
-
                break;
             case 0x250:
-              //  memcpy(&final_dist_remaining,&rx_msg.data.words[0],2);
                 Message.canReceivedMsg_gps2=rx_msg;
-
-//                puts("sensor can 250 received\n");
                break;
 
            default:

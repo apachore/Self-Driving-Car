@@ -10,6 +10,7 @@
 
 #include "scheduler_task.hpp"
 #include "lpc_pwm.hpp"
+#include "gpio.hpp"
 
 
 
@@ -33,6 +34,7 @@ class MotorTask: public scheduler_task
         int count_init;
         int count_rev;
 //        int just;
+        GPIO p2_pin6,p2_pin7;
 };
 
 #endif /* MOTOR_HPP_ */
