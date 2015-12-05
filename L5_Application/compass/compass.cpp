@@ -78,7 +78,7 @@ int compassHeading()
 	 registerRead = compassReadReg();
      if(!registerRead)
      {
-    	 LE.toggle(2);
+    	 //LE.toggle(2);
      }
 
      float headingRadians, headingRadiansCalibrated;
