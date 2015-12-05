@@ -40,6 +40,7 @@
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 uint16_t heading;
 extern uint16_t current_bearing;
+extern bool BootReplySent;
 
 /// Called once before the RTOS is started, this is a good place to initialize things once
 bool period_init(void)
@@ -75,9 +76,12 @@ void period_10Hz(void)
 
 void period_100Hz(void)
 {
+    if (BootReplySent)
+    {
         heading = compassHeading();
 //        current_bearing = 0;
         masterTurnAngle(heading,current_bearing);
+    }
 //    CANReception();
 //    CANMessageProcessing();
     //LE.toggle(2);

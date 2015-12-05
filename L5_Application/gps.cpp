@@ -10,7 +10,8 @@
 #include "gps.hpp"
 #include "handlers.hpp"
 
-#define FetchCheckpointDistance 20
+#define FetchCheckpointDistance 40
+#define ZeroCoordinate 0.0
 
 extern bool BootReplySent;
 extern uint8_t Received_Checkpoint_Count;
@@ -233,9 +234,9 @@ Distance_Data GPS_Calculations()
     }
     else if (xQueueReceive(gps_data_q, &current_gps_data, 0))
     {
-       // if (BootReplySent)
+       if (BootReplySent)
         {
-            LOG_INFO("Latitude: %f  Longitude: %f ",current_gps_data.latitude,current_gps_data.longitude);
+            LOG_INFO("%f %f ",current_gps_data.latitude,current_gps_data.longitude);
             //LE.toggle(2);
               printf("%f  %f\n",current_gps_data.latitude,current_gps_data.longitude);
             //printf("Longitude: %f\n",current_gps_data.longitude);
@@ -254,13 +255,13 @@ Distance_Data GPS_Calculations()
             if((Received_Checkpoint_Count - Fetched_Checkpoint_Count) == 0)
                 Current_Distances.is_last_checkpoint = 1;
 
-            if((checkpoint.latitude != 0.0) && (checkpoint.longitude != 0.0))
+            if((checkpoint.latitude != ZeroCoordinate) && (checkpoint.longitude != ZeroCoordinate))
             {
                 Current_Distances.Current_Checkpoint_Distance = calculateCheckpointDistance(checkpoint,current_gps_data);
-                LOG_INFO("Current Distance: %d",Current_Distances.Current_Checkpoint_Distance);
+                //LOG_INFO("Current Distance: %d",Current_Distances.Current_Checkpoint_Distance);
                 //printf("Current Checkpoint Distance: %d feet\n",Current_Distances.Current_Checkpoint_Distance);
                 current_bearing = calculateBearing(checkpoint,current_gps_data);
-                LOG_INFO("Current Bearing: %d",current_bearing);
+                //LOG_INFO("Current Bearing: %d",current_bearing);
                 //printf("Current Bearing: %d degrees\n",current_bearing);
                 if (first_after_cp_fetch)
                 {
@@ -274,14 +275,16 @@ Distance_Data GPS_Calculations()
                     Fetch_Checkpoint = 1;
 
                 Total_Distance_Traveled = Total_Distance_Traveled + (Previous_Checkpoint_Distnace - Current_Distances.Current_Checkpoint_Distance);
-                LOG_INFO("Total Distance Traveled: %d",Total_Distance_Traveled);
+                //LOG_INFO("Total Distance Traveled: %d",Total_Distance_Traveled);
                 //printf("Total Distance Traveled: %d",Total_Distance_Traveled);
 
                 Previous_Checkpoint_Distnace = Current_Distances.Current_Checkpoint_Distance;
                 Current_Distances.Total_Distance_Remaining = Total_Distance_To_Travel - Total_Distance_Traveled;
-                LOG_INFO("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
+
                 //printf("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
 
+                LOG_INFO("GPS:%d  %d  %d\n",Current_Distances.Total_Distance_Remaining,
+                        Current_Distances.Current_Checkpoint_Distance,current_bearing);
                 printf("%d  %d  %d\n",Current_Distances.Total_Distance_Remaining,
                        Current_Distances.Current_Checkpoint_Distance,current_bearing);
 
