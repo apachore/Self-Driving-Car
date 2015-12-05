@@ -76,7 +76,7 @@ void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, b
         canMessage.data.bytes[1] = levelOfDirection;
     }
 
-    printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
+//    printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
     CANTransmission(canMessage);
     //CANTransmission(canMessage.msg_id, &canMessage.data.bytes[0], 4);
 }
@@ -384,14 +384,14 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
         firstDistanceMessage = false;
     }
 
-    LD.setNumber((char)(nextCheckPointDistance));
+    LD.setNumber(nextCheckPointDistance);
     // Changed the flag from here to
     if(!isSensorObstruction)
     {
-        //printf("%d  %d  %d  %d\n", finalDistance, nextCheckPointDistance, turningAngle, turnDirection);
-        if(nextCheckPointDistance >10)  //(distance check)
+        printf("%d  %d  %d  %d\n", finalDistance, nextCheckPointDistance, turningAngle, turnDirection);
+        if(nextCheckPointDistance > 30)  //(distance check)
         {
-            if(turningAngle > 10)
+            if(turningAngle > 15)
             {
                 if(turningAngle >= 90)
                 {
@@ -449,6 +449,8 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
                         frontMotor = true;
                         levelOfDirection = DirectionLevel1;
                         levelOfSpeed = SpeedLevel3;
+                        if(nextCheckPointDistance < 50)
+                            levelOfSpeed = SpeedLevel2;
                     }
                     else if(turnDirection == 2)
                     {
@@ -458,6 +460,8 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
                         frontMotor = true;
                         levelOfDirection = DirectionLevel1;
                         levelOfSpeed = SpeedLevel3;
+                        if(nextCheckPointDistance < 50)
+                            levelOfSpeed = SpeedLevel2;
                     }
                 }
             }
@@ -467,6 +471,8 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
                 //  go straight.
                 frontMotor = true;
                 levelOfSpeed = SpeedLevel3;
+                if(nextCheckPointDistance < 50)
+                    levelOfSpeed = SpeedLevel2;
             }
         }
         else
