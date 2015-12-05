@@ -21,7 +21,7 @@
 // XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
 // XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
 
-static bool run = true;
+static bool run = false;
 static bool stop = false;
 GeoTurnData receivedTurnData;
 GeoDistanceData receivedDistanceData;
@@ -155,5 +155,6 @@ bool CANReception(can_msg_t& canMessageBlock)
         }
         receptionSuccessful = true;
     }
+
     return receptionSuccessful;
 }
