@@ -22,6 +22,7 @@
 #include "can.h"
 #include "can_Tx_Rx.hpp"
 #include "LED_Display.hpp"
+#include "sensor_defines.hpp"
 
 
 int front_start_time =0,back_start_time=0, right_start_time=0,left_start_time=0;
@@ -34,14 +35,14 @@ void sensor_trig_MB1010(int pin)
 {
     LPC_GPIO2->FIOPIN &= ~(1 << pin);
     LPC_GPIO2->FIOPIN |= (1 << pin);
-    delay_us(20);
+    delay_us(SONAR_TRIG_DELAY);
     LPC_GPIO2->FIOPIN &= ~(1 << pin);
 }
 void sensor_trig_HCSR04(int pin)
 {
     LPC_GPIO2->FIOPIN &= ~(1 << pin);
     LPC_GPIO2->FIOPIN |= (1 << pin);
-    delay_us(10);
+    delay_us(HCSR04_TRIG_DELAY);
     LPC_GPIO2->FIOPIN &= ~(1 << pin);
     left_start_time = lpc_timer_get_value(lpc_timer0);
 }
@@ -49,7 +50,7 @@ void sensor_trig_HCSR04b(int pin)
 {
     LPC_GPIO2->FIOPIN &= ~(1 << pin);
     LPC_GPIO2->FIOPIN |= (1 << pin);
-    delay_us(10);
+    delay_us(HCSR04_TRIG_DELAY);
     LPC_GPIO2->FIOPIN &= ~(1 << pin);
     back_start_time = lpc_timer_get_value(lpc_timer0);
 }
@@ -72,32 +73,51 @@ void right_rise_edge()
 void front_fall_edge()
 {
     front_echo_width = lpc_timer_get_value(lpc_timer0) - front_start_time;
-    front = front_echo_width/58;
+    front = front_echo_width/PW_CM_CONV;
     portYIELD_FROM_ISR(yield);
 }
 void back_fall_edge()
 {
     back_echo_width = lpc_timer_get_value(lpc_timer0) - back_start_time;
-    back = back_echo_width/58;
+    back = back_echo_width/PW_CM_CONV;
     portYIELD_FROM_ISR(yield);
 }
 void left_fall_edge()
 {
     left_echo_width = lpc_timer_get_value(lpc_timer0) - left_start_time;
-    left = left_echo_width/58;
+    left = left_echo_width/PW_CM_CONV;
     portYIELD_FROM_ISR(yield);
 }
 void right_fall_edge()
 {
     right_echo_width = lpc_timer_get_value(lpc_timer0) - right_start_time;
-    right =right_echo_width/58;
+    right =right_echo_width/PW_CM_CONV;
     portYIELD_FROM_ISR(yield);
 
 }
 
+void sensor_distance_limit()
+{
+    if(front >DISTANCE_LIMIT)
+    {
+        front = DISTANCE_LIMIT;
+    }
+    if(back>DISTANCE_LIMIT)
+    {
+        back = DISTANCE_LIMIT;
+    }
+    if(right>DISTANCE_LIMIT)
+    {
+        right = DISTANCE_LIMIT;
+    }
+    if(left>DISTANCE_LIMIT)
+    {
+        left = DISTANCE_LIMIT;
+    }
+}
 void interrupt_init()
 {
-       const uint8_t port2_1 = 1, port2_3 = 3, port2_5 = 5,port2_7 = 7;
+       const uint8_t port2_1 = FRONT_SENSOR_PW, port2_3 = BACK_SENSOR_PW, port2_5 = FRONT_LEFT_SENSOR_PW,port2_7 = FRONT_RIGHT_SENSOR_PW;
        eint3_enable_port2(port2_1, eint_rising_edge, front_rise_edge);
        eint3_enable_port2(port2_7, eint_rising_edge, right_rise_edge );
 
@@ -109,33 +129,34 @@ void interrupt_init()
 
 void config_sensor_pins()
 {
-    LPC_GPIO2->FIODIR |= (1 << 0);
-    LPC_GPIO2->FIODIR |= (1 << 2);
-    LPC_GPIO2->FIODIR |= (1 << 4);
-    LPC_GPIO2->FIODIR |= (1 << 6);
-    LPC_GPIO2->FIODIR &= ~(1 << 1);
-    LPC_GPIO2->FIODIR &= ~(1 << 3);
-    LPC_GPIO2->FIODIR &= ~(1 << 5);
-    LPC_GPIO2->FIODIR &= ~(1 << 7);
+    LPC_GPIO2->FIODIR |= (1 << FRONT_SENSOR_RX);
+    LPC_GPIO2->FIODIR |= (1 << BACK_SENSOR_RX);
+    LPC_GPIO2->FIODIR |= (1 << FRONT_LEFT_SENSOR_RX);
+    LPC_GPIO2->FIODIR |= (1 << FRONT_RIGHT_SENSOR_RX);
+//    LPC_GPIO2->FIODIR &= ~(1 << 1);
+//    LPC_GPIO2->FIODIR &= ~(1 << 3);
+//    LPC_GPIO2->FIODIR &= ~(1 << 5);
+//    LPC_GPIO2->FIODIR &= ~(1 << 7);
 }
 bool sensor_init(void)
 {
 
     config_sensor_pins();
+    delay_ms(SENSOR_INIT_DELAY); //Time required by sensor for calibration.
     interrupt_init();
-    lpc_timer_enable(lpc_timer0, 1);
+    lpc_timer_enable(lpc_timer0, TIMER_TICK);
     can_Tx_Rx_init();
 
     return true;
 }
 bool sensor_compute()
 {
-    sensor_trig_MB1010(0); //Trigger front sensor
-    sensor_trig_HCSR04b(2); //Trigger back sensor
-    delay_ms(55);
-    sensor_trig_MB1010(6); //Trigger right sensor
-    sensor_trig_HCSR04(4); //Trigger left sensor
-    delay_ms(40);
+    sensor_trig_MB1010(FRONT_SENSOR_RX);            //Trigger front sensor
+    sensor_trig_HCSR04b(BACK_SENSOR_RX);            //Trigger back sensor
+    delay_ms(SENSOR_TRIG_DELAY_FB);
+    sensor_trig_MB1010(FRONT_RIGHT_SENSOR_RX);      //Trigger right sensor
+    sensor_trig_HCSR04(FRONT_LEFT_SENSOR_RX);       //Trigger left sensor
+    delay_ms(SENSOR_TRIG_DELAY_RL);
 
   //  LE.setAll(0);
     //can_msg_t msgRx;
@@ -147,15 +168,13 @@ bool sensor_compute()
 //    }
 //    can_Heart_beat();
 
+
     printf("%d %d %d %d\n",front, left, right,back);
+    LD.setNumber(front/LED_DISP_FACTOR);
 
-    LD.setNumber(front/10);
-    if(front >255){front =255;}
-    if(back>255){back =255;}
-    if(right>255){right =255;}
-    if(left>255){left=255;}
+    sensor_distance_limit();
 
-        can_Tx_Sensor_data();
+    can_Tx_Sensor_data();
      //   front = 0; back = 0; right = 0; left = 0;
 
   if(CAN_is_bus_off(can1))
