@@ -50,6 +50,7 @@ void period_1Hz(void)
 void period_10Hz(void)
 {
     CANReception('0',u3);
+    CANTransmit(THeartbeatToMaster,0,0);
 
 }
 

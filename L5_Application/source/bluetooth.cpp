@@ -93,6 +93,13 @@ bool bluetoothTask::run(void *p)
             CANReception(recChar[0],u3);
             recChar[0]='0';
             break;
+
+        case 'h'://monitor
+            CANReception(recChar[0],u3);
+            recChar[0]='0';
+             break;
+
+
     }
 
     vTaskDelay(100);

@@ -21,7 +21,7 @@
 
 #include "can.h"
 #include "stdio.h"
-#define BootReplyData 20151122
+#define BootReplyData 2015
 typedef enum
 {
 
@@ -29,9 +29,9 @@ typedef enum
     TStartToMaster                    = 0x270,//no data
     TStopToMaster                     = 0x030,//no data
     TKillToMaster                     = 0x010,//no data
-    THeartbeatToMaster                = 0x282,//not decided
+    THeartbeatToMaster                = 0x282,//not decided-no data//ask when will be sent
     TBootReplyToMaster                = 0x623,//not decided
-    RDestReachedFromMaster            = 0x410,//no data
+    RDestReachedFromMaster            = 0x410,//no data //ask what action to be done afterreceiving msg id
     RBootReqFromMaster                = 0x610,//no data
     RBootStatReqFromMaster            = 0x630,//data
     RKillFromMaster                   = 0x020,//no data
@@ -45,7 +45,7 @@ typedef enum
     RSensorDataFromSensors            = 0x210,//data
 
     /* CAN Communication with Motor Module*/
-    RBatteryStatFromMotor             = 0x420,//data
+    RBatteryStatFromMotor             = 0x420,//data//1 variable-1 byte of data in the form of percentage.
 
     //DIsabled Filter ID - Used to make Standard ID count even
     FilterDisabledCANmsgID            = 0xFFFF//no data
@@ -69,5 +69,14 @@ const can_std_id_t canMessagesFilterList[] =
         CAN_gen_sid(can1,FilterDisabledCANmsgID)         //MSG ID = 0xFFFF
 };
 
+
+typedef struct
+{
+   uint32_t FrontDistance   :8;
+   uint32_t LeftDistance   :8;
+   uint32_t RightDistance   :8;
+   uint32_t RearDistance   :8;
+
+}SensorData;
 
 #endif /* L5_APPLICATION_SOURCE_CAN_COMMUNICATION_IDS_H_ */
