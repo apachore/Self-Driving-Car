@@ -8,6 +8,7 @@
 #ifndef L5_APPLICATION_SENSOR_DEFINES_HPP_
 #define L5_APPLICATION_SENSOR_DEFINES_HPP_
 
+#define DEBUG                                   1
 #define PW_CM_CONV                              58
 #define LED_DISP_FACTOR                         10
 #define DISTANCE_LIMIT                          255
@@ -17,7 +18,7 @@
 #define SONAR_TRIG_DELAY                        20
 #define HCSR04_TRIG_DELAY                       10
 #define SENSOR_TRIG_DELAY_FB                    55      //Delay to get reading from sonar sensor
-#define SENSOR_TRIG_DELAY_RL                    40
+#define SENSOR_TRIG_DELAY_RL                    30
 
 
 //Sensor trigger and echo pins. RX indicate trigger pin while PW is PWM/Echo

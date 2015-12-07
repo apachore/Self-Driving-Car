@@ -38,13 +38,21 @@ void sensor_trig_MB1010(int pin)
     delay_us(SONAR_TRIG_DELAY);
     LPC_GPIO2->FIOPIN &= ~(1 << pin);
 }
-void sensor_trig_HCSR04(int pin)
+void sensor_trig_HCSR04l(int pin)
 {
     LPC_GPIO2->FIOPIN &= ~(1 << pin);
     LPC_GPIO2->FIOPIN |= (1 << pin);
     delay_us(HCSR04_TRIG_DELAY);
     LPC_GPIO2->FIOPIN &= ~(1 << pin);
     left_start_time = lpc_timer_get_value(lpc_timer0);
+}
+void sensor_trig_HCSR04r(int pin)
+{
+    LPC_GPIO2->FIOPIN &= ~(1 << pin);
+    LPC_GPIO2->FIOPIN |= (1 << pin);
+    delay_us(HCSR04_TRIG_DELAY);
+    LPC_GPIO2->FIOPIN &= ~(1 << pin);
+    right_start_time = lpc_timer_get_value(lpc_timer0);
 }
 void sensor_trig_HCSR04b(int pin)
 {
@@ -57,18 +65,6 @@ void sensor_trig_HCSR04b(int pin)
 void front_rise_edge()
 {
     front_start_time = lpc_timer_get_value(lpc_timer0);
-}
-void back_rise_edge()
-{
-    back_start_time = lpc_timer_get_value(lpc_timer0);
-}
-void left_rise_edge()
-{
-    left_start_time = lpc_timer_get_value(lpc_timer0);
-}
-void right_rise_edge()
-{
-    right_start_time = lpc_timer_get_value(lpc_timer0);
 }
 void front_fall_edge()
 {
@@ -119,7 +115,6 @@ void interrupt_init()
 {
        const uint8_t port2_1 = FRONT_SENSOR_PW, port2_3 = BACK_SENSOR_PW, port2_5 = FRONT_LEFT_SENSOR_PW,port2_7 = FRONT_RIGHT_SENSOR_PW;
        eint3_enable_port2(port2_1, eint_rising_edge, front_rise_edge);
-       eint3_enable_port2(port2_7, eint_rising_edge, right_rise_edge );
 
        eint3_enable_port2(port2_1, eint_falling_edge, front_fall_edge);
        eint3_enable_port2(port2_3, eint_falling_edge, back_fall_edge);
@@ -133,10 +128,6 @@ void config_sensor_pins()
     LPC_GPIO2->FIODIR |= (1 << BACK_SENSOR_RX);
     LPC_GPIO2->FIODIR |= (1 << FRONT_LEFT_SENSOR_RX);
     LPC_GPIO2->FIODIR |= (1 << FRONT_RIGHT_SENSOR_RX);
-//    LPC_GPIO2->FIODIR &= ~(1 << 1);
-//    LPC_GPIO2->FIODIR &= ~(1 << 3);
-//    LPC_GPIO2->FIODIR &= ~(1 << 5);
-//    LPC_GPIO2->FIODIR &= ~(1 << 7);
 }
 bool sensor_init(void)
 {
@@ -154,8 +145,8 @@ bool sensor_compute()
     sensor_trig_MB1010(FRONT_SENSOR_RX);            //Trigger front sensor
     sensor_trig_HCSR04b(BACK_SENSOR_RX);            //Trigger back sensor
     delay_ms(SENSOR_TRIG_DELAY_FB);
-    sensor_trig_MB1010(FRONT_RIGHT_SENSOR_RX);      //Trigger right sensor
-    sensor_trig_HCSR04(FRONT_LEFT_SENSOR_RX);       //Trigger left sensor
+    sensor_trig_HCSR04r(FRONT_RIGHT_SENSOR_RX);      //Trigger right sensor
+    sensor_trig_HCSR04l(FRONT_LEFT_SENSOR_RX);       //Trigger left sensor
     delay_ms(SENSOR_TRIG_DELAY_RL);
 
   //  LE.setAll(0);
@@ -168,8 +159,9 @@ bool sensor_compute()
 //    }
 //    can_Heart_beat();
 
-
+#if DEBUG
     printf("%d %d %d %d\n",front, left, right,back);
+#endif
     LD.setNumber(front/LED_DISP_FACTOR);
 
     sensor_distance_limit();
