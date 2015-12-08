@@ -44,12 +44,12 @@ Uart3& u3 = Uart3::getInstance();
 
 void period_1Hz(void)
 {
-
+    CANReception('0',u3);
 }
 
 void period_10Hz(void)
 {
-    CANReception('0',u3);
+
 
 }
 

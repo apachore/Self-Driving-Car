@@ -100,4 +100,3 @@ bool bluetoothTask::run(void *p)
 
     return true;
 }
-

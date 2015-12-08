@@ -59,14 +59,14 @@ void CANReception(char rec_bluetooth,Uart3 u3){
 
                 memcpy(&checkpoint,&canMessageReceivedBlock.data,sizeof(coordinates));
 
-                if(rec_bluetooth=='g'){
+              //  if(rec_bluetooth=='g'){
 
                 //printf("Recevied");
                 sprintf(source_coordinates1,"x%8.5f#",checkpoint.latitude);
                 sprintf(source_coordinates2,"y%10.5f#",checkpoint.longitude);
                       u3.put(source_coordinates1);
                       u3.put(source_coordinates2);
-                }
+              //  }
 /*                else{
                     char current_lat[50];
                     char current_lon[50];
@@ -109,5 +109,4 @@ void CANReception(char rec_bluetooth,Uart3 u3){
     }
 
 }
-
 

@@ -1,9 +1,3 @@
-/*
- * can_transmission_reception.h
- *
- *  Created on: Oct 24, 2015
- *      Author: Gaurao Chaudhari
- */
 
 #ifndef L5_APPLICATION_SOURCE_CAN_TRANSMISSION_RECEPTION_H_
 #define L5_APPLICATION_SOURCE_CAN_TRANSMISSION_RECEPTION_H_
