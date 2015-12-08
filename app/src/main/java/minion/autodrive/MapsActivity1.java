@@ -5,8 +5,13 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -25,13 +30,26 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.lang.reflect.Array;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.transform.Source;
 
@@ -41,11 +59,23 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private static final int REQUEST_ENABLE_BT = 1;
     private boolean startflag=false;
-    private float latitude_s=0;
-    private float longitude_s=0;
+    private double latitude_s=0;
+    private double longitude_s=0;
     private String source=null;
     private String lon_string;
     private String lat_string;
+
+    ArrayList<LatLng> markerPoints;
+    String lat_current;
+    String lon_current;
+
+    //TextView source_l;
+
+    Handler bluetoothIn;
+
+    final int handlerState = 0;                        //used to identify handler message
+    private StringBuilder recDataString = new StringBuilder();
+
 
     BluetoothAdapter bluetoothAdapter;
     ArrayList<BluetoothDevice> pairedDeviceArrayList;
@@ -78,10 +108,12 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
         inputPane = (LinearLayout)findViewById(R.id.inputpane);
 
         runstop_btn=(ToggleButton)findViewById(R.id.run_stop_toggle);
-        monitor_btn=(Button)findViewById(R.id.monitor);
+        //monitor_btn=(Button)findViewById(R.id.monitor);
         kill_btn=(Button)findViewById(R.id.kill);
         set_btn=(Button)findViewById(R.id.setdest);
         get_btn=(Button)findViewById(R.id.getSource);
+
+
 
         View.OnClickListener handler = new View.OnClickListener(){
             public void onClick(View view) {
@@ -91,9 +123,9 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
                     case R.id.run_stop_toggle: //toast will be shown
                         onToggleClicked(view);
                         break;
-                    case R.id.monitor: //program will end
+                   /* case R.id.monitor: //program will end
                         openMonitor();
-                        break;
+                        break;*/
                     case R.id.kill:
                         sendKillSignal();
                         break;
@@ -108,46 +140,81 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
 
         //Setting the listeners
         findViewById(R.id.run_stop_toggle).setOnClickListener(handler);
-        findViewById(R.id.monitor).setOnClickListener(handler);
+        //findViewById(R.id.monitor).setOnClickListener(handler);
         findViewById(R.id.kill).setOnClickListener(handler);
         findViewById(R.id.setdest).setOnClickListener(handler);
         findViewById(R.id.getSource).setOnClickListener(handler);
 
+        //source_l = (TextView) findViewById(R.id.source);
 
         //monitor=(Button)findViewById(R.id.monitor);
+
+        markerPoints = new ArrayList<LatLng>();
 
         SupportMapFragment mapFragment=(SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
         mMap=mapFragment.getMap();
 
+        if(mMap!=null){
+
+            // Enable MyLocation Button in the Map
+            mMap.setMyLocationEnabled(true);
+
+            // Setting onclick event listener for the map
+            mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+
+                @Override
+                public void onMapClick(LatLng point) {
+
+                    // Already two locations
+                    if(markerPoints.size()>1){
+                        markerPoints.clear();
+                        mMap.clear();
+                    }
+
+                    // Adding new item to the ArrayList
+                    markerPoints.add(point);
+
+                    // Creating MarkerOptions
+                    MarkerOptions options = new MarkerOptions();
+
+                    // Setting the position of the marker
+                    options.position(point);
+
+                    /**
+                     * For the start location, the color of marker is GREEN and
+                     * for the end location, the color of marker is RED.
+                     */
+
+                    if(markerPoints.size()==1){
+                        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                    }
+
+                    else if(markerPoints.size()==2){
+                        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                    }
+
+                    // Add new marker to the Google Map Android API V2
+                    mMap.addMarker(options);
+
+                    // Checks, whether start and end locations are captured
+                    if(markerPoints.size() >= 2){
+                        LatLng origin = markerPoints.get(0);
+                        LatLng dest = markerPoints.get(1);
+
+                        // Getting URL to the Google Directions API
+                        String url = getDirectionsUrl(origin, dest);
+
+                        DownloadTask downloadTask = new DownloadTask();
+
+                        // Start downloading json data from Google Directions API
+                        downloadTask.execute(url);
+                    }
+                }
+            });
+        }
+
+
         mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(37.336079,-121.880453) , 14.0f) );
-
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                // Creating a marker
-                MarkerOptions markerOptions = new MarkerOptions();
-
-                // Setting the position for the marker
-                markerOptions.position(latLng);
-
-                // Setting the title for the marker.
-                // This will be displayed on taping the marker
-                markerOptions.title(latLng.latitude + " : " + latLng.longitude);
-
-                System.out.println("Latitude " + latLng.latitude + " Info " + latLng.toString());
-                latitude_s=(float)latLng.latitude;
-                longitude_s=(float)latLng.longitude;
-
-                // Clears the previously touched position
-                mMap.clear();
-
-                // Animating to the touched position
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-
-                // Placing a marker on the touched position
-                mMap.addMarker(markerOptions);
-            }
-        });
 
         myUUID = UUID.fromString(UUID_STRING_WELL_KNOWN_SPP);
 
@@ -162,11 +229,277 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
         //setUpMapIfNeeded();
     }
 
+    Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            byte[] writeBuf = (byte[]) msg.obj;
+            int begin = (int)msg.arg1;
+            int end = (int)msg.arg2;
+
+            switch(msg.what) {
+                case 1:
+                    String readMessage = new String(writeBuf);
+                    String id=readMessage.substring(begin,end);
+                    //final String data=readMessage.substring(begin+1, end);
+
+
+                    if(id.contains("x")){
+                       lat_string = readMessage.substring(begin+1, end);
+
+                    }
+
+                    if(id.contains("y")){
+                        lon_string = readMessage.substring(begin+1, end);
+
+                    }
+ /*                   if(id.contains("a")){
+                        lat_current=readMessage.substring(begin+1, end);
+                    }
+
+                    if(id.contains("b")){
+                        lon_current=readMessage.substring(begin+1, end);
+                    }
+
+                    LatLng lat_lng_current=new LatLng(Double.parseDouble(lat_current), Double.parseDouble(lon_current));
+                    MarkerOptions options1 = new MarkerOptions();
+                    options1.position(lat_lng_current);
+                    options1.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+
+                    mMap.addMarker(options1);*/
+
+                    if(markerPoints.size()>0){
+                        markerPoints.clear();
+                        mMap.clear();
+                    }
+
+                    if(id.contains("y")) {
+                    LatLng lat_lng = new LatLng(Double.parseDouble(lat_string), Double.parseDouble(lon_string));
+
+                    markerPoints.add(0, lat_lng);
+                    MarkerOptions options = new MarkerOptions();
+                    options.position(lat_lng);
+
+                    if (markerPoints.size() == 1) {
+                        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                    }
+
+                    mMap.addMarker(options);
+                }
+                    //final String finalWriteMessage1 = finalWriteMessage;
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+
+                        }
+                    });
+
+                    break;
+
+            }
+        }
+    };
+
+    private String getDirectionsUrl(LatLng origin,LatLng dest){
+
+        // Origin of route
+        String str_origin = "origin="+origin.latitude+","+origin.longitude;
+
+        // Destination of route
+        String str_dest = "destination="+dest.latitude+","+dest.longitude;
+
+        // Sensor enabled
+        String sensor = "sensor=false";
+
+        // Building the parameters to the web service
+        String parameters = str_origin+"&"+str_dest+"&"+sensor+"&mode=bicycling";
+
+        // Output format
+        String output = "json";
+
+        // Building the url to the web service
+        String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters;
+
+        return url;
+    }
+    /** A method to download json data from url */
+    private String downloadUrl(String strUrl) throws IOException {
+        String data = "";
+        InputStream iStream = null;
+        HttpURLConnection urlConnection = null;
+        try{
+            URL url = new URL(strUrl);
+
+            // Creating an http connection to communicate with url
+            urlConnection = (HttpURLConnection) url.openConnection();
+
+            // Connecting to url
+            urlConnection.connect();
+
+            // Reading data from url
+            iStream = urlConnection.getInputStream();
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+
+            StringBuffer sb = new StringBuffer();
+
+            String line = "";
+            while( ( line = br.readLine()) != null){
+                sb.append(line);
+            }
+
+            data = sb.toString();
+
+            br.close();
+
+        }catch(Exception e){
+            Log.d("Exception", e.toString());
+        }finally{
+            iStream.close();
+            urlConnection.disconnect();
+        }
+        return data;
+    }
+
+    // Fetches data from url passed
+    private class DownloadTask extends AsyncTask<String, Void, String> {
+
+        // Downloading data in non-ui thread
+        @Override
+        protected String doInBackground(String... url) {
+
+            // For storing data from web service
+            String data = "";
+
+            try{
+                // Fetching the data from web service
+                data = downloadUrl(url[0]);
+            }catch(Exception e){
+                Log.d("Background Task",e.toString());
+            }
+            return data;
+        }
+
+        // Executes in UI thread, after the execution of
+        // doInBackground()
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            ParserTask parserTask = new ParserTask();
+
+            // Invokes the thread for parsing the JSON data
+            parserTask.execute(result);
+        }
+    }
+
+    /** A class to parse the Google Places in JSON format */
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,String>>> >{
+
+        // Parsing the data in non-ui thread
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+
+            try{
+                jObject = new JSONObject(jsonData[0]);
+                DirectionsJSONParser parser = new DirectionsJSONParser();
+
+                // Starts parsing data
+                routes = parser.parse(jObject);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+        // Executes in UI thread, after the parsing process
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+            ArrayList<LatLng> points = null;
+            PolylineOptions lineOptions = null;
+            MarkerOptions markerOptions = new MarkerOptions();
+
+            // Traversing through all the routes
+            for(int i=0;i<result.size();i++){
+                points = new ArrayList<LatLng>();
+                lineOptions = new PolylineOptions();
+
+                // Fetching i-th route
+                List<HashMap<String, String>> path = result.get(i);
+
+                // Fetching all the points in i-th route
+                int size_of_path=path.size();
+                String noofpoints= String.valueOf(size_of_path);
+
+                Toast.makeText(MapsActivity1.this, noofpoints, Toast.LENGTH_SHORT).show();
+
+                for(int j=0;j<path.size();j++){
+                    HashMap<String,String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+
+                    // Adding new item to the ArrayList
+                    markerPoints.add(position);
+
+                    // Creating MarkerOptions
+                    MarkerOptions options = new MarkerOptions();
+
+                    // Setting the position of the marker
+                    options.position(position);
+
+                    options.title(position.latitude + " : " + position.longitude);
+
+                    /**
+                     * For the start location, the color of marker is GREEN and
+                     * for the end location, the color of marker is RED.
+                     */
+                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+
+                    // Add new marker to the Google Map Android API V2
+                    mMap.addMarker(options);
+
+
+
+                }
+
+                // Adding all the points in the route to LineOptions
+
+                for (int size=0;size<points.size();size++) {
+                    LatLng checkpoints=points.get(size);
+
+                    String latinput = Double.toString(checkpoints.latitude);
+                    String loninput = Double.toString(checkpoints.longitude);
+                    String coordinate = "f" + "," + latinput + "," + loninput;
+                    byte[] coordinateBytes = coordinate.getBytes();
+                    myThreadConnected.write(coordinateBytes);
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                lineOptions.addAll(points);
+                lineOptions.width(10);
+                lineOptions.color(Color.BLUE);
+
+            }
+
+            // Drawing polyline in the Google Map for the i-th route
+            mMap.addPolyline(lineOptions);
+        }
+    }
+
     public void onToggleClicked(View view) {
         // Is the toggle on?
         boolean on = ((ToggleButton) view).isChecked();
-        if (latitude_s != 0 && longitude_s != 0)
-            {
+       /* if (latitude_s != 0 && longitude_s != 0)
+            {*/
         if (on) {
 
                 if (myThreadConnected != null) {
@@ -199,23 +532,15 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
             myThreadConnected.write(bytesToSend);
             Toast.makeText(this, "Stop", Toast.LENGTH_SHORT).show();
         }
-    }
+
+            /*}
         else {
 
             Toast.makeText(this, "Destination needed", Toast.LENGTH_LONG).show();
 
-        }
+        }*/
 
     }
-
-
-
-    /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
-     * <p/>
-     * This should only be called once and when we are sure that {@link #mMap} is not null.
-     */
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -224,12 +549,12 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
-    public void openMonitor(){
+/*    public void openMonitor(){
         String monitorId="e";
         byte[] bytesToSend = monitorId.getBytes();
         myThreadConnected.write(bytesToSend);
         Toast.makeText(this, "Monitor pressed", Toast.LENGTH_SHORT).show();
-    }
+    }*/
 
     public void sendKillSignal(){
         String killId="d";
@@ -240,24 +565,11 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void setDest(){
-        String destId="f";
 
-        String latinput = Float.toString(latitude_s);
-        String loninput = Float.toString(longitude_s);
-
-        String coordinate=destId+","+latinput+","+loninput;
-
-        byte[] coordinateBytes = coordinate.getBytes();
-
-        myThreadConnected.write(coordinateBytes);
-
-        get_btn.setVisibility(View.GONE);
-        set_btn.setVisibility(View.GONE);
-        runstop_btn.setVisibility(View.VISIBLE);
-        kill_btn.setVisibility(View.VISIBLE);
-        monitor_btn.setVisibility(View.VISIBLE);
-        Toast.makeText(this, "Destination Set", Toast.LENGTH_SHORT).show();
-
+        if(markerPoints.size()>=0){
+            markerPoints.clear();
+            mMap.clear();
+        }
     }
 
     public void getSource(){
@@ -267,6 +579,7 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
 
         byte[] getIdBytes = getId.getBytes();
         myThreadConnected.write(getIdBytes);
+
         Toast.makeText(this, "Source request send", Toast.LENGTH_SHORT).show();
 
     }
@@ -397,16 +710,9 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
 
                     @Override
                     public void run() {
-                        final LatLng latLng_source=new LatLng(37.336079,-121.880453);
 
-                        final Marker marker= mMap.addMarker(new MarkerOptions()
-                                .position(latLng_source)
-                                .title("Current")
-                                .icon(BitmapDescriptorFactory
-                                        .fromResource(R.drawable.marker)));
+                        Toast.makeText(MapsActivity1.this,"Connection On",Toast.LENGTH_SHORT).show();
 
-                        Toast.makeText(MapsActivity1.this,"Paired successfully",Toast.LENGTH_SHORT).show();
-                        marker.showInfoWindow();
                     }
                 });
 
@@ -421,7 +727,7 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
         public void cancel() {
 
             Toast.makeText(getApplicationContext(),
-                    "close bluetoothSocket",
+                    "Connection Off",
                     Toast.LENGTH_LONG).show();
 
             try {
@@ -440,7 +746,7 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     Background Thread to handle Bluetooth data communication
     after connected
      */
-    private class ThreadConnected extends Thread {
+    public class ThreadConnected extends Thread {
         private final BluetoothSocket connectedBluetoothSocket;
         private final InputStream connectedInputStream;
         private final OutputStream connectedOutputStream;
@@ -465,24 +771,25 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
         @Override
         public void run() {
             byte[] buffer = new byte[1024];
-            int bytes;
-
-            String strRx = "";
+            int bytes = 0;
+            int begin = 0;
 
             while (true) {
                 try {
-                    bytes = connectedInputStream.read(buffer);
-                    final String strReceived = new String(buffer, 0, bytes);
-                    source=strReceived;
 
+                        bytes += connectedInputStream.read(buffer, bytes, buffer.length - bytes);
+                        for(int i = begin; i < bytes; i++) {
+                            if (buffer[i] == "#".getBytes()[0]) {
+                                mHandler.obtainMessage(1, begin, i, buffer).sendToTarget();
+                                begin = i + 1;
+                                if (i == bytes - 1) {
+                                    bytes = 0;
+                                    begin = 0;
+                                }
+                            }
+                        }
 
-                    runOnUiThread(new Runnable(){
-
-                        @Override
-                        public void run() {
-
-                            Toast.makeText(MapsActivity1.this,strReceived,Toast.LENGTH_SHORT).show();
-                        }});
+                    //bytes = connectedInputStream.read(buffer);
 
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
@@ -503,6 +810,8 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
         public void write(byte[] buffer) {
             try {
                 connectedOutputStream.write(buffer);
+                connectedOutputStream.flush();
+                //Thread.sleep(1000);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

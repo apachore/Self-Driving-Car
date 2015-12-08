@@ -39,29 +39,27 @@
 
     <ToggleButton
         android:id="@+id/run_stop_toggle"
-        android:layout_width="100dp"
-        android:scaleType="fitXY"
+        android:layout_width="150dp"
         android:layout_alignParentLeft="true"
         android:layout_height="wrap_content"
         android:textOn="@string/toggle_turn_on"
         android:textOff="@string/toggle_turn_off"
         android:layout_below="@+id/inputpane"
         android:onClick="onToggleClicked"
-        android:visibility="gone"/>
+        />
 
     <Button
         android:id="@+id/kill"
-        android:layout_width="100dp"
-        android:scaleType="fitXY"
-        android:layout_centerInParent="true"
+        android:layout_width="150dp"
+        android:layout_alignParentRight="true"
         android:layout_height="wrap_content"
         android:text="Kill"
         android:layout_below="@+id/inputpane"
         android:layout_toRightOf="@id/run_stop_toggle"
         android:onClick="sendKillSignal"
-        android:visibility="gone"/>
+        />
 
-    <Button
+<!--    <Button
         android:id="@+id/monitor"
         android:layout_width="100dp"
         android:scaleType="fitXY"
@@ -70,27 +68,26 @@
         android:layout_below="@+id/inputpane"
         android:layout_toRightOf="@id/kill"
         android:onClick="openMonitor"
-        android:visibility="gone"/>
+        />-->
 
     <Button
         android:id="@+id/getSource"
-        android:layout_width="100dp"
-        android:scaleType="fitXY"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:text="Locate"
         android:layout_below="@+id/run_stop_toggle"
         android:onClick="getSource"
-        android:visibility="visible"/>
+        />
 
     <Button
         android:id="@+id/setdest"
-        android:layout_width="100dp"
-        android:scaleType="fitXY"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:text="Set"
+        android:text="Reset"
+        android:layout_alignParentRight="true"
         android:layout_below="@+id/kill"
         android:layout_toRightOf="@id/getSource"
         android:onClick="setDest"
-        android:visibility="visible"/>
+        />
 
 </RelativeLayout>
