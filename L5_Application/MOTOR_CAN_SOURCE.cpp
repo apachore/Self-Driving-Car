@@ -15,6 +15,7 @@
 #include "string.h"
 #include "stdlib.h"
 #include "can_comms.hpp"
+#include "lpc_sys.h"
 
 
 
@@ -43,7 +44,8 @@ void Receive_init()
     CAN_init(can1, 100, 100, 100, *BusOffCb,*DataOverCanBuffer);/*Initializing CAN bus*/
     CAN_reset_bus(can1);          /*Reset CAN bus*/
 
-    const can_std_id_t slist[]  {CAN_gen_sid(can1, 0x210),CAN_gen_sid(can1, 0x220), CAN_gen_sid(can1, 0x240), CAN_gen_sid(can1, 0x250),CAN_gen_sid(can1, 0x420),
+    const can_std_id_t slist[]  {CAN_gen_sid(can1, 0x020),CAN_gen_sid(can1, 0x210),CAN_gen_sid(can1, 0x220),
+            CAN_gen_sid(can1, 0x240), CAN_gen_sid(can1, 0x250),CAN_gen_sid(can1, 0x410),CAN_gen_sid(can1, 0x420),
             CAN_gen_sid(can1, 0x610)};    /*CAN standard ID list*/
 
     /*Motor Control message from Master : 0x220 */
@@ -108,6 +110,8 @@ void Receiver_message()
     	CAN_Receive = 0;
         switch(rx_msg.msg_id)
         {
+            case 0x020:
+                sys_reboot();
             case 0x210:
                 Message.canReceivedMsg_Sensor=rx_msg;
             break;
