@@ -64,7 +64,6 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     private String source=null;
     private String lon_string;
     private String lat_string;
-
     ArrayList<LatLng> markerPoints;
     String lat_current;
     String lon_current;
@@ -90,6 +89,8 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     Button set_btn;
     Button get_btn;
 
+    Button controls;
+
     ArrayAdapter<BluetoothDevice> pairedDeviceAdapter;
     private UUID myUUID;
     private final String UUID_STRING_WELL_KNOWN_SPP =
@@ -108,12 +109,10 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
         inputPane = (LinearLayout)findViewById(R.id.inputpane);
 
         runstop_btn=(ToggleButton)findViewById(R.id.run_stop_toggle);
-        //monitor_btn=(Button)findViewById(R.id.monitor);
+        monitor_btn=(Button)findViewById(R.id.monitor);
         kill_btn=(Button)findViewById(R.id.kill);
         set_btn=(Button)findViewById(R.id.setdest);
-        get_btn=(Button)findViewById(R.id.getSource);
-
-
+        controls=(Button)findViewById(R.id.controls);
 
         View.OnClickListener handler = new View.OnClickListener(){
             public void onClick(View view) {
@@ -123,16 +122,17 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
                     case R.id.run_stop_toggle: //toast will be shown
                         onToggleClicked(view);
                         break;
-                   /* case R.id.monitor: //program will end
+                    case R.id.monitor: //program will end
                         openMonitor();
-                        break;*/
+                        break;
                     case R.id.kill:
                         sendKillSignal();
                         break;
                     case R.id.setdest:
                         setDest();
-                    case R.id.getSource:
-                        getSource();
+                        break;
+                    case R.id.controls:
+                        backToControls();
                         break;
                 }
             }
@@ -140,10 +140,11 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
 
         //Setting the listeners
         findViewById(R.id.run_stop_toggle).setOnClickListener(handler);
-        //findViewById(R.id.monitor).setOnClickListener(handler);
+        findViewById(R.id.monitor).setOnClickListener(handler);
         findViewById(R.id.kill).setOnClickListener(handler);
         findViewById(R.id.setdest).setOnClickListener(handler);
-        findViewById(R.id.getSource).setOnClickListener(handler);
+        findViewById(R.id.controls).setOnClickListener(handler);
+
 
         //source_l = (TextView) findViewById(R.id.source);
 
@@ -244,7 +245,7 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
 
 
                     if(id.contains("x")){
-                       lat_string = readMessage.substring(begin+1, end);
+                        lat_string = readMessage.substring(begin+1, end);
 
                     }
 
@@ -252,39 +253,29 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
                         lon_string = readMessage.substring(begin+1, end);
 
                     }
- /*                   if(id.contains("a")){
-                        lat_current=readMessage.substring(begin+1, end);
-                    }
-
-                    if(id.contains("b")){
-                        lon_current=readMessage.substring(begin+1, end);
-                    }
-
-                    LatLng lat_lng_current=new LatLng(Double.parseDouble(lat_current), Double.parseDouble(lon_current));
-                    MarkerOptions options1 = new MarkerOptions();
-                    options1.position(lat_lng_current);
-                    options1.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-
-                    mMap.addMarker(options1);*/
-
-                    if(markerPoints.size()>0){
-                        markerPoints.clear();
-                        mMap.clear();
-                    }
 
                     if(id.contains("y")) {
-                    LatLng lat_lng = new LatLng(Double.parseDouble(lat_string), Double.parseDouble(lon_string));
-
-                    markerPoints.add(0, lat_lng);
-                    MarkerOptions options = new MarkerOptions();
-                    options.position(lat_lng);
-
-                    if (markerPoints.size() == 1) {
-                        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        LatLng lat_lng_current = new LatLng(Double.parseDouble(lat_string), Double.parseDouble(lon_string));
+                        MarkerOptions options1 = new MarkerOptions();
+                        options1.position(lat_lng_current);
+                        options1.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                        mMap.addMarker(options1);
                     }
 
-                    mMap.addMarker(options);
-                }
+
+                    if(id.contains("y") && markerPoints.size()==0) {
+                        LatLng lat_lng = new LatLng(Double.parseDouble(lat_string), Double.parseDouble(lon_string));
+
+                        markerPoints.add(0, lat_lng);
+                        MarkerOptions options = new MarkerOptions();
+                        options.position(lat_lng);
+
+                        if (markerPoints.size() == 1) {
+                            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        }
+
+                        mMap.addMarker(options);
+                    }
                     //final String finalWriteMessage1 = finalWriteMessage;
                     runOnUiThread(new Runnable() {
                         public void run() {
@@ -478,7 +469,7 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
                     byte[] coordinateBytes = coordinate.getBytes();
                     myThreadConnected.write(coordinateBytes);
                     try {
-                        Thread.sleep(2000);
+                        Thread.sleep(1500);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -502,27 +493,27 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
             {*/
         if (on) {
 
-                if (myThreadConnected != null) {
+            if (myThreadConnected != null) {
 
-                    if (startflag == false) {
+                if (startflag == false) {
 
-                        String startId = "a";
-                        byte[] bytesToSend = startId.getBytes();
-                        myThreadConnected.write(bytesToSend);
-                        //myThreadConnected.write(latbytes);
-                        //myThreadConnected.write(lonbytes);
+                    String startId = "a";
+                    byte[] bytesToSend = startId.getBytes();
+                    myThreadConnected.write(bytesToSend);
+                    //myThreadConnected.write(latbytes);
+                    //myThreadConnected.write(lonbytes);
 
-                        startflag = true;
-                    } else {
+                    startflag = true;
+                } else {
 
-                        String startId = "b";
-                        byte[] bytesToSend = startId.getBytes();
-                        myThreadConnected.write(bytesToSend);
-                    }
-
-                    Toast.makeText(this, "Start", Toast.LENGTH_SHORT).show();
-
+                    String startId = "b";
+                    byte[] bytesToSend = startId.getBytes();
+                    myThreadConnected.write(bytesToSend);
                 }
+
+                Toast.makeText(this, "Start", Toast.LENGTH_SHORT).show();
+
+            }
 
 
         } else {
@@ -549,12 +540,13 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
-/*    public void openMonitor(){
-        String monitorId="e";
-        byte[] bytesToSend = monitorId.getBytes();
-        myThreadConnected.write(bytesToSend);
-        Toast.makeText(this, "Monitor pressed", Toast.LENGTH_SHORT).show();
-    }*/
+    public void openMonitor(){
+        runstop_btn.setVisibility(View.INVISIBLE);
+        kill_btn.setVisibility(View.INVISIBLE);
+        monitor_btn.setVisibility(View.INVISIBLE);
+        set_btn.setVisibility(View.INVISIBLE);
+        controls.setVisibility(View.VISIBLE);
+    }
 
     public void sendKillSignal(){
         String killId="d";
@@ -564,24 +556,19 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
 
     }
 
+    public void backToControls(){
+        controls.setVisibility(View.INVISIBLE);
+        runstop_btn.setVisibility(View.VISIBLE);
+        kill_btn.setVisibility(View.VISIBLE);
+        monitor_btn.setVisibility(View.VISIBLE);
+        set_btn.setVisibility(View.VISIBLE);
+    }
     public void setDest(){
 
         if(markerPoints.size()>=0){
             markerPoints.clear();
             mMap.clear();
         }
-    }
-
-    public void getSource(){
-
-        String getId="g";
-        //String coordinate=destId;
-
-        byte[] getIdBytes = getId.getBytes();
-        myThreadConnected.write(getIdBytes);
-
-        Toast.makeText(this, "Source request send", Toast.LENGTH_SHORT).show();
-
     }
 
     @Override
@@ -685,6 +672,7 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
             try {
                 bluetoothSocket.connect();
                 success = true;
+                //inputPane.setVisibility(View.GONE);
             } catch (IOException e) {
                 e.printStackTrace();
 
@@ -777,17 +765,17 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
             while (true) {
                 try {
 
-                        bytes += connectedInputStream.read(buffer, bytes, buffer.length - bytes);
-                        for(int i = begin; i < bytes; i++) {
-                            if (buffer[i] == "#".getBytes()[0]) {
-                                mHandler.obtainMessage(1, begin, i, buffer).sendToTarget();
-                                begin = i + 1;
-                                if (i == bytes - 1) {
-                                    bytes = 0;
-                                    begin = 0;
-                                }
+                    bytes += connectedInputStream.read(buffer, bytes, buffer.length - bytes);
+                    for(int i = begin; i < bytes; i++) {
+                        if (buffer[i] == "#".getBytes()[0]) {
+                            mHandler.obtainMessage(1, begin, i, buffer).sendToTarget();
+                            begin = i + 1;
+                            if (i == bytes - 1) {
+                                bytes = 0;
+                                begin = 0;
                             }
                         }
+                    }
 
                     //bytes = connectedInputStream.read(buffer);
 
@@ -829,5 +817,4 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     }
 
 }
-
 
