@@ -35,13 +35,16 @@ char sensor_front[50];
 char sensor_left[50];
 char sensor_right[50];
 char sensor_rear[50];
+char distance[50];
+char checkpointdistance[50];
+
 
 void CANInitialization()
 {
     CAN_init(can1, 100, 30, 30, NULL, NULL);
 
     if(CAN_setup_filter(canMessagesFilterList , 8, NULL, 0, NULL, 0, NULL, 0))
-    CAN_reset_bus(can1);
+        CAN_reset_bus(can1);
 
 }
 
@@ -63,10 +66,13 @@ bool CANTransmit(uint32_t msg_id , uint8_t * data, uint32_t len)
 }
 
 void CANReception(char rec_bluetooth,Uart3 u3){
-    can_msg_t rx_msg;
+    // can_msg_t rx_msg;
     can_msg_t canMessageReceivedBlock;
     coordinates checkpoint;
     char source_coordinates[20];
+    char source_coordinates1[50];
+    char source_coordinates2[50];
+
 
     //temporary code for static source coordinates
     if(rec_bluetooth=='g'){
@@ -84,21 +90,37 @@ void CANReception(char rec_bluetooth,Uart3 u3){
 
         if(canMessageReceivedBlock.msg_id==0x210)
         {
-           printf("received msg id 210\n");
+            printf("received msg id 210\n");
         }
         switch (canMessageReceivedBlock.msg_id)
         {
-            /*case RSourceFromGeo:
+            case RSourceFromGeo:
 
-                //if(rec_bluetooth=='g'){
+                if(rec_bluetooth=='g'){
 
-                    memcpy(&checkpoint,&canMessageReceivedBlock.data,sizeof(coordinates));
-                    sprintf(source_coordinates,"%9.6f,%9.6f", checkpoint.latitude,checkpoint.longitude);
+                    //memcpy(&checkpoint,&canMessageReceivedBlock.data,sizeof(coordinates));//to be added
+                    //sprintf(source_coordinates,"%9.6f,%9.6f", checkpoint.latitude,checkpoint.longitude);
                     //printf("%9.6f\n",checkpoint.latitude);
-                    u3.put(source_coordinates);
-                //}
+                    //u3.put(source_coordinates);
+                    //}
 
-                break;*/
+                    checkpoint.latitude=27.12312;
+                    checkpoint.longitude=-121.12434;
+
+
+
+                    sprintf(source_coordinates1,"x%8.5f#",checkpoint.latitude);
+                    sprintf(source_coordinates2,"y%10.5f#",checkpoint.longitude);
+
+                    printf("Lat is %8.5f",checkpoint.latitude);
+                    printf("Lon is %10.5f",checkpoint.longitude);
+
+                    u3.put(source_coordinates1);
+                    u3.put(source_coordinates2);
+                }
+
+
+                break;
 
             case RBatteryStatFromMotor:
                 //Send battery status to android
@@ -108,31 +130,31 @@ void CANReception(char rec_bluetooth,Uart3 u3){
                 //Send boot reply to Master after receiving message
                 printf("here");
                 if(BootReplySent==0)
-                                    {
-                                      //uint8_t bootData=BootReplyData;
-                                      CANTransmit(TBootReplyToMaster,(uint8_t*)&bootData,sizeof(bootData));
-                                      printf("Received Request from master= %x\n",canMessageReceivedBlock.msg_id);
-                                      BootReplySent=1;
-                                    }
+                {
+                    //uint8_t bootData=BootReplyData;
+                    CANTransmit(TBootReplyToMaster,(uint8_t*)&bootData,sizeof(bootData));
+                    printf("Received Request from master= %x\n",canMessageReceivedBlock.msg_id);
+                    BootReplySent=1;
+                }
                 printf("Received Request from master= %x\n",canMessageReceivedBlock.msg_id);
                 CANTransmit(TBootReplyToMaster,(uint8_t*)&bootData,sizeof(bootData));
                 //CMD_HANDLER_FUNC(timeHandler);
                 //const char* rtc_get_date_time_str(void);
-             // rtc_settime(&t);
-               //int rtc_gettime (void);
+                // rtc_settime(&t);
+                //int rtc_gettime (void);
 
 
                 //long t= get_fattime();
-             printf("%s", rtc_get_date_time_str());
-            // printf("%d",t);
+                printf("%s", rtc_get_date_time_str());
+                // printf("%d",t);
 
 
                 break;
 
             case RBootStatReqFromMaster:
-                 //Send boot status from Master to Android for re-alinging user controls
+                //Send boot status from Master to Android for re-alinging user controls
                 printf("Boot status");
-                   u3.put("All controllers are ready");
+                u3.put("All controllers are ready");
 
                 break;
 
@@ -146,41 +168,41 @@ void CANReception(char rec_bluetooth,Uart3 u3){
                 //Receive sensor data and send it to Android
                 printf("in sensor");
                 //Message.canReceivedMsg_Sensor=canMessageReceivedBlock;
-                               printf("Received Request from master= %x\n",canMessageReceivedBlock.msg_id);
-                         SensorData receivedSensorData;
+                printf("Received Request from master= %x\n",canMessageReceivedBlock.msg_id);
+                SensorData receivedSensorData;
 
-                         receivedSensorData.FrontDistance =96/*canMessageReceivedBlock.data.bytes[0]*/;
-                         receivedSensorData.LeftDistance =43/*canMessageReceivedBlock.data.bytes[1]*/;
-                         receivedSensorData.RightDistance =58/*canMessageReceivedBlock.data.bytes[2]*/;
-                         receivedSensorData.RearDistance =35/*canMessageReceivedBlock.data.bytes[3]*/;
+                receivedSensorData.FrontDistance =canMessageReceivedBlock.data.bytes[0];//96;
+                receivedSensorData.LeftDistance =canMessageReceivedBlock.data.bytes[1];//43;
+                receivedSensorData.RightDistance =canMessageReceivedBlock.data.bytes[2];//58;
+                receivedSensorData.RearDistance =canMessageReceivedBlock.data.bytes[3];//35;
 
-                     sprintf(sensor_front,"f%d#",receivedSensorData.FrontDistance);
+                sprintf(sensor_front,"f%d#",receivedSensorData.FrontDistance);
 
-                     sprintf(sensor_left,"l%d#",receivedSensorData.LeftDistance);
+                sprintf(sensor_left,"l%d#",receivedSensorData.LeftDistance);
 
-                     sprintf(sensor_right,"s%d#",receivedSensorData.RightDistance);
+                sprintf(sensor_right,"s%d#",receivedSensorData.RightDistance);
 
-                     sprintf(sensor_rear,"r%d#",receivedSensorData.RearDistance);
+                sprintf(sensor_rear,"r%d#",receivedSensorData.RearDistance);
 
-                     printf(" sensor F is %d\n",receivedSensorData.FrontDistance);
+                printf(" sensor F is %d\n",receivedSensorData.FrontDistance);
 
-                     printf(" sensor L is %d\n",receivedSensorData.LeftDistance);
+                printf(" sensor L is %d\n",receivedSensorData.LeftDistance);
 
-                     printf(" sensor R is %d\n",receivedSensorData.RightDistance);
+                printf(" sensor R is %d\n",receivedSensorData.RightDistance);
 
-                     printf(" sensor Rear is %d\n",receivedSensorData.RearDistance);
+                printf(" sensor Rear is %d\n",receivedSensorData.RearDistance);
 
-                      //u3.put("F:");
-                      u3.put(sensor_front);
+                //u3.put("F:");
+                u3.put(sensor_front);
 
-                      //u3.put("B:");
-                      u3.put(sensor_left);
+                //u3.put("B:");
+                u3.put(sensor_left);
 
-                      //u3.put("L:");
-                      u3.put(sensor_right);
+                //u3.put("L:");
+                u3.put(sensor_right);
 
-                      //u3.put("R:");
-                      u3.put(sensor_rear);
+                //u3.put("R:");
+                u3.put(sensor_rear);
                 break;
 
             case RKillFromMaster:
@@ -189,6 +211,22 @@ void CANReception(char rec_bluetooth,Uart3 u3){
 
                 break;
 
+            case RDistanceFinalAndNextCheckpoint:
+                GeoDistanceData receivedDistanceData;
+                receivedDistanceData.FinalDistance = canMessageReceivedBlock.data.words[0];
+                receivedDistanceData.NextCheckpointDistance = canMessageReceivedBlock.data.words[1];
+                //memcpy(&receivedDistanceData,&canMessageBlock.data,sizeof(GeoDistanceData));
+
+
+                sprintf(distance,"d%d#",receivedDistanceData.FinalDistance);
+
+                sprintf(checkpointdistance,"c%d#",receivedDistanceData.NextCheckpointDistance);
+
+                u3.put(distance);
+
+                u3.put(checkpointdistance);
+
+                break;
         }
 
     }

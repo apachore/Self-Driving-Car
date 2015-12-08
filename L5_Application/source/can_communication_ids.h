@@ -35,7 +35,7 @@ typedef enum
     RBootReqFromMaster                = 0x610,//no data
     RBootStatReqFromMaster            = 0x630,//data
     RKillFromMaster                   = 0x020,//no data
-
+    RDistanceFinalAndNextCheckpoint   = 0x250,
     /* CAN Communication with Geo Module*/
     TDestToGeo                        = 0x240,//data
     TDistanceToGeo                    = 0x230,//data
@@ -66,7 +66,10 @@ const can_std_id_t canMessagesFilterList[] =
         CAN_gen_sid(can1,RBootReqFromMaster),            //MSG ID = 0x610
         CAN_gen_sid(can1,RBootStatReqFromMaster),        //MSG ID = 0x630
         CAN_gen_sid(can1,RSourceFromGeo),                //MSG ID = 0x650
-        CAN_gen_sid(can1,FilterDisabledCANmsgID)         //MSG ID = 0xFFFF
+        CAN_gen_sid(can1,RDistanceFinalAndNextCheckpoint),
+
+        //CAN_gen_sid(can1,FilterDisabledCANmsgID)         //MSG ID = 0xFFFF
+
 };
 
 
@@ -78,5 +81,13 @@ typedef struct
    uint32_t RearDistance   :8;
 
 }SensorData;
+
+typedef struct
+{
+        //Message 0x250 (8 bytes)
+
+        uint32_t FinalDistance          :   16;          // Final distance to the destination
+        uint32_t NextCheckpointDistance :   16; // Next checkpoint distance to the destination
+}GeoDistanceData;
 
 #endif /* L5_APPLICATION_SOURCE_CAN_COMMUNICATION_IDS_H_ */
