@@ -24,7 +24,7 @@ bluetoothTask::bluetoothTask(uint8_t priority) :scheduler_task("bluetooth", 2000
 bool bluetoothTask::init(void) {
 
     Uart3& u3 = Uart3::getInstance();
-    u3.init(9600,50,50);
+    u3.init(9600,100,50);
 
     return true;
 }
@@ -32,7 +32,8 @@ bool bluetoothTask::init(void) {
 bool bluetoothTask::run(void *p)
 {
 
-    char recChar[1];
+    char recChar[100];
+
     char *parsed_coordinates[3];
     int i=0;
     coordinates checkpoint;

@@ -17,6 +17,8 @@
 #include "queue.h"
 #include "file_logger.h"
 
+coordinates checkpoint;
+
 void CANInitialization()
 {
     CAN_init(can1, 100, 30, 30, NULL, NULL);
@@ -46,19 +48,8 @@ bool CANTransmit(uint32_t msg_id , uint8_t * data, uint32_t len)
 void CANReception(char rec_bluetooth,Uart3 u3){
 
     can_msg_t canMessageReceivedBlock;
-    coordinates checkpoint;
-    char source_coordinates[20];
-
-    //temporary code for static source coordinates
-    if(rec_bluetooth=='g'){
-
-        checkpoint.latitude=27.12312;
-        checkpoint.longitude=-121.12434;
-        sprintf(source_coordinates,"la%9.6f,lo%9.6f",checkpoint.latitude,checkpoint.longitude);
-        u3.put(source_coordinates);
-
-    }
-
+    char source_coordinates1[50];
+    char source_coordinates2[50];
 
     if(CAN_rx(can1, &canMessageReceivedBlock, 0))
     {
@@ -66,12 +57,26 @@ void CANReception(char rec_bluetooth,Uart3 u3){
         {
             case RSourceFromGeo:
 
+                memcpy(&checkpoint,&canMessageReceivedBlock.data,sizeof(coordinates));
+
                 if(rec_bluetooth=='g'){
 
-                    memcpy(&checkpoint,&canMessageReceivedBlock.data,sizeof(coordinates));
-                    sprintf(source_coordinates,"%9.6f,%9.6f", checkpoint.latitude,checkpoint.longitude);
-                    u3.put(source_coordinates);
+                //printf("Recevied");
+                sprintf(source_coordinates1,"x%8.5f#",checkpoint.latitude);
+                sprintf(source_coordinates2,"y%10.5f#",checkpoint.longitude);
+                      u3.put(source_coordinates1);
+                      u3.put(source_coordinates2);
                 }
+/*                else{
+                    char current_lat[50];
+                    char current_lon[50];
+
+                    sprintf(current_lat,"a%8.5f#",checkpoint.latitude);
+                    sprintf(current_lon,"b%10.5f#",checkpoint.longitude);
+                      u3.put(current_lat);
+                      u3.put(current_lon);
+
+                }*/
 
                 break;
 
