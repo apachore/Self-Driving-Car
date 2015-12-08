@@ -83,7 +83,7 @@ bool MotorTask::run(void *p)
         DC_level = canReceivedData.data.bytes[3];
         LD.setNumber(DC_control*10 + DC_level);
 
-       // printf("\nDC: Control %x, Level_exp %x",DC_control,DC_level);
+        printf("\nDC: Control %x, Level_exp %x",DC_control,DC_level);
 //        printf("\nServo: Control %x, Level %x",servo_control,servo_level);
 
 #if(0)

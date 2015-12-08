@@ -58,7 +58,7 @@ void period_1Hz(void)
 void period_10Hz(void)
 {
     /*Calling the Motor control */
-
+	Transmitter_message();
 	//LE.toggle(2);
 }
 

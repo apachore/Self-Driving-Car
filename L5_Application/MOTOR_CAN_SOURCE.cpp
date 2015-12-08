@@ -20,6 +20,7 @@
 
 QueueHandle_t Master_Motor_q;
 Can_msg Message;
+int Boot_req;
 
 void BusOffCb(uint32_t param)
 {
@@ -82,13 +83,14 @@ void Transmitter_message()
 //        printf("Heart Beat message NOT 0x220 sent successfully \n ");
     }
 
-    if(CAN_rx(can1,&check_0x610,1000))
+    if(Boot_req)
     {
 
 //        printf("Boot request message 0x610 received successfully \n ");
         CAN_tx(can1,&Boot_send,1000);
 //        printf("Boot response message 0x620 sent successfully \n ");
         LOG_INFO("Boot response message 0x620 sent successfully \n");
+        Boot_req = 0;
     }
     else
     {
@@ -101,7 +103,7 @@ can_msg_t canReceivedData;
 void Receiver_message()
 {
     can_msg_t rx_msg;
-    if(CAN_rx(can1, &rx_msg, 0))
+    while(CAN_rx(can1, &rx_msg, 0))
     {
     	CAN_Receive = 0;
         switch(rx_msg.msg_id)
@@ -119,6 +121,9 @@ void Receiver_message()
             case 0x250:
                 Message.canReceivedMsg_gps2=rx_msg;
                break;
+            case 0x610:
+                Boot_req =1;
+               break;
 
            default:
                break;
@@ -126,13 +131,13 @@ void Receiver_message()
         }
 
     }
-    else
-    {
-//        puts("\n220 not message received\n");
-    	canReceivedData.data.bytes[2] = 0;
-    	canReceivedData.data.bytes[3] = 0;
-        LE.toggle(4);
-    }
+//    else
+//    {
+////        puts("\n220 not message received\n");
+//    	canReceivedData.data.bytes[2] = 0;
+//    	canReceivedData.data.bytes[3] = 0;
+//        LE.toggle(4);
+//    }
     //printf("This is Motor RX function\n");
 
 }

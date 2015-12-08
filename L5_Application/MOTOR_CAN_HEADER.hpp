@@ -12,6 +12,7 @@
         bool CANInitialization();
         void Receiver_message(void);
         void Receive_init();
+        void Transmitter_message();
 
 
 #endif /* L5_APPLICATION_MOTOR_CAN_HEADER_HPP_ */
