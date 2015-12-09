@@ -16,8 +16,9 @@
 #include "MainMasterAlgorithm.h"
 #include "file_logger.h"
 #include "string.h"
+#include "iostream"
 
-
+using namespace std;
 // XXX: The callback is called from inside CAN Bus interrupt, should not use printf() here
 // XXX: CAN Bus reset should not be called right away, it should reset maybe in 10Hz if can bus is off
 
@@ -27,8 +28,15 @@ GeoTurnData receivedTurnData;
 GeoDistanceData receivedDistanceData;
 bool isSensorObstruction = false;
 static bool SensorActivate = true;
-bool sentStartFromAndroid = true;
+bool sentStartFromAndroid;
 bool sentStopFromAndroid;
+
+bool bootFromAndroid = false;
+bool bootFromGeo = false;
+bool bootFromSensor = false;
+bool bootFromMotorIO = false;
+
+bool bootRepliesReceived = false;
 
 
 void DataOverCanBuffer(uint32_t param)
@@ -49,7 +57,6 @@ void CANInitialization()
 
 void CANTransmission(can_msg_t canMessageBlock/*uint32_t msg_id, uint8_t* data, uint32_t length*/)
 {
-
     CAN_tx(can1,&canMessageBlock, 0);
 }
 
@@ -78,6 +85,7 @@ bool CANReception(can_msg_t& canMessageBlock)
                 }*/
                 if(sentStartFromAndroid && SensorActivate)
                 {
+                    cout << sentStartFromAndroid;
                     SensorData receivedSensorData;
                     receivedSensorData.FrontDistance    = canMessageBlock.data.bytes[0];
                     receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
@@ -106,12 +114,11 @@ bool CANReception(can_msg_t& canMessageBlock)
                 break;
 
 
-            case RRunAndPauseCommandFromAndroid:
+            case RRunCommandFromAndroid:
                 printf("Run received");
                 MotorDriveFromSensors(false, false, false, false, false, 0, 0);
                 run = true;
                 stop = false;
-
                 break;
 
             case RStopMessageFromAndroid:
@@ -126,19 +133,19 @@ bool CANReception(can_msg_t& canMessageBlock)
                 break;
 
             case RBootReplyFromAndroid:
-                GetBootReplyFromModule();
+                bootFromAndroid = true;
                 break;
 
             case RBootReplyFromGeo:
-                GetBootReplyFromModule();
+                bootFromGeo = true;
                 break;
 
-            case RBootReplyFromMotor:
-                GetBootReplyFromModule();
+            case RBootReplyFromMotorIO:
+                bootFromMotorIO = true;
                 break;
 
             case RBootReplyFromSensor:
-                GetBootReplyFromModule();
+                bootFromSensor = true;
                 break;
 
                 // XXX: Why do this in the default case?

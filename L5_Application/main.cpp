@@ -49,6 +49,8 @@ int main(void)
     //SystemInitialization();
     CANInitialization();
 
+    while(!SendBootRequest());
+
     /**
      * A few basic tasks for this bare-bone system :
      *      1.  Terminal task provides gateway to interact with the board through UART terminal.

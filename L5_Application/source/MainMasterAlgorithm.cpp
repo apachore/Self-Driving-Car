@@ -14,16 +14,20 @@
 #include "can_communication_ids.h"
 #include "can_transmission_reception.h"
 #include "file_logger.h"
-//#include "motorDrive.cpp"
+#include "utilities.h"
 
 extern GeoDistanceData receivedDistanceData;
 extern GeoTurnData receivedTurnData;
 extern bool isSensorObstruction;
-bool firstDistanceMessage = true;
+bool destinationReached = false;
+extern bool bootFromAndroid;
+extern bool bootFromGeo;
+extern bool bootFromMotorIO;
+extern bool bootFromSensor;
+extern bool bootRepliesReceived;
 
-#define straightSensorDangerDistance    50
-#define turnSensorDangerDistance        30
-#define lowestDangerDistance            20
+
+#define destinationReachedDistance    20
 
 #define fDanger                 40
 #define fLow                    40
@@ -76,7 +80,7 @@ void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, b
         canMessage.data.bytes[1] = levelOfDirection;
     }
 
-//    printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
+    printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
     CANTransmission(canMessage);
     //CANTransmission(canMessage.msg_id, &canMessage.data.bytes[0], 4);
 }
@@ -111,6 +115,10 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
     }
     else {
         isSensorObstruction = false;     // Adjustment for now
+        return;
+    }
+    if(destinationReached)
+    {
         return;
     }
 
@@ -262,7 +270,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             LE.toggle(4);
             frontMotor = false;
             reverseMotor = true;
-            rightMotor = true;
+            leftMotor = true;
             levelOfSpeed = SpeedLevel2;
             levelOfDirection = DirectionLevel4;
         }
@@ -298,7 +306,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
             LE.toggle(4);
             frontMotor = false;
             reverseMotor = true;
-            leftMotor = true;
+            rightMotor = true;
             levelOfSpeed = SpeedLevel2;
             levelOfDirection = DirectionLevel4;
         }
@@ -311,24 +319,14 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
     MotorDriveFromSensors(frontMotor, reverseMotor, leftMotor, rightMotor, brakeFlag, levelOfSpeed, levelOfDirection);
 }
 
-void GeoProcessingAlgorithm(can_msg_t canData)
+
+bool SendBootRequest()
 {
-
-}
-
-void DecisionAlgorithm(can_msg_t canReceivedData)
-{
-    //XXX Take Sensor data continuously and take the decisions at this end.
-    //XXX whenever you think it is under a danger limit, slow it down and then take further decisions
-    //XXX
-    if(canReceivedData.msg_id == RSensorDataFromSensor)
-    {
-
-    }
-    else
-    {
-        MotorDriveFromSensors(true, false, false, false, false, 1, 1);
-    }
+    delay_ms(3);                        // Delay to properly start all the controllers;
+    can_msg_t bootRequestCANMessage;
+    bootRequestCANMessage.msg_id = TBootRequestToAll;
+    CANTransmission(bootRequestCANMessage);
+    return true;
 }
 
 void SendKillMessageToAllControllers()
@@ -340,23 +338,21 @@ void SendKillMessageToAllControllers()
     CANTransmission(canMessage);
 }
 
-void SystemInitialization()
+void GetBootReplyFromModuleCheck()
 {
-    can_msg_t canMessage;
-    canMessage.msg_id = TBootRequestToAll;
-    canMessage.frame_fields.is_29bit = 0;
-    canMessage.frame_fields.data_len = 0;
-    CANTransmission(canMessage);
+    if(bootFromAndroid && bootFromGeo && bootFromMotorIO && bootFromSensor)
+    {
+        bootRepliesReceived = true;
+    }
 }
 
-void AndroidReceivingProcessing()
+void SendBootStatusToAllControllers()
 {
-
-}
-
-void GetBootReplyFromModule()
-{
-
+    can_msg_t canMessageBootStatus;
+    canMessageBootStatus.msg_id = TBootStatusToAll;
+    canMessageBootStatus.frame_fields.is_29bit = 0;
+    canMessageBootStatus.frame_fields.data_len = 0;
+    CANTransmission(canMessageBootStatus);
 }
 
 void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
@@ -376,20 +372,14 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
     uint8_t turningAngle = receivedTurnData.TurningAngle;
     uint8_t turnDirection = receivedTurnData.TurnDirection;
 
-    static int totalInitialDistance;
-
-    if(firstDistanceMessage)
-    {
-        totalInitialDistance = finalDistance;
-        firstDistanceMessage = false;
-    }
+//    destinationReached = nextCheckPointDistance < destinationReachedDistance ? true : false;
 
     LD.setNumber(nextCheckPointDistance);
     // Changed the flag from here to
     if(!isSensorObstruction)
     {
         printf("%d  %d  %d  %d\n", finalDistance, nextCheckPointDistance, turningAngle, turnDirection);
-        if(nextCheckPointDistance > 30)  //(distance check)
+        if(nextCheckPointDistance > destinationReachedDistance)  //(distance check)
         {
             if(turningAngle > 15)
             {
@@ -408,7 +398,6 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
                     }
                     else if(turnDirection == 2)
                     {
-
                         LE.toggle(3);
                         // Turn right with level 3
                         rightMotor = true;
@@ -448,9 +437,9 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
                         leftMotor = true;
                         frontMotor = true;
                         levelOfDirection = DirectionLevel1;
-                        levelOfSpeed = SpeedLevel3;
+                        levelOfSpeed = SpeedLevel2;
                         if(nextCheckPointDistance < 50)
-                            levelOfSpeed = SpeedLevel2;
+                            levelOfSpeed = SpeedLevel1;
                     }
                     else if(turnDirection == 2)
                     {
@@ -459,9 +448,9 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
                         rightMotor = true;
                         frontMotor = true;
                         levelOfDirection = DirectionLevel1;
-                        levelOfSpeed = SpeedLevel3;
+                        levelOfSpeed = SpeedLevel2;
                         if(nextCheckPointDistance < 50)
-                            levelOfSpeed = SpeedLevel2;
+                            levelOfSpeed = SpeedLevel1;
                     }
                 }
             }
@@ -470,9 +459,9 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
                 LE.toggle(1);
                 //  go straight.
                 frontMotor = true;
-                levelOfSpeed = SpeedLevel3;
+                levelOfSpeed = SpeedLevel2;
                 if(nextCheckPointDistance < 50)
-                    levelOfSpeed = SpeedLevel2;
+                    levelOfSpeed = SpeedLevel1;
             }
         }
         else
