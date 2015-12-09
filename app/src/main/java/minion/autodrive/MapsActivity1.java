@@ -12,6 +12,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -67,6 +69,8 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     ArrayList<LatLng> markerPoints;
     String lat_current;
     String lon_current;
+    String latinput;
+    String loninput;
 
     //TextView source_l;
 
@@ -87,7 +91,6 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     Button monitor_btn;
     Button kill_btn;
     Button set_btn;
-    Button get_btn;
 
     Button controls;
 
@@ -289,6 +292,14 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
         }
     };
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        MenuInflater inflater=getMenuInflater();
+        inflater.inflate(R.menu.menu_activity_maps1, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
     private String getDirectionsUrl(LatLng origin,LatLng dest){
 
         // Origin of route
@@ -454,26 +465,11 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
                     // Add new marker to the Google Map Android API V2
                     mMap.addMarker(options);
 
-
-
                 }
 
                 // Adding all the points in the route to LineOptions
 
-                for (int size=0;size<points.size();size++) {
-                    LatLng checkpoints=points.get(size);
-
-                    String latinput = Double.toString(checkpoints.latitude);
-                    String loninput = Double.toString(checkpoints.longitude);
-                    String coordinate = "f" + "," + latinput + "," + loninput;
-                    byte[] coordinateBytes = coordinate.getBytes();
-                    myThreadConnected.write(coordinateBytes);
-                    try {
-                        Thread.sleep(1500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
+                sendCheckpoints(points);
 
                 lineOptions.addAll(points);
                 lineOptions.width(10);
@@ -484,6 +480,50 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
             // Drawing polyline in the Google Map for the i-th route
             mMap.addPolyline(lineOptions);
         }
+    }
+
+    public void sendCheckpoints(final ArrayList<LatLng> points){
+
+               Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+
+                            for (int size=0;size<points.size();size++) {
+                                LatLng checkpoints = points.get(size);
+
+                                latinput = Double.toString(checkpoints.latitude);
+                                loninput = Double.toString(checkpoints.longitude);
+                                String coordinate = "f" + "," + latinput + "," + loninput;
+                                byte[] coordinateBytes = coordinate.getBytes();
+                                myThreadConnected.write(coordinateBytes);
+                                Thread.sleep(1200);
+
+                            }
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    runstop_btn.setVisibility(View.VISIBLE);
+                                    kill_btn.setVisibility(View.VISIBLE);
+
+                                }
+                            });
+
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+
+                    }
+                });
+        thread.start();
+
+/*
+        runstop_btn.setVisibility(View.VISIBLE);
+        kill_btn.setVisibility(View.VISIBLE);
+*/
+
     }
 
     public void onToggleClicked(View view) {
@@ -541,10 +581,11 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void openMonitor(){
-        runstop_btn.setVisibility(View.INVISIBLE);
-        kill_btn.setVisibility(View.INVISIBLE);
-        monitor_btn.setVisibility(View.INVISIBLE);
-        set_btn.setVisibility(View.INVISIBLE);
+        runstop_btn.setVisibility(View.GONE);
+        kill_btn.setVisibility(View.GONE);
+        monitor_btn.setVisibility(View.GONE);
+        set_btn.setVisibility(View.GONE);
+        inputPane.setVisibility(View.GONE);
         controls.setVisibility(View.VISIBLE);
     }
 
@@ -557,11 +598,12 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void backToControls(){
-        controls.setVisibility(View.INVISIBLE);
+        controls.setVisibility(View.GONE);
         runstop_btn.setVisibility(View.VISIBLE);
         kill_btn.setVisibility(View.VISIBLE);
         monitor_btn.setVisibility(View.VISIBLE);
         set_btn.setVisibility(View.VISIBLE);
+        inputPane.setVisibility(View.VISIBLE);
     }
     public void setDest(){
 
@@ -569,6 +611,13 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
             markerPoints.clear();
             mMap.clear();
         }
+
+        String resetId="r";
+        byte[] bytesToSend = resetId.getBytes();
+        myThreadConnected.write(bytesToSend);
+
+        runstop_btn.setVisibility(View.INVISIBLE);
+        kill_btn.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -597,7 +646,7 @@ public class MapsActivity1 extends FragmentActivity implements OnMapReadyCallbac
                     android.R.layout.simple_list_item_1, pairedDeviceArrayList);
 
             listViewPairedDevice.setAdapter(pairedDeviceAdapter);
-
+            listViewPairedDevice.setBackgroundColor(0xFFFFFFFF);
             listViewPairedDevice.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 @Override

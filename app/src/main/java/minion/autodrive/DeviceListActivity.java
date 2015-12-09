@@ -49,6 +49,7 @@ public class DeviceListActivity extends Activity {
         });
 
         mListView.setAdapter(mAdapter);
+        mListView.setBackgroundColor(0xFFFFFFFF);
 
         registerReceiver(mPairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
     }

@@ -24,6 +24,8 @@
         android:visibility="gone"
         />
 
+
+
     <ToggleButton
         android:id="@+id/run_stop_toggle"
         android:layout_width="170dp"
@@ -32,7 +34,7 @@
         android:textOff="@string/toggle_turn_off"
         android:layout_below="@+id/map"
         android:onClick="onToggleClicked"
-        android:visibility="visible"
+        android:visibility="invisible"
         />
 
     <Button
@@ -43,7 +45,7 @@
         android:layout_below="@+id/map"
         android:layout_toRightOf="@id/run_stop_toggle"
         android:onClick="sendKillSignal"
-        android:visibility="visible"
+        android:visibility="invisible"
         />
 
         <Button
@@ -59,7 +61,7 @@
 
     <Button
         android:id="@+id/setdest"
-        android:layout_width="17 0dp"
+        android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:text="Reset map"
         android:layout_below="@+id/kill"
@@ -89,6 +91,7 @@
             android:id="@+id/pairedlist"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+
             />
     </LinearLayout>
 
