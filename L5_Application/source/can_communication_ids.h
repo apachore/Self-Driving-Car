@@ -53,6 +53,8 @@ typedef enum
     // Other Messages
     RKillMessageFromMaster            = 0x020,
 
+    RMapResetFromAndroid                 = 0x241,
+
     //DIsabled Filter ID - Used to make Standard ID count even
     FilterDisabledCANmsgID               = 0xFFFF
 
@@ -68,9 +70,11 @@ const can_std_id_t canMessagesFilterList[] =
         CAN_gen_sid(can1, RKillMessageFromMaster),         /*MSG ID = 0x020*/
         CAN_gen_sid(can1, RTotalTravelDistanceFromAndroid),/*MSG ID = 0x230*/
         CAN_gen_sid(can1, RCheckpointsFromAndroid),        /*MSG ID = 0x240*/
-        CAN_gen_sid(can1, RDestinationReached),             /*MSG ID = 0x410*/
+        CAN_gen_sid(can1, RMapResetFromAndroid),           /*MSG ID = 0x241*/
+        CAN_gen_sid(can1, RDestinationReached),            /*MSG ID = 0x410*/
         CAN_gen_sid(can1, RBootRequestFromMaster),         /*MSG ID = 0x610*/
         CAN_gen_sid(can1, RBootStatusFromMaster),          /*MSG ID = 0x630*/
+        CAN_gen_sid(can1, FilterDisabledCANmsgID),         /*MSG ID = 0xFFFF*/
 };
 
 

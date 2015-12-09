@@ -19,7 +19,7 @@
 
 #include "gps.hpp"
 
-#define TestingWithoutAndroid 1
+#define TestingWithoutAndroid 0
 
 bool BootReplySent = true; //Used as indication of system startup flag
 bool reboot = 0; // Used to indicate the reboot status
@@ -51,7 +51,7 @@ void CANInitialization()
     CAN_init(can1, 100, 30, 30, NULL, NULL);
 
     //Any message with 0xffff would disable the message
-    if(CAN_setup_filter(canMessagesFilterList , 6, NULL, 0, NULL, 0, NULL, 0))
+    if(CAN_setup_filter(canMessagesFilterList , 8, NULL, 0, NULL, 0, NULL, 0))
         printf("CAN Filter Setup Success\n");
     //CAN_bypass_filter_accept_all_msgs();
     CAN_reset_bus(can1);
@@ -150,6 +150,12 @@ void CANReception()
                     Received_Checkpoint_Count++;
                     LE.toggle(3);
                 }
+                break;
+
+            case RMapResetFromAndroid:
+                printf("Map Reset");
+                xQueueReset(Checkpoint_Queue);
+                LE.off(3);
                 break;
 
             case RBootRequestFromMaster:

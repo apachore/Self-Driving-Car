@@ -21,56 +21,6 @@ uint16_t current_bearing = 0;
 
 //Commented printf statements are added for testing purpose
 
-void copyLogtoMMCard()
-{
-    unsigned int readTimeMs = 0;
-    unsigned int writeTimeMs = 0;
-    unsigned int bytesTransferred = 0;
-    FRESULT copyStatus = Storage::copy("0:log.csv", "1:log.csv",
-            &readTimeMs, &writeTimeMs, &bytesTransferred);
-
-    if(FR_OK != copyStatus) {
-        printf("Error %u copying |%s| -> |%s|\n", copyStatus, "0:log.csv", "1:log.csv");
-    }
-    else {
-        printf("Finished!  Read: %u Kb/sec, Write: %u Kb/sec\n",
-                bytesTransferred/(0 == readTimeMs  ? 1 : readTimeMs),
-                bytesTransferred/(0 == writeTimeMs ? 1 : writeTimeMs));
-    }
-    LOG_FLUSH();
-    //printf("Delete '%s' : %s\n","0:log.csv", (FR_OK == f_unlink("0:log.csv")) ? "OK" : "ERROR");
-    //crtNewLogFile();
-
-}
-
-bool crtNewLogFile()
-{
-//    const char end_file = '~';
-//        int timeout_ms = OS_MS(10 * 10);
-
-        FIL file;
-        if (FR_OK != f_open(&file, "log.csv", FA_WRITE | FA_CREATE_ALWAYS)) {
-           // printf("Unable to open '%s' to write the file\n", "log.csv");
-            return true;
-        }
-
-        char c = 0;
-        UINT bw = 0;
-        //printf("End the file by using %c character.  %i is the timeout\n", end_file, timeout_ms);
-        //printf("Sorry, no backspace support :(\n");
-
-        //while (getChar(&c, timeout_ms) && c != end_file) {
-            if (FR_OK != f_write(&file, &c, 1, &bw) || 1 != bw) {
-                //printf("Error occurred while writing the file\n");
-            }
-//            else {
-//                putChar(c);
-//            }
-//        }
-
-        f_close(&file);
-}
-
 gpsTask::gpsTask(uint8_t priority) : scheduler_task("gps", 4*512, priority),
 gps_uart(Uart3::getInstance()),
 gps_data_q(NULL)
@@ -86,18 +36,6 @@ bool gpsTask::init(void)
     addSharedObject("gps_queue", gps_data_q);
     return (NULL != gps_data_q);
 }
-
-
-//Function moved inside run
-//void gpsTask::parse_gps_string(void)
-//{
-//
-//
-////        for(i=0;i<14;i++)
-////        {
-////            printf("%s\n",GPS_parsed_data[i]);
-////        }
-//}
 
 float /*gpsTask::*/ToRadians(float InDegrees)
 {
@@ -294,3 +232,56 @@ Distance_Data GPS_Calculations()
         }
     }
 }
+
+
+/*
+void copyLogtoMMCard()
+{
+    unsigned int readTimeMs = 0;
+    unsigned int writeTimeMs = 0;
+    unsigned int bytesTransferred = 0;
+    FRESULT copyStatus = Storage::copy("0:log.csv", "1:log.csv",
+            &readTimeMs, &writeTimeMs, &bytesTransferred);
+
+    if(FR_OK != copyStatus) {
+        printf("Error %u copying |%s| -> |%s|\n", copyStatus, "0:log.csv", "1:log.csv");
+    }
+    else {
+        printf("Finished!  Read: %u Kb/sec, Write: %u Kb/sec\n",
+                bytesTransferred/(0 == readTimeMs  ? 1 : readTimeMs),
+                bytesTransferred/(0 == writeTimeMs ? 1 : writeTimeMs));
+    }
+    LOG_FLUSH();
+    //printf("Delete '%s' : %s\n","0:log.csv", (FR_OK == f_unlink("0:log.csv")) ? "OK" : "ERROR");
+    //crtNewLogFile();
+
+}
+
+bool crtNewLogFile()
+{
+//    const char end_file = '~';
+//        int timeout_ms = OS_MS(10 * 10);
+
+        FIL file;
+        if (FR_OK != f_open(&file, "log.csv", FA_WRITE | FA_CREATE_ALWAYS)) {
+           // printf("Unable to open '%s' to write the file\n", "log.csv");
+            return true;
+        }
+
+        char c = 0;
+        UINT bw = 0;
+        //printf("End the file by using %c character.  %i is the timeout\n", end_file, timeout_ms);
+        //printf("Sorry, no backspace support :(\n");
+
+        //while (getChar(&c, timeout_ms) && c != end_file) {
+            if (FR_OK != f_write(&file, &c, 1, &bw) || 1 != bw) {
+                //printf("Error occurred while writing the file\n");
+            }
+//            else {
+//                putChar(c);
+//            }
+//        }
+
+        f_close(&file);
+}
+*/
