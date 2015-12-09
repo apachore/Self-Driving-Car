@@ -25,6 +25,7 @@ extern bool bootFromGeo;
 extern bool bootFromMotorIO;
 extern bool bootFromSensor;
 extern bool bootRepliesReceived;
+bool stopFromKill=false;
 
 
 #define destinationReachedDistance    20
@@ -44,6 +45,12 @@ extern bool bootRepliesReceived;
 #define rLevel1                 120     // 100
 #define rLevel2                 150
 
+void KillTask()
+{
+    stopFromKill=true;
+    SendKillMessageToAllControllers();
+
+}
 
 void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, bool rightMotor, bool brakeFlag, uint8_t levelOfSpeed, uint8_t levelOfDirection)
 {

@@ -27,6 +27,7 @@
 #include "examples/examples.hpp"
 #include "source/can_transmission_reception.h"
 #include "source/MainMasterAlgorithm.h"
+#include "eint.h"
 
 /**
  * The main() creates tasks or "threads".  See the documentation of scheduler_task class at scheduler_task.hpp
@@ -48,7 +49,7 @@ int main(void)
 
     //SystemInitialization();
     CANInitialization();
-
+    eint3_enable_port2(1,eint_rising_edge,KillTask);   // Interrupt at P2.1 for On-board kill switch implementation.
     while(!SendBootRequest());
 
     /**

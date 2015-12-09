@@ -23,5 +23,6 @@ void SendKillMessageToAllControllers();
 void GeoDecision(/*uint8_t angle,uint8_t turn*/);
 bool SendBootRequest();
 void GetBootReplyFromModuleCheck();
+void KillTask();  // Call back function for On-board Kill switch Implementation.
 
 #endif /* L5_APPLICATION_SOURCE_MAINMASTERALGORITHM_H_ */
