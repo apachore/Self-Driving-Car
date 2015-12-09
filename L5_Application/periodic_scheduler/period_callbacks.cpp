@@ -58,16 +58,22 @@ bool period_reg_tlm(void)
 
 void period_1Hz(void)
 {
-
-    //LE.toggle(1);
+    if(BootReplySent)
+    {
+        //Heart Beat message
+        CANTransmit(THeartbeatToMaster,0,0);
+    }
+     //LE.toggle(1);
 }
 
 void period_10Hz(void)
 {
     Distance_Data Current_Distances;
     Current_Distances = GPS_Calculations();
-    CANTransmit(TFinalAndNextCheckpointDistance,(uint8_t*)&Current_Distances,sizeof(Current_Distances));
-
+    if(BootReplySent)
+    {
+        CANTransmit(TFinalAndNextCheckpointDistance,(uint8_t*)&Current_Distances,sizeof(Current_Distances));
+    }
     //Check if CAN bus is off... if yes then reset CAN bus
     if(CAN_is_bus_off(can1))
         CAN_reset_bus(can1);

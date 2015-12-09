@@ -21,7 +21,7 @@
 
 #define TestingWithoutAndroid 1
 
-bool BootReplySent=true; //Used as indication of system startup flag
+bool BootReplySent = 0; //Used as indication of system startup flag
 bool reboot = 0; // Used to indicate the reboot status
 uint8_t Received_Checkpoint_Count=0;
 uint16_t Total_Distance_To_Travel;
@@ -166,6 +166,7 @@ void CANReception()
                 break;
 
             case RDestinationReached:
+                //This message will not be used
                 break;
         }
     }

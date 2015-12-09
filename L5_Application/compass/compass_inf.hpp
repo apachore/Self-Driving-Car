@@ -108,7 +108,7 @@ enum compassRegConfigValues
 {
     /* These values are tentative. The values are taken as default  settings
      specified by the HMC8335L and is subject to change as the project demands */
-    ConfigRegA_value = (Eight|_75Hz|Normal),
+    ConfigRegA_value = (Eight|_15Hz|Normal),
     ConfigRegB_value = Gain_1370,
     ModeReg_value    = Continuous,
 };

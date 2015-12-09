@@ -81,7 +81,7 @@ gps_data_q(NULL)
 
 bool gpsTask::init(void)
 {
-    void logger_init();
+    logger_init(PRIORITY_LOW);
     gps_data_q = xQueueCreate(2, sizeof(coordinates));
     addSharedObject("gps_queue", gps_data_q);
     return (NULL != gps_data_q);
