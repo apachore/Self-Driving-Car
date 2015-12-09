@@ -49,7 +49,8 @@ int main(void)
 
     //SystemInitialization();
     CANInitialization();
-    eint3_enable_port2(1,eint_rising_edge,KillTask);   // Interrupt at P2.1 for On-board kill switch implementation.
+
+     GPIOInitialization();
     while(!SendBootRequest());
 
     /**
