@@ -21,15 +21,13 @@ void compassInitialisation()
 {
     void logger_init();
    /*Check if the i2c slave device is ready for operations*/
-	/*if the device is not ready, the onboard LED is switched on*/
-	if((i2c.checkDeviceResponse(DEVICEWRITEADDRESS)) == false)
-	{
-		LE.toggle(1);
-	}
 
-	/*Intialise the device and write the compass registers*/
-	else
+	if((i2c.checkDeviceResponse(DEVICEWRITEADDRESS)) == true)
 	{
+	  /*if the device is  ready, the onboard LED is switched on
+	   This LED will be turned on only once*/
+		LE.toggle(1);
+	  /*Intialise the device and write the compass registers*/
 		i2c.init(I2CBAUDRATE);
 		compassWriteReg();
 	}
@@ -76,9 +74,10 @@ int compassHeading()
 
 	 bool registerRead;
 	 registerRead = compassReadReg();
-     if(!registerRead)
+     if(registerRead)
      {
-    	 //LE.toggle(2);
+         /* This LED will be toggled every 10 ms*/
+    	 LE.toggle(2);
      }
 
      float headingRadians, headingRadiansCalibrated;
@@ -193,8 +192,7 @@ void masterTurnAngle(uint16_t sourceAngle, uint16_t destinationAngle)
     LOG_INFO("Compass:%d %d %d",sourceAngle, turn.degree,turn.direction);
     printf("%d  %d  %d\n",sourceAngle,turn.degree,turn.direction);
 
-	if(!CANTransmit(TTurnAngleToMaster,(uint8_t*)&turn,sizeof(turn)))
-	{
-	    //LE.toggle(3);
-	}
+	CANTransmit(TTurnAngleToMaster,(uint8_t*)&turn,sizeof(turn));
+
+
 }

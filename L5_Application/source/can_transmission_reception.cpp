@@ -21,7 +21,7 @@
 
 #define TestingWithoutAndroid 1
 
-bool BootReplySent = 0; //Used as indication of system startup flag
+bool BootReplySent = true; //Used as indication of system startup flag
 bool reboot = 0; // Used to indicate the reboot status
 uint8_t Received_Checkpoint_Count=0;
 uint16_t Total_Distance_To_Travel;
@@ -91,7 +91,7 @@ void CANInitialization()
         else
         {
             Received_Checkpoint_Count++;
-            //LE.toggle(3);
+            LE.toggle(3);
         }
     }
     Total_Distance_To_Travel = 350;
@@ -112,6 +112,7 @@ bool CANTransmit(uint32_t msg_id , uint8_t * data, uint32_t len)
         tx.data.bytes[i] = data[i];
     }
 
+    /* Toggles when CAN transmission happens*/
     LE.toggle(4);
     //printf("Transmitted ID: %x\n",tx.msg_id);
     return(CAN_tx(can1,&tx,0));
@@ -152,12 +153,12 @@ void CANReception()
                 break;
 
             case RBootRequestFromMaster:
-                if (BootReplySent == 0)
+                if (BootReplySent == false)
                 {
                     uint32_t bootData = BootReplyData;
                     CANTransmit(TBootReplyToMaster,(uint8_t*)&bootData,sizeof(bootData));
                     //CANTransmitBootReply();
-                    BootReplySent = 1;
+                    BootReplySent = true;
                 }
                 break;
 
