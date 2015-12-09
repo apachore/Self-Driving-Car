@@ -35,30 +35,37 @@ BS_:
 
 BU_: NOONE SENSOR MASTER MOTORIO ANDROID GEO
 
-BO_ 010 HEARTBEAT: 1 ANDROID
- SG_ ANDROID_HEARTBEAT_cmd : 0|8@1+ (1,0) [0|0] "" MASTER
+BO_ 220 MOTORIO_CMD: 4 MASTER
+ SG_ MOTORIO_CMD_LeftRightdirection : 0|8@1+ (1,0) [0|2] "" MOTORIO
+ SG_ MOTORIO_CMD_LevelOfDirection : 8|8@1+ (1,0) [0|5] "" MOTORIO
+ SG_ MOTORIO_CMD_FrontBackDirection : 16|8@1+ (1,0) [0|2] "" MOTORIO
+ SG_ MOTORIO_CMD_LevelOfSpeed : 24|8@1+ (1,0) [0|5] "" MOTORIO
  
-BO_ 280 HEARTBEAT_: 1 MOTORIO
- SG_ MOTORIO_HEARTBEAT_cmd : 0|8@1+ (1,0) [0|0] "" MASTER
- 
-BO_ 281 HEARTBEAT: 1 GEO
- SG_ GEO_HEARTBEAT_cmd : 0|8@1+ (1,0) [0|0] "" MASTER
- 
-BO_ 283 HEARTBEAT: 1 SENSOR
- SG_ SENSOR_HEARTBEAT_cmd : 0|8@1+ (1,0) [0|0] "" MASTER
+BO_ 010 KILL_REQUEST: 0 ANDROID
+ SG_ KILL_REQUEST : 0|0@1+ (1,0) [0|0] "" MASTER
 
+BO_ 020 KILL_MESSAGE: 0 MASTER
+ SG_ KILL_REQUEST : 0|0@1+ (1,0) [0|0] "" MOTORIO,SENSOR,GEO,ANDROID
+
+BO_ 030 STOP_REQUEST: 0 ANDROID
+ SG_ STOP_REQUEST : 0|0@1+ (1,0) [0|0] "" MASTER
+  
+BO_ 040 STOP_COMMAND: 0 MASTER
+ SG_ ANDROID_HEARTBEAT_cmd : 0|0@1+ (1,0) [0|0] "" MOTOR
+ 
 BO_ 210 SONARS: 4 SENSOR
  SG_ SENSOR_SONARS_FrontDistance : 0|8@1+ (1,0) [0|0] "" MASTER,MOTORIO
  SG_ SENSOR_SONARS_LeftDistance : 8|8@1+ (1,0) [0|0] "" MASTER,MOTORIO
  SG_ SENSOR_SONARS_RightDistance : 16|8@1+ (1,0) [0|0] "" MASTER,MOTORIO
  SG_ SENSOR_SONARS_RearDistance : 24|12@1+ (1,0) [0|0] "" MASTER,MOTORIO
-
-BO_ 220 MOTORIO_CMD: 4 MASTER
- SG_ MOTORIO_CMD_LeftRightdirection : 0|8@1+ (1,0) [0|0] "" MOTORIO
- SG_ MOTORIO_CMD_LevelOfDirection : 8|8@1+ (1,0) [0|0] "" MOTORIO
- SG_ MOTORIO_CMD_FrontBackDirection : 16|8@1+ (1,0) [0|0] "" MOTORIO
- SG_ MOTORIO_CMD_LevelOfSpeed : 24|8@1+ (1,0) [0|0] "" MOTORIO
  
+BO_ 230 TOTAL_DISTANCE_TO_TRAVEL: 4 ANDROID
+ SG_ TOTAL_DISTANCE_TO_TRAVEL: 0|16@1+ (1,0) [0|0] "" GEO
+
+BO_ 240 SEND_CHECKPOINTS: 8 ANDROID
+ SG_ SEND_CHECKPOINTS_Latitude: 0|32@1+ (1,0) [0|0] "" GEO
+ SG_ SEND_CHECKPOINTS_Longitude: 32|64@1+ (1,0) [0|0] "" GEO
+  
 BO_ 250 DISTANCE: 4 GEO
  SG_ DISTANCE_FinalDistance : 0|16@1+ (1,0) [0|0] "" MASTER
  SG_ DISTANCE_CheckpointDistance : 16|16@1+ (1,0) [0|0] "" MASTER
@@ -67,14 +74,55 @@ BO_ 260 TURN_ANGLE_DIRECTION: 2 GEO
  SG_ TURN_ANGLE_DIRECTION_TurnAngle : 0|8@1+ (1,0) [0|0] "" MASTER
  SG_ TURN_ANGLE_DIRECTION_TurnDirection : 8|8@1+ (1,0) [0|0] "" MASTER
  
-BO_ 270 RUN_PAUSE: 1 ANDROID
- SG_ RUN_PAUSE : 0|8@1+ (1,0) [0|0] "" MASTER
+BO_ 270 RUN_PAUSE: 0 ANDROID
+ SG_ RUN_PAUSE : 0|0@1+ (1,0) [0|0] "" MASTER
+ 
+BO_ 280 HEARTBEAT_: 0 MOTORIO
+ SG_ MOTORIO_HEARTBEAT_cmd : 0|0@1+ (1,0) [0|0] "" MASTER
+ 
+BO_ 281 HEARTBEAT: 0 GEO
+ SG_ GEO_HEARTBEAT_cmd : 0|0@1+ (1,0) [0|0] "" MASTER
 
-CM_ BU_ NOONE "No node, used to indicate if it's a debug message going to no one";
-CM_ BU_ MASTER "The Master controller driving the car";
-CM_ BU_ SENSOR "The Sensor controller of the car";
-CM_ BU_ MOTORIO "The Motor-IO controller of the car";
-CM_ BU_ ANDROID "The Android controller of the car";
+BO_ 282 HEARTBEAT: 0 ANDROID
+ SG_ ANDROID_HEARTBEAT_cmd : 0|0@1+ (1,0) [0|0] "" MASTER
+
+BO_ 283 HEARTBEAT: 0 SENSOR
+ SG_ SENSOR_HEARTBEAT_cmd : 0|0@1+ (1,0) [0|0] "" MASTER
+ 
+BO_ 410 DESTINATION_REACHED: 0 MASTER
+ SG_ SENSOR_HEARTBEAT_cmd : 0|0@1+ (1,0) [0|0] "" MASTER
+ 
+BO_ 420 BATTERY_STATUS: 1 SENSOR
+ SG_ BATTERY_STATUS_VALUE : 0|0@1+ (1,0) [0|0] "" MASTER,MOTORIO
+
+BO_ 610 BOOT_REQUEST: 0 MASTER
+ SG_ BATTERY_STATUS_VALUE : 0|0@1+ (1,0) [0|0] "" MOTORIO,SENSOR,ANDROID,GEO
+ 
+BO_ 620 BOOT_REPLY_MOTORIO: 0 MOTORIO
+ SG_ BOOT_REPLY_MOTORIO : 0|0@1+ (1,0) [0|0] "" MASTER
+ 
+BO_ 621 BOOT_REPLY_SENSOR: 0 SENSOR
+ SG_ BOOT_REPLY_SENSOR : 0|0@1+ (1,0) [0|0] "" MASTER
+ 
+BO_ 622 BOOT_REPLY_GEO: 0 GEO
+ SG_ BOOT_REPLY_GEO : 0|0@1+ (1,0) [0|0] "" MASTER
+ 
+BO_ 623 BOOT_REPLY_ANDROID: 0 ANDROID
+ SG_ BOOT_REPLY_ANDROID : 0|0@1+ (1,0) [0|0] "" MASTER
+ 
+BO_ 630 BOOT_STATUS: 0 MASTER
+ SG_ BOOT_STATUS : 0|0@1+ (1,0) [0|0] "" MOTORIO,ANDROID
+
+BO_ 650 SOURCE_COORDINATE: 8 GEO
+ SG_ SOURCE_COORDINATE_LATITUDE : 0|32@1+ (1,0) [0|0] "" ANDROID
+ SG_ SOURCE_COORDINATE_LONGITUDE : 32|32@1+ (1,0) [0|0] "" ANDROID
+
+CM_ BU_ NOONE "No node, used to indicate if it's a debug message going to no one.";
+CM_ BU_ MASTER "The Master controller driving the car.";
+CM_ BU_ SENSOR "The Sensor controller of the car.";
+CM_ BU_ MOTORIO "The Motor-IO controller of the car.";
+CM_ BU_ ANDROID "The Android controller of the car.";
+CM_ BU_ GEO "The Geo controller of the car.";
 CM_ BO_ 100 "Sync message used to synchronize the controllers";
 
 BA_DEF_  "BusType" STRING ;
@@ -84,9 +132,15 @@ BA_DEF_ BO_ "GenMsgCycleTime" INT 0 0;
 BA_DEF_DEF_ "BusType" "CAN";
 BA_DEF_DEF_ "FieldType" "";
 
-BA_ "GenMsgCycleTime" BO_ 100 1000;
-BA_ "GenMsgCycleTime" BO_ 200 100;
-BA_ "GenMsgCycleTime" BO_ 300 100;
+BA_ "GenMsgCycleTime" BO_ 220 10;
+BA_ "GenMsgCycleTime" BO_ 210 10;
+BA_ "GenMsgCycleTime" BO_ 250 10;
+BA_ "GenMsgCycleTime" BO_ 260 10;
+BA_ "GenMsgCycleTime" BO_ 280 1;
+BA_ "GenMsgCycleTime" BO_ 281 1;
+BA_ "GenMsgCycleTime" BO_ 282 1;
+BA_ "GenMsgCycleTime" BO_ 283 1;
+BA_ "GenMsgCycleTime" BO_ 420 1;
 BA_ "FieldType" SG_ 100 MASTER_HEARTBEAT_cmd "MASTER_HEARTBEAT_cmd";
 
 VAL_ 100 MASTER_HEARTBEAT_cmd 0 "MASTER_HEARTBEAT_cmd_NOOP" 1 "MASTER_HEARTBEAT_cmd_SYNC" 2 "MASTER_HEARTBEAT_cmd_REBOOT";
