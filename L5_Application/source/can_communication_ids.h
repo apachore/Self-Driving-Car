@@ -1,16 +1,3 @@
-/*
- * can_communication_ids.h
- *
- * Enumeration for the CAN message ID's that Master Module is expected to receive and
- * transmit.
- *
- *  Created on: Oct 24, 2015
- *  Author: Original code:Akshay Dabholkar and Gaurao Chaudhari
- *          Modified by:Amit Pachore
- *          Modified on:Oct 26, 2015
- *          Modified for GeoController specific CAN messages
- */
-
 #ifndef L5_APPLICATION_SOURCE_CAN_COMMUNICATION_IDS_H_
 #define L5_APPLICATION_SOURCE_CAN_COMMUNICATION_IDS_H_
 
@@ -40,6 +27,7 @@ typedef enum
     TDestToGeo                        = 0x240,
     TDistanceToGeo                    = 0x230,
     RSourceFromGeo                    = 0x650,
+    TResetToGeo                       = 0x241,
 
     /* CAN Communication with Sensor Module*/
     RSensorDataFromSensors            = 0x210,

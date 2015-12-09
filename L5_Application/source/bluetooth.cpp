@@ -1,4 +1,3 @@
-
 #include <source/bluetooth.hpp>
 #include "stdio.h"
 #include "stdlib.h"
@@ -89,11 +88,17 @@ bool bluetoothTask::run(void *p)
 
             break;
 
-        case 'g':
+        case 'r':
 
-            CANReception(recChar[0],u3);
+            //CANReception(recChar[0],u3);
+            CANTransmit(TResetToGeo,0,0);
             recChar[0]='0';
             break;
+        case 't':
+            LD.setNumber(12);
+            recChar[0]='0';
+            break;
+
     }
 
     vTaskDelay(100);

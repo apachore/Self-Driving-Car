@@ -1,11 +1,3 @@
-/*
- * can_transmission_reception.cpp
- *
- *  Created on: Oct 24, 2015
- *      Author: Gaurao Chaudhari
- */
-
-
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -16,6 +8,7 @@
 #include "scheduler_task.hpp"
 #include "queue.h"
 #include "file_logger.h"
+#include "lpc_sys.h"
 
 coordinates checkpoint;
 
@@ -51,7 +44,7 @@ void CANReception(char rec_bluetooth,Uart3 u3){
     char source_coordinates1[50];
     char source_coordinates2[50];
 
-    if(CAN_rx(can1, &canMessageReceivedBlock, 0))
+    while(CAN_rx(can1, &canMessageReceivedBlock, 0))
     {
         switch (canMessageReceivedBlock.msg_id)
         {
@@ -59,24 +52,10 @@ void CANReception(char rec_bluetooth,Uart3 u3){
 
                 memcpy(&checkpoint,&canMessageReceivedBlock.data,sizeof(coordinates));
 
-              //  if(rec_bluetooth=='g'){
-
-                //printf("Recevied");
                 sprintf(source_coordinates1,"x%8.5f#",checkpoint.latitude);
                 sprintf(source_coordinates2,"y%10.5f#",checkpoint.longitude);
                       u3.put(source_coordinates1);
                       u3.put(source_coordinates2);
-              //  }
-/*                else{
-                    char current_lat[50];
-                    char current_lon[50];
-
-                    sprintf(current_lat,"a%8.5f#",checkpoint.latitude);
-                    sprintf(current_lon,"b%10.5f#",checkpoint.longitude);
-                      u3.put(current_lat);
-                      u3.put(current_lon);
-
-                }*/
 
                 break;
 
@@ -98,10 +77,12 @@ void CANReception(char rec_bluetooth,Uart3 u3){
 
             case RSensorDataFromSensors:
                 //Receive sensor data and send it to Android
+
                 break;
 
             case RKillFromMaster:
                 //Perform system reboot after receiving message
+                sys_reboot();
                 break;
 
         }

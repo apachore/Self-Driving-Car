@@ -1,11 +1,3 @@
-/*
- * bluetooth.hpp
- *
- *  Created on: Nov 10, 2015
- *      Author: Akshay
- */
-
-
 #ifndef L5_APPLICATION_SOURCE_BLUETOOTH_HPP_
 #define L5_APPLICATION_SOURCE_BLUETOOTH_HPP_
 
