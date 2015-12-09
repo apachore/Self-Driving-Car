@@ -42,6 +42,7 @@ SensorData receivedSensorData;
 static bool GEOActivate = true;
 extern bool sentStartFromAndroid;
 extern bool sentStopFromAndroid;
+extern bool bootRepliesReceived;
 
 /// This is the stack size used for each of the period tasks
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
@@ -79,11 +80,16 @@ void period_100Hz(void)
     }*/
 
     // Continuously go and check the GEO.
-    if(GEOActivate && sentStartFromAndroid)
+    if(sentStartFromAndroid/* && bootRepliesReceived*/)
+    {
         GeoDecision();       // Need to look at this. Present adjustment
+    }
 }
 
 void period_1000Hz(void)
 {
-
+    if(!bootRepliesReceived)
+    {
+        GetBootReplyFromModuleCheck();
+    }
 }
