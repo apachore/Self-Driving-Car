@@ -26,7 +26,7 @@ typedef enum
     TBootRequestToAll                = 0x610,
 
     // Boot Replies from all Controllers
-    RBootReplyFromMotor              = 0x620,
+    RBootReplyFromMotorIO            = 0x620,
     RBootReplyFromSensor             = 0x621,
     RBootReplyFromGeo                = 0x622,
     RBootReplyFromAndroid            = 0x623,
@@ -55,7 +55,7 @@ typedef enum
     RStopMessageFromAndroid          = 0x030,
     RKillMessageFromAndroid          = 0x010,          // Kill from Android to Master.
     //Sys_start,
-    RRunAndPauseCommandFromAndroid   = 0x270,          // To make the car run and pause
+    RRunCommandFromAndroid   = 0x270,          // To make the car run and pause
 
     // Heartbeat message from all controllers
     RHeartbeatMessageFomMotor        = 0x280,
@@ -80,14 +80,14 @@ const can_std_id_t canMessagesFilterList[] =
 {
         CAN_gen_sid(can1, RKillMessageFromAndroid),CAN_gen_sid(can1, RStopMessageFromAndroid),  CAN_gen_sid(can1, RSensorDataFromSensor),
         CAN_gen_sid(can1, RDistanceFinalAndNextCheckpoint), CAN_gen_sid(can1, RHeadingAndBearingToGeo),
-        CAN_gen_sid(can1, RRunAndPauseCommandFromAndroid), CAN_gen_sid(can1, RBatteryStatusFromSensor),
+        CAN_gen_sid(can1, RRunCommandFromAndroid), CAN_gen_sid(can1, RBatteryStatusFromSensor),
         CAN_gen_sid(can1, RFilterDisabledId)
 };
 
 const can_std_grp_id_t groupList[] =
 {
         {CAN_gen_sid(can1, RHeartbeatMessageFomMotor), CAN_gen_sid(can1, RHeartbeatFromSensor)},
-        {CAN_gen_sid(can1, RBootReplyFromMotor), CAN_gen_sid(can1, RBootReplyFromAndroid)}
+        {CAN_gen_sid(can1, RBootReplyFromMotorIO), CAN_gen_sid(can1, RBootReplyFromAndroid)}
 };
 
 
