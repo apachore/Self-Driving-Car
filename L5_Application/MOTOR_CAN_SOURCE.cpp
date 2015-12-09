@@ -46,8 +46,8 @@ void Receive_init()
     CAN_reset_bus(can1);          /*Reset CAN bus*/
 
     const can_std_id_t slist[]  {CAN_gen_sid(can1, 0x020),CAN_gen_sid(can1, 0x210),CAN_gen_sid(can1, 0x220),
-          CAN_gen_sid(can1, 0x250),CAN_gen_sid(can1, 0x260),CAN_gen_sid(can1, 0x410),CAN_gen_sid(can1, 0x420),
-            CAN_gen_sid(can1, 0x610)};    /*CAN standard ID list*/
+            CAN_gen_sid(can1, 0x240), CAN_gen_sid(can1, 0x250),CAN_gen_sid(can1, 0x260),
+          CAN_gen_sid(can1, 0x410), CAN_gen_sid(can1, 0x610)};    /*CAN standard ID list*/
 
     /*Motor Control message from Master : 0x220 */
     /*Boot Request message from Master : 0x610 */
@@ -60,7 +60,7 @@ void Receive_init()
     can_ext_grp_id_t *extgrp=NULL;
     //CAN_bypass_filter_accept_all_msgs();
 
-    CAN_setup_filter(slist,6,grplist,0,ext,0,extgrp,0);  /*CAN message filter */
+    CAN_setup_filter(slist,8,grplist,0,ext,0,extgrp,0);  /*CAN message filter */
 }
 
 void Transmitter_message()
@@ -120,9 +120,9 @@ void Receiver_message()
                 LE.toggle(2);
                 canReceivedData = rx_msg;
            break;
-          //  case 0x240:
-            //    memcpy(&checkpoint,&rx_msg.data,sizeof(coordinates));
-              // break;
+            case 0x240:
+                memcpy(&checkpoint,&rx_msg.data,sizeof(coordinates));
+               break;
            case 0x250:
                 Message.canReceivedMsg_gps2=rx_msg;
               break;
