@@ -60,18 +60,21 @@ typedef enum
  *
  */
 
- typedef struct
- {
-         uint16_t Dist_Remaining;
-         float Latitude;
-         float Longitude;
- } Geo_Data;
+
 typedef struct
 {
    can_msg_t canReceivedData;
    can_msg_t canReceivedMsg_gps1;
    can_msg_t canReceivedMsg_gps2;
+   can_msg_t canReceivedMsg_compass;
    can_msg_t canReceivedMsg_Sensor;
 }Can_msg;
+
+typedef struct
+{
+        float latitude;
+        float longitude;
+}coordinates;
+
 
 #endif /* L5_APPLICATION_CAN_COMMS_HPP_ */

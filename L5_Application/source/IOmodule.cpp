@@ -27,7 +27,9 @@ float gps_longitude;
 uint16_t final_dist_remaining;
 uint16_t checkpoint_dist;
 extern Can_msg Message;
+extern coordinates checkpoint;
 uint8_t sensor_data[4];
+uint8_t compass_data[2];
 char a13[80];
 int clear_index;
 
@@ -42,32 +44,40 @@ void UARTInitialization()
 }
 void LCDdisplay()
 {
-    char gps_lat_buf[6],gps_long_buf[6],dist_buf[3],sen_buf0[4],sen_buf1[4],sen_buf2[4],sen_buf3[4];
+    char dist_buf[4],sen_buf0[4],sen_buf1[4],sen_buf2[4],sen_buf3[4],checkpoint_dist_buf[4],compass_buf0[4],compass_buf1[4];
+
     char team_name_buf[7]="MINION";
     int i;
+    char gps_lat_buf[50],gps_long_buf[50];
     char s=32;
+
+   // printf("int size:%d\t float size:%d\n",sizeof(int),sizeof(float));
     char command_buf[3];
-    char checkpoint_dist_buf[3];
-  /* sensor_data[0] =Message.canReceivedMsg_Sensor.data.bytes[0];
+   // char checkpoint_dist_buf[4];
+    sensor_data[0] =Message.canReceivedMsg_Sensor.data.bytes[0];
     sensor_data[1] =Message.canReceivedMsg_Sensor.data.bytes[1];
     sensor_data[2] =Message.canReceivedMsg_Sensor.data.bytes[2];
-    sensor_data[3] =Message.canReceivedMsg_Sensor.data.bytes[3];*/
-    sensor_data[0]=11;
-    sensor_data[1]=41;
+    sensor_data[3] =Message.canReceivedMsg_Sensor.data.bytes[3];
+    /*sensor_data[0]=11;
+    sensor_data[1]=49;
     sensor_data[2]=255;
-    sensor_data[3]=8;
-  /*gps_latitude=Message.canReceivedMsg_gps1.data.dwords[0];
-    gps_longitude=Message.canReceivedMsg_gps1.data.dwords[1];
+    sensor_data[3]=8;*/
+    compass_data[0]=Message.canReceivedMsg_compass.data.bytes[0];
+    compass_data[1]=Message.canReceivedMsg_compass.data.bytes[1];
+
     final_dist_remaining=Message.canReceivedMsg_gps2.data.words[0];
-    checkpoint_dist=Message.canReceivedMsg_gps2.data.words[1];*/
-    gps_longitude =24.453;
+  // checkpoint_dist=Message.canReceivedMsg_gps2.data.words[1];
+   /* gps_longitude =24.413;
     gps_latitude=7.89;
     final_dist_remaining=63;
-    checkpoint_dist = 34;
-    snprintf(gps_lat_buf,6,"%0.2f",gps_latitude);
-    snprintf(gps_long_buf,6,"%0.2f",gps_longitude);
-    snprintf(checkpoint_dist_buf,3,"%d",checkpoint_dist);
-    snprintf(dist_buf,3,"%d",final_dist_remaining);
+    checkpoint_dist = 34;*/
+  // snprintf(checkpoint_dist_buf,4,"%d",checkpoint_dist);
+       snprintf(dist_buf,4,"%d",final_dist_remaining);
+  //  sprintf(gps_lat_buf,"%0.2f",checkpoint.latitude);
+ //   sprintf(gps_long_buf,"%0.2f",checkpoint.longitude);
+       snprintf(compass_buf0,4,"%d",compass_data[0]);
+       snprintf(compass_buf1,4,"%d",compass_data[1]);
+
     snprintf(sen_buf0,4,"%d",sensor_data[0]);
     snprintf(sen_buf1,4,"%d",sensor_data[1]);
     snprintf(sen_buf2,4,"%d",sensor_data[2]);
@@ -97,22 +107,29 @@ void LCDdisplay()
     command_buf[1] = 0x45;
     command_buf[2] = 0x14;
     u2.put(command_buf);
-    u2.put("CD:");
-    u2.put(checkpoint_dist_buf);
-    u2.putChar(s);
     u2.put("FD:");
     u2.put(dist_buf);
     u2.putChar(s);
+  //  u2.put("CD:");
+   // u2.put(checkpoint_dist_buf);
+   // u2.putChar(s);
+
     command_buf[0] = 0xFE;  // command to place cursor in line 3
     command_buf[1] = 0x45;
     command_buf[2] = 0x54;
     u2.put(command_buf);
-    u2.put("LAT:");
+    u2.put("TA:");
+    u2.put(compass_buf0);
+    u2.putChar(s);
+    u2.put("DIR:");
+    u2.put(compass_buf1);
+    u2.putChar(s);
+   /* u2.put("LAT:");
     u2.put(gps_lat_buf);
     u2.putChar(s);
     u2.put("LON:");
     u2.put(gps_long_buf);
-    u2.putChar(s);
+    u2.putChar(s);*/
     vTaskDelay(800);
     command_buf[0] = 0xFE;     /* clear screen command */
     command_buf[1] = 0x51;

@@ -21,6 +21,7 @@
 
 QueueHandle_t Master_Motor_q;
 Can_msg Message;
+coordinates checkpoint;
 int Boot_req;
 
 void BusOffCb(uint32_t param)
@@ -45,7 +46,7 @@ void Receive_init()
     CAN_reset_bus(can1);          /*Reset CAN bus*/
 
     const can_std_id_t slist[]  {CAN_gen_sid(can1, 0x020),CAN_gen_sid(can1, 0x210),CAN_gen_sid(can1, 0x220),
-            CAN_gen_sid(can1, 0x240), CAN_gen_sid(can1, 0x250),CAN_gen_sid(can1, 0x410),CAN_gen_sid(can1, 0x420),
+          CAN_gen_sid(can1, 0x250),CAN_gen_sid(can1, 0x260),CAN_gen_sid(can1, 0x410),CAN_gen_sid(can1, 0x420),
             CAN_gen_sid(can1, 0x610)};    /*CAN standard ID list*/
 
     /*Motor Control message from Master : 0x220 */
@@ -119,12 +120,16 @@ void Receiver_message()
                 LE.toggle(2);
                 canReceivedData = rx_msg;
            break;
-            case 0x240:
-                Message.canReceivedMsg_gps1=rx_msg;
-               break;
-            case 0x250:
+          //  case 0x240:
+            //    memcpy(&checkpoint,&rx_msg.data,sizeof(coordinates));
+              // break;
+           case 0x250:
                 Message.canReceivedMsg_gps2=rx_msg;
-               break;
+              break;
+            case 0x260:
+                Message.canReceivedMsg_compass=rx_msg;
+                break;
+
             case 0x610:
                 Boot_req =1;
                break;
