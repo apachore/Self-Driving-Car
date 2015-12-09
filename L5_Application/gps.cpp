@@ -12,6 +12,7 @@
 
 #define FetchCheckpointDistance 40
 #define ZeroCoordinate 0.0
+#define CheckPointDistance 200
 
 extern bool BootReplySent;
 extern uint8_t Received_Checkpoint_Count;
@@ -23,7 +24,8 @@ uint16_t current_bearing = 0;
 
 gpsTask::gpsTask(uint8_t priority) : scheduler_task("gps", 4*512, priority),
 gps_uart(Uart3::getInstance()),
-gps_data_q(NULL)
+gps_data_q(NULL),
+midpoint_q(NULL)
 {
     //setRunDuration(10);
     gps_uart.init(gps_uart_BaudRate,gps_rx_q_size,1);
@@ -34,6 +36,8 @@ bool gpsTask::init(void)
     logger_init(PRIORITY_LOW);
     gps_data_q = xQueueCreate(2, sizeof(coordinates));
     addSharedObject("gps_queue", gps_data_q);
+    midpoint_q = xQueueCreate(2, sizeof(coordinates));
+    addSharedObject("Middle_Checkpoint_q", midpoint_q);
     return (NULL != gps_data_q);
 }
 
@@ -65,6 +69,15 @@ uint16_t /*gpsTask::*/calculateCheckpointDistance(coordinates point_2,coordinate
     c = 2 * atan2(sqrt(a),sqrt(1-a));
     distance = Radius * c;
     return(distance);
+}
+
+coordinates getCheckpoint_AtCheckPointDistance(coordinates checkpoint,uint16_t bearing)
+{
+    coordinates midCheckpoint;
+    midCheckpoint.latitude = ToDegrees(asin((sin(ToRadians(checkpoint.latitude))*cos((CheckPointDistance/Radius)))+(cos(ToRadians(checkpoint.latitude))*sin((CheckPointDistance/Radius))*cos(ToRadians(bearing)))));
+    //λ2 = λ1 + atan2( sin θ ⋅ sin δ ⋅ cos φ1, cos δ − sin φ1 ⋅ sin φ2 )
+    midCheckpoint.longitude = ToDegrees(ToRadians(checkpoint.longitude) + atan2(sin(ToRadians(bearing))*sin((CheckPointDistance/Radius))*cos(ToRadians(checkpoint.latitude)),(cos((CheckPointDistance/Radius))-sin(ToRadians(checkpoint.latitude))*sin(ToRadians(midCheckpoint.latitude)))));
+    return midCheckpoint;
 }
 
 bool gpsTask::run(void *p)
@@ -152,6 +165,7 @@ Distance_Data GPS_Calculations()
     //gpsTask gpsTaskInstance()
     QueueHandle_t gps_data_q = scheduler_task::getSharedObject("gps_queue");
     QueueHandle_t Checkpoint_q = scheduler_task::getSharedObject("CheckpointsQueue");
+    QueueHandle_t Mid_Checkppoint_q = scheduler_task::getSharedObject("Middle_Checkpoint_q");
     coordinates current_gps_data;
     Distance_Data Current_Distances;
     //uint16_t Current_Checkpoint_Distance,Total_Distance_Remaining;
@@ -181,7 +195,12 @@ Distance_Data GPS_Calculations()
 
             if (Fetch_Checkpoint)
             {
-                if (xQueueReceive(Checkpoint_q, &checkpoint, 0))
+                if (xQueueReceive(Mid_Checkppoint_q, &checkpoint, 0))
+                {
+                    first_after_cp_fetch = 1;
+                    Fetch_Checkpoint = 0;
+                }
+                else if (xQueueReceive(Checkpoint_q, &checkpoint, 0))
                 {
                     Fetch_Checkpoint = 0;
                     Fetched_Checkpoint_Count++;
@@ -205,6 +224,15 @@ Distance_Data GPS_Calculations()
                 {
                     Previous_Checkpoint_Distnace = Current_Distances.Current_Checkpoint_Distance;
                     Total_Checkpoint_Distnace = Current_Distances.Current_Checkpoint_Distance;
+                    if(Current_Distances.Current_Checkpoint_Distance>CheckPointDistance)
+                    {
+                        if (!xQueueSend(Mid_Checkppoint_q, &checkpoint, 0))
+                        {
+                            LOG_ERROR("Mid_Checkpoint Queue Send Failed");
+                        }
+                        checkpoint = getCheckpoint_AtCheckPointDistance(current_gps_data,current_bearing);
+                        LOG_INFO("Calc CP:%f  %f\n",checkpoint.latitude,checkpoint.longitude);
+                    }
                     first_after_cp_fetch = 0;
                 }
 
@@ -221,6 +249,7 @@ Distance_Data GPS_Calculations()
 
                 //printf("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
 
+                LOG_INFO("CheckPoint:%f  %f\n",checkpoint.latitude,checkpoint.longitude);
                 LOG_INFO("GPS:%d  %d  %d\n",Current_Distances.Total_Distance_Remaining,
                         Current_Distances.Current_Checkpoint_Distance,current_bearing);
                 printf("%d  %d  %d\n",Current_Distances.Total_Distance_Remaining,

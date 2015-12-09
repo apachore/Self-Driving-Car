@@ -43,6 +43,7 @@ typedef struct
 
 uint16_t calculateBearing(coordinates,coordinates);
 uint16_t calculateCheckpointDistance(coordinates,coordinates);
+coordinates getCheckpoint_AtCheckPointDistance(coordinates,uint16_t);
 float ToRadians(float);
 float ToDegrees(float);
 
@@ -71,6 +72,7 @@ class gpsTask : public scheduler_task
         static const int gps_rx_q_size = 100;
 
         QueueHandle_t gps_data_q;
+        QueueHandle_t midpoint_q;
 };
 
 
