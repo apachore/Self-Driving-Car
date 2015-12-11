@@ -31,6 +31,7 @@ int front=0, back = 0, right =0, left = 0,start =0;
 int amb_temp;
 long yield = 0;
 int start_flag, pin_number,count;
+int adc_val;
 void sensor_trig_MB1010(int pin)
 {
     LPC_GPIO2->FIOPIN &= ~(1 << pin);
@@ -128,6 +129,11 @@ void config_sensor_pins()
     LPC_GPIO2->FIODIR |= (1 << BACK_SENSOR_RX);
     LPC_GPIO2->FIODIR |= (1 << FRONT_LEFT_SENSOR_RX);
     LPC_GPIO2->FIODIR |= (1 << FRONT_RIGHT_SENSOR_RX);
+    LPC_PINCON->PINSEL1 |= (1 << 20); // ADC-3 is on P0.26, select this as ADC0.3
+       LPC_PINCON->PINSEL3 |= (3 << 28); // ADC-4 is on P1.30, select this as ADC0.4
+       LPC_PINCON->PINSEL3 |= (3 << 30); // ADC-5 is on P1.31, select this as ADC0.5
+
+
 }
 bool sensor_init(void)
 {
@@ -158,12 +164,13 @@ bool sensor_compute()
 //        can_Boot_stat();
 //    }
 //    can_Heart_beat();
+    adc_val =adc0_get_reading(4);
 
 #if DEBUG
-    printf("%d %d %d %d\n",front, left, right,back);
+   // printf("%d %d %d %d\n",front, left, right,back);
 #endif
     LD.setNumber(front/LED_DISP_FACTOR);
-
+    printf("%d\n",adc_val);
     sensor_distance_limit();
 
     can_Tx_Sensor_data();

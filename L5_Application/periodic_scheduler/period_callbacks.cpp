@@ -34,6 +34,7 @@
 #include "periodic_callback.h"
 #include "can.h"
 #include "stdio.h"
+#include "can_Tx_Rx.hpp"
 /// This is the stack size used for each of the period tasks
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 
@@ -53,7 +54,7 @@ bool period_reg_tlm(void)
 
 void period_1Hz(void)
 {
-
+    can_Boot_stat();
 }
 
 void period_10Hz(void)
@@ -69,7 +70,7 @@ void period_10Hz(void)
 
 void period_100Hz(void)
 {
-  //  sensor_compute();
+    CANReception();
     //LE.toggle(3);
 }
 

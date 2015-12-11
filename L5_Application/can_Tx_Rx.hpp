@@ -7,27 +7,27 @@
 
 #ifndef L5_APPLICATION_CAN_TX_RX_HPP_
 #define L5_APPLICATION_CAN_TX_RX_HPP_
-
+#include "can_communication_ids.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "can.h"
 
-typedef enum
-{
-    THeartbeatToMaster     = 0x283, // Heart beat message to Master
-    TBootStatToMaster     = 0x621, // Boot status to Master
-    TDirectionSensorData  = 0x210, // Sensor data to IO and Master
-    TBatteryStatus        = 0x420, // Battery status to IO and Master
-
-    RBootStatEnquire      = 0x610, // Boot status enquire from Master
-    RBootStatfromMaster   = 0x630,
-    RKillMessage          = 0x020  // Kill Message
-}CANMessageIds;
+//typedef enum
+//{
+//    THeartbeatToMaster     = 0x283, // Heart beat message to Master
+//    TBootStatToMaster     = 0x621, // Boot status to Master
+//    TDirectionSensorData  = 0x210, // Sensor data to IO and Master
+//    TBatteryStatus        = 0x420, // Battery status to IO and Master
+//
+//    RBootStatEnquire      = 0x610, // Boot status enquire from Master
+//    RBootStatfromMaster   = 0x630,
+//    RKillMessage          = 0x020  // Kill Message
+//}CANMessageIds;
 
 void can_Tx_Rx_init();
 void can_Boot_stat();
 void can_Heart_beat();
-
+void CANReception();
 void can_Tx_Sensor_data();
 //
 //class can_Tx_Rx
