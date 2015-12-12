@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:keepScreenOn="true"
+    tools:context=".MainActivity"
+    android:background="@drawable/roads">
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:map="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+        android:layout_height="400dp" android:id="@+id/map"
+        tools:context="minion.autodrive.MapsActivity1"
+        android:name="com.google.android.gms.maps.SupportMapFragment" />
+
+    <Button
+        android:id="@+id/controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Controls"
+        android:layout_below="@+id/map"
+        android:onClick="backToControls"
+        android:visibility="gone"
+        />
+
+    <TextView
+        android:text="F:"
+        android:id="@+id/sensorf"
+        android:textStyle="bold|italic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/controls"
+        android:textSize="35px"
+        />
+
+    <TextView
+        android:text="000"
+        android:id="@+id/sensor"
+        android:textStyle="bold|italic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/sensorf"
+        android:layout_below="@+id/controls"
+        android:textSize="35px"
+        />
+
+    <TextView
+        android:text="L:"
+        android:id="@+id/sensorl"
+        android:textStyle="bold|italic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/controls"
+        android:layout_toRightOf="@id/sensor"
+        android:layout_marginLeft="30dp"
+        android:textSize="35px"
+        />
+
+
+    <TextView
+        android:text="000"
+        android:id="@+id/sensor2"
+        android:textStyle="bold|italic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/controls"
+        android:layout_toRightOf="@id/sensorl"
+        android:textSize="35px"
+
+        />
+
+    <TextView
+        android:text="R:"
+        android:id="@+id/sensorr"
+        android:textStyle="bold|italic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/controls"
+        android:layout_toRightOf="@id/sensor2"
+        android:layout_marginLeft="30dp"
+        android:textSize="35px"
+        />
+
+
+
+
+    <TextView
+        android:text="000"
+        android:id="@+id/sensor3"
+        android:textStyle="bold|italic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/controls"
+        android:layout_toRightOf="@id/sensorr"
+        android:textSize="35px"
+
+
+        />
+
+    <TextView
+        android:text="B:"
+        android:id="@+id/sensorb"
+        android:textStyle="bold|italic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/controls"
+        android:layout_toRightOf="@id/sensor3"
+        android:layout_marginLeft="30dp"
+        android:textSize="35px"
+        />
+
+
+    <TextView
+        android:text="000"
+        android:id="@+id/sensor4"
+        android:textStyle="bold|italic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/controls"
+        android:layout_toRightOf="@id/sensorb"
+        android:textSize="35px"
+        />
+
+
+    <ToggleButton
+        android:id="@+id/run_stop_toggle"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:textOn="@string/toggle_turn_on"
+        android:textOff="@string/toggle_turn_off"
+        android:layout_below="@+id/map"
+        android:onClick="onToggleClicked"
+        android:visibility="visible"
+        />
+
+    <Button
+        android:id="@+id/kill"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:text="Kill"
+        android:layout_below="@+id/map"
+        android:layout_toRightOf="@id/run_stop_toggle"
+        android:onClick="sendKillSignal"
+        android:visibility="visible"
+        />
+
+        <Button
+            android:id="@+id/monitor"
+            android:layout_width="170dp"
+            android:scaleType="fitXY"
+            android:layout_height="wrap_content"
+            android:text="Monitor"
+            android:layout_below="@+id/run_stop_toggle"
+            android:onClick="openMonitor"
+            android:visibility="visible"
+            />
+
+    <Button
+        android:id="@+id/setdest"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:text="Reset map"
+        android:layout_below="@+id/kill"
+        android:layout_toRightOf="@id/monitor"
+        android:onClick="setDest"
+        android:visibility="visible"
+        />
+
+    <LinearLayout
+        android:id="@+id/inputpane"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@+id/monitor"
+        android:visibility="visible"
+        >
+
+        <TextView
+            android:text="Click to Connect"
+            android:id="@+id/info"
+            android:textStyle="bold|italic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/common_plus_signin_btn_text_dark_default"
+            />
+        <ListView
+            android:id="@+id/pairedlist"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+    </LinearLayout>
+
+</RelativeLayout>
+
