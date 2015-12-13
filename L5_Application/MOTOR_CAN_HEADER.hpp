@@ -13,6 +13,7 @@
         void Receiver_message(void);
         void Receive_init();
         void Transmitter_message();
+        void Transmitter_message_1Hz();
 
 
 #endif /* L5_APPLICATION_MOTOR_CAN_HEADER_HPP_ */

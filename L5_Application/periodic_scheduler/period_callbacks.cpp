@@ -51,7 +51,7 @@ void period_1Hz(void)
         CAN_reset_bus(can1);
     }
 	Speed_Pulse_Count();
-
+	Transmitter_message_1Hz();
     LCDdisplay();
 }
 

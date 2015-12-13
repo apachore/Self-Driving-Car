@@ -1,5 +1,5 @@
 /*
- * MOTOR_CAN_SOURCE.cpp
+/ * MOTOR_CAN_SOURCE.cpp
  *
  *  Created on: 26-Oct-2015
  *      Author: Su
@@ -63,15 +63,12 @@ void Receive_init()
     CAN_setup_filter(slist,8,grplist,0,ext,0,extgrp,0);  /*CAN message filter */
 }
 
-void Transmitter_message()
+void Transmitter_message_1Hz()
 {
-    can_msg_t canMessageBlock,check_0x610,Boot_send;
+    can_msg_t canMessageBlock;
     canMessageBlock.msg_id = 0x280;
     canMessageBlock.frame_fields.data_len = 8;
     canMessageBlock.data.qword = 0x222; /*Sending Heart beat message data*/
-    Boot_send.msg_id = 0x620;
-    Boot_send.frame_fields.data_len = 8;
-    Boot_send.data.qword = 0x224; /*Sending Boot reply message data*/
 
     bool flag = CAN_tx(can1,&canMessageBlock, 0);
 
@@ -85,6 +82,15 @@ void Transmitter_message()
         LOG_ERROR("Heart Beat message NOT 0x220 sent successfully \n");
 //        printf("Heart Beat message NOT 0x220 sent successfully \n ");
     }
+}
+
+void Transmitter_message()
+{
+    can_msg_t check_0x610,Boot_send;
+    Boot_send.msg_id = 0x620;
+    Boot_send.frame_fields.data_len = 8;
+    Boot_send.data.qword = 0x224; /*Sending Boot reply message data*/
+
 
     if(Boot_req)
     {
