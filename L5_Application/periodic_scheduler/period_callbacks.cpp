@@ -44,27 +44,32 @@ const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 
 void period_1Hz(void)
 {
-    //LE.toggle(1);
-  //  puts("entered 1hz task\n");    //Recover from CAN Bus off at 10Hz
+	//Detecting if CAN is bus off and then Resetting if bus off
     if (CAN_is_bus_off(can1))
     {
         CAN_reset_bus(can1);
     }
+
+    //This function processes the Speed sensor information
 	Speed_Pulse_Count();
+
+	//CAN messages transmitted once every second
 	Transmitter_message_1Hz();
+
+	//LCD display function called every one second
     LCDdisplay();
 }
 
 void period_10Hz(void)
 {
-    /*Calling the Motor control */
+    //CAN messages transmitted at 10Hz
 	Transmitter_message();
 	//LE.toggle(2);
 }
 
 void period_100Hz(void)
 {
-//	Speed_Pulse_Cnt();
+	//CAN messages received at 100Hz
     Receiver_message();
     //LE.toggle(3);
 }

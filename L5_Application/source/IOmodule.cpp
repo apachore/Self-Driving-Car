@@ -34,7 +34,7 @@ char a13[80];
 int clear_index;
 
 Uart2 &u2 = Uart2 ::getInstance();
-
+//Initializing the UART2 with 9600 baudrate
 void UARTInitialization()
 {
    static const int io_rx_q_size = 32;
@@ -42,6 +42,8 @@ void UARTInitialization()
    u2.init(9600, io_rx_q_size, io_tx_q_size);
    u2.put("FO");
 }
+
+//This function displays information every one second
 void LCDdisplay()
 {
     char dist_buf[4],sen_buf0[4],sen_buf1[4],sen_buf2[4],sen_buf3[4],checkpoint_dist_buf[4],compass_buf0[4],compass_buf1[4];
@@ -54,6 +56,8 @@ void LCDdisplay()
    // printf("int size:%d\t float size:%d\n",sizeof(int),sizeof(float));
     char command_buf[3];
    // char checkpoint_dist_buf[4];
+
+    //Copying Sensor data
     sensor_data[0] =Message.canReceivedMsg_Sensor.data.bytes[0];
     sensor_data[1] =Message.canReceivedMsg_Sensor.data.bytes[1];
     sensor_data[2] =Message.canReceivedMsg_Sensor.data.bytes[2];
@@ -62,9 +66,12 @@ void LCDdisplay()
     sensor_data[1]=49;
     sensor_data[2]=255;
     sensor_data[3]=8;*/
+
+    //Reading Compass data
     compass_data[0]=Message.canReceivedMsg_compass.data.bytes[0];
     compass_data[1]=Message.canReceivedMsg_compass.data.bytes[1];
 
+    //Distance remaining information from read
     final_dist_remaining=Message.canReceivedMsg_gps2.data.words[0];
   // checkpoint_dist=Message.canReceivedMsg_gps2.data.words[1];
    /* gps_longitude =24.413;
@@ -72,6 +79,8 @@ void LCDdisplay()
     final_dist_remaining=63;
     checkpoint_dist = 34;*/
   // snprintf(checkpoint_dist_buf,4,"%d",checkpoint_dist);
+
+    //Printing Distance remaining, Compass and Sensor data
        snprintf(dist_buf,4,"%d",final_dist_remaining);
   //  sprintf(gps_lat_buf,"%0.2f",checkpoint.latitude);
  //   sprintf(gps_long_buf,"%0.2f",checkpoint.longitude);

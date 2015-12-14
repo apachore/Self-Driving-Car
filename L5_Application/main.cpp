@@ -35,18 +35,14 @@
 #include "lpc_timers.h"
 #include "eint.h"
 
-//int timer_val,speed_pulse = 0,time_diff,rps_actual;
+//Label which indicates the Pulse from Speed Sensor
 int speed_pulse_cnt = 0;
-//static int timer_val_last;
+
+//Callback function for interrupt from Speed sensor
 void Spd_Pls()
 {
-
-//    timer_val = lpc_timer_get_value(lpc_timer2);
-//    time_diff = timer_val - timer_val_last;
-//    rps_actual = 1000000/time_diff;
-//    printf("\nrps: %d",rps_actual);
-
-//    timer_val_last = timer_val;
+    //Incrementing the label on every Rising edge interrupt.
+    //This is the cumulative Speed pulse count
     speed_pulse_cnt++;
 }
 
@@ -81,10 +77,15 @@ int main(void)
     /* Consumes very little CPU, but need highest priority to handle mesh network ACKs */
 //    scheduler_add_task(new wirelessTask(PRIORITY_CRITICAL));
 
+	//P2.4 used for pulse detection from Speed sensor.
     eint3_enable_port2(4,eint_rising_edge,Spd_Pls);
 
+    //CAN Initialization. Used for communication between the controllers
     CANInitialization();
+
+    //UART Initialization. Used to display information on LCD
     UARTInitialization();
+
     /* Change "#if 0" to "#if 1" to run period tasks; @see period_callbacks.cpp */
     #if 1
     scheduler_add_task(new periodicSchedulerTask());
@@ -151,7 +152,7 @@ int main(void)
         scheduler_add_task(new wifiTask(Uart3::getInstance(), PRIORITY_LOW));
     #endif
 
-
+    //Motor task creation. All the Motor control related functions are handled in this task
 	#if 1
         scheduler_add_task(new MotorTask(PRIORITY_MEDIUM));
 	#endif

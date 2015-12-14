@@ -13,9 +13,10 @@
 #include "can_comms.hpp"
 #include "gpio.hpp"
 static int speed_pulse_cnt_sec;
+
+//This function records the number of pulses from speed sensor in a second
 void Speed_Pulse_Count()
 {
-
 	extern int speed_pulse_cnt,speed_pulse_cnt_100ms;
 	speed_pulse_cnt_sec = speed_pulse_cnt;
 	speed_pulse_cnt = 0;
@@ -28,10 +29,10 @@ MotorTask::MotorTask(uint8_t priority) :
 {
     count_init = 1;
     count_rev = 1;
-//    just = 0;
     setRunDuration(100);
 }
 
+//Initializing the Motor with required PWM signals
 bool MotorTask::init(void)
 {
     pwm2.set(15);   /*Initialization sequence for DC motor*/
@@ -46,29 +47,21 @@ bool MotorTask::init(void)
     return true;
 }
 
+//This task continuously controls the Motor based on the information from Master
 bool MotorTask::run(void *p)
 {
-//    extern int speed_pulse_cnt;
-//    static int speed_pulse_current,speed_pulse_prev;
-//	speed_pulse_current = speed_pulse_cnt;
-//	printf("\nSpeed_Pulse Count: %d",speed_pulse_current);
-//	speed_pulse_cnt = 0;
-//	speed_pulse_prev = speed_pulse_current;
-
 	int servo_control, servo_level, DC_control, DC_level;
     float speed_factor, speed_offset, PWM_value_DC, PWM_value_servo, speed_correction;
     static float PWM_value_DC_last, PWM_value_servo_last;
-//    static QueueHandle_t receivedDataQueue = scheduler_task::getSharedObject("MasterMotorQueue");
     extern can_msg_t canReceivedData;
     int speed_pls_exp,speed_pls_act,speed_pls_diff;
     static uint32_t speed_miss,speed_miss_cont;
     static int DC_level_last;
     extern int Mstr_Mtr_cmd;
 
-//    printf("\nMstr_Mtr_cmd : %d",Mstr_Mtr_cmd);
-
     if (count_init)
     {
+    	//Mode configuration for Motor
         config_init();
         count_init--;
     }
@@ -86,33 +79,6 @@ bool MotorTask::run(void *p)
     //    printf("\nDC: Control %x, Level_exp %x",DC_control,DC_level);
 //        printf("\nServo: Control %x, Level %x",servo_control,servo_level);
 
-#if(0)
-        if (just < 5)
-        {
-            LE.toggle(4);
-            servo_control = 1; //canReceivedData.data.bytes[0];
-            servo_level = 1;//canReceivedData.data.bytes[1];
-            DC_control = 1;//canReceivedData.data.bytes[2];
-            DC_level = 2;//canReceivedData.data.bytes[3];
-            count_rev++;
-            just++;
-        }
-        else
-        {
-            LE.toggle(3);
-            servo_control = 1; //canReceivedData.data.bytes[0];
-            servo_level = 1;//canReceivedData.data.bytes[1];
-            DC_control = 2;//canReceivedData.data.bytes[2];
-            DC_level = 2;//canReceivedData.data.bytes[3];
-            just++;
-
-            if(just >= 10)
-            {
-                just = 0;
-            }
-        }
-#endif
-
         if((DC_control == 2) && count_rev)
         {
             pwm2.set(15);
@@ -126,6 +92,7 @@ bool MotorTask::run(void *p)
             count_rev = 0;
         }
 
+        //Offset and factors to get PWM level generalized formula for DC motor
         switch(DC_control)
         {
             case 0:
@@ -176,6 +143,7 @@ bool MotorTask::run(void *p)
         }
         PWM_value_DC = 15 + (speed_factor)*(DC_level) + speed_offset;
 
+        //Number of revolutions expected corresponding to a speed level
         switch(DC_level)
         {
         case 0:
@@ -194,6 +162,7 @@ bool MotorTask::run(void *p)
         	speed_pls_exp = 0;
         }
 
+        //Offset and factors to get PWM level generalized formula for Servo motor
         switch(servo_control)
         {
             case 0:
@@ -215,31 +184,31 @@ bool MotorTask::run(void *p)
         }
         PWM_value_servo = 15.0 + (speed_factor)*(servo_level) + speed_offset;
 
+        //Comparing Required and actual Motor speeds
         speed_pls_diff = speed_pulse_cnt_sec - speed_pls_exp;
+
+        //Registering a speed mismatch if the difference is greater than 3
         if((-3<=speed_pls_diff) && (speed_pls_diff<=3))
         {
-//        	speed_miss--;
-//        	speed_miss_cont--;
-//        	if(speed_miss<0)
-//        	{
         		speed_miss = 0;
         		speed_miss_cont = 0;
-//        	}
         }
         else
         {
         	speed_miss++;
         	speed_miss_cont++;
         }
-//        speed_miss_cont = 5;
-
 //    	printf("\nspeed_miss  : %d",speed_miss);
 //    	printf("\nspeed_miss_cont  : %d",speed_miss_cont);
+
+        //PWM level value to be increased/decreased on speed mismatch
     	speed_correction = (speed_miss_cont/20)*0.3;
 
+    	//Speed correction done if speed mismatch is observed for two or more times continuously
         if(speed_miss > 1)
         {
-//        	speed_miss_cont++;
+        	//LED 1 toggled to indicate that Feedback correction is active
+        	LE.toggle(1);
         	if(speed_pulse_cnt_sec < speed_pls_exp)
         	{
 //        		printf("\nspeed_miss_cont  : %d",speed_miss_cont);
@@ -256,7 +225,6 @@ bool MotorTask::run(void *p)
         		{
         			PWM_value_DC = PWM_value_DC;
         		}
-
         		speed_miss = 0;
         	}
         	else if(speed_pulse_cnt_sec > speed_pls_exp)
@@ -294,9 +262,6 @@ bool MotorTask::run(void *p)
 //        printf("\nspeed_miss_cont  : %d",speed_miss_cont);
 
         DC_level_last = DC_level;
-
-//        delay_ms(2000);
-
 //        printf("\nDC value: %f\nServo value: %f",PWM_value_DC,PWM_value_servo);
     }
     else
@@ -306,6 +271,7 @@ bool MotorTask::run(void *p)
     return true;
 }
 
+//Motor mode configuration
 void MotorTask::config_init(void)
 {
     delay_ms(3000);
