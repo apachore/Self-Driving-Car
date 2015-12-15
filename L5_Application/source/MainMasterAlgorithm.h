@@ -24,5 +24,6 @@ void GeoDecision();
 bool SendBootRequest();
 void GetBootReplyFromModuleCheck();
 void KillTask();  // Call back function for On-board Kill switch Implementation.
+void GPIOInitialization();
 
 #endif /* L5_APPLICATION_SOURCE_MAINMASTERALGORITHM_H_ */

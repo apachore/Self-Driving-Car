@@ -52,6 +52,7 @@ int main(void)
     CANInitialization();
 
     // Boot Initialization
+    GPIOInitialization();
     while(!SendBootRequest());
 
     /**

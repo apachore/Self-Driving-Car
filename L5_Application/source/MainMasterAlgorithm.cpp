@@ -15,6 +15,8 @@
 #include "can_transmission_reception.h"
 #include "file_logger.h"
 #include "utilities.h"
+#include "gpio.hpp"
+#include "eint.h"
 
 extern GeoDistanceData receivedDistanceData;
 extern GeoTurnData receivedTurnData;
@@ -53,6 +55,15 @@ void KillTask()
     printf("Here");
     stopFromKill = true;
     SendKillMessageToAllControllers();
+}
+
+void GPIOInitialization()
+{
+    GPIO Port2Pin1(P2_1);
+    Port2Pin1.setAsInput();
+    Port2Pin1.enablePullDown();
+    eint3_enable_port2(1,eint_falling_edge,KillTask);
+
 }
 
 void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, bool rightMotor, bool brakeFlag, uint8_t levelOfSpeed, uint8_t levelOfDirection)
