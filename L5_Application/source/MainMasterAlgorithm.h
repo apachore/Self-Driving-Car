@@ -18,9 +18,9 @@
 
 
 void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, bool rightMotor, bool brakeFlag, uint8_t levelOfSpeed, uint8_t levelOfDirection);
-void SensorProcessingAlgorithm(SensorData receivedSensorData);
+void SensorProcessingAlgorithm();
 void SendKillMessageToAllControllers();
-void GeoDecision(/*uint8_t angle,uint8_t turn*/);
+void GeoDecision();
 bool SendBootRequest();
 void GetBootReplyFromModuleCheck();
 void KillTask();  // Call back function for On-board Kill switch Implementation.

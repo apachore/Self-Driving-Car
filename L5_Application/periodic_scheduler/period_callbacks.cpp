@@ -37,8 +37,6 @@
 #include "source/MainMasterAlgorithm.h"
 #include "string.h"
 
-static int count = 0;
-SensorData receivedSensorData;
 static bool GEOActivate = true;
 extern bool sentStartFromAndroid;
 extern bool sentStopFromAndroid;
@@ -68,20 +66,10 @@ void period_100Hz(void)
     can_msg_t canMessage;
     bool received = CANReception(canMessage);
 
-/*    if (SW.getSwitch(1))
-    {
-        if(!GEOActivate) {
-            GEOActivate = true;
-        }
-        else {
-            GEOActivate = false;
-        }
-        LD.setNumber(00);
-    }*/
-
     // Continuously go and check the GEO.
     if(sentStartFromAndroid/* && bootRepliesReceived*/)
     {
+        SensorProcessingAlgorithm();
         GeoDecision();       // Need to look at this. Present adjustment
     }
 }

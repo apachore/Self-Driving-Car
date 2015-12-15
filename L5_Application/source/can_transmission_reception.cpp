@@ -26,6 +26,7 @@ static bool run = false;
 static bool stop = false;
 GeoTurnData receivedTurnData;
 GeoDistanceData receivedDistanceData;
+SensorData receivedSensorData;
 bool isSensorObstruction = false;
 static bool SensorActivate = true;
 bool sentStartFromAndroid;
@@ -85,14 +86,11 @@ bool CANReception(can_msg_t& canMessageBlock)
                 }*/
                 if(sentStartFromAndroid && SensorActivate)
                 {
-                    cout << sentStartFromAndroid;
-                    SensorData receivedSensorData;
                     receivedSensorData.FrontDistance    = canMessageBlock.data.bytes[0];
                     receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
                     receivedSensorData.RightDistance    = canMessageBlock.data.bytes[2];
                     receivedSensorData.RearDistance     = canMessageBlock.data.bytes[3];
                     //memcpy(&receivedSensorData,&canMessageBlock.data,sizeof(SensorData));
-                    SensorProcessingAlgorithm(receivedSensorData);
                 }
                 else
                 {

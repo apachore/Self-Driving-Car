@@ -18,6 +18,7 @@
 
 extern GeoDistanceData receivedDistanceData;
 extern GeoTurnData receivedTurnData;
+extern SensorData receivedSensorData;
 extern bool isSensorObstruction;
 bool destinationReached = false;
 extern bool bootFromAndroid;
@@ -25,7 +26,7 @@ extern bool bootFromGeo;
 extern bool bootFromMotorIO;
 extern bool bootFromSensor;
 extern bool bootRepliesReceived;
-bool stopFromKill=false;
+bool stopFromKill = false;
 
 
 #define destinationReachedDistance    20
@@ -45,11 +46,13 @@ bool stopFromKill=false;
 #define rLevel1                 120     // 100
 #define rLevel2                 150
 
+#define reverseDistance         60
+
 void KillTask()
 {
-    stopFromKill=true;
+    printf("Here");
+    stopFromKill = true;
     SendKillMessageToAllControllers();
-
 }
 
 void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, bool rightMotor, bool brakeFlag, uint8_t levelOfSpeed, uint8_t levelOfDirection)
@@ -92,7 +95,7 @@ void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, b
     //CANTransmission(canMessage.msg_id, &canMessage.data.bytes[0], 4);
 }
 
-void SensorProcessingAlgorithm(SensorData receivedSensorData)
+void SensorProcessingAlgorithm()
 {
     uint8_t levelOfSpeed = 0, levelOfDirection = 0;
     bool frontMotor = false;
@@ -115,7 +118,7 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
     bool Rt2 = (receivedSensorData.RightDistance < rLevel1 && receivedSensorData.RightDistance >= rLow) ? true : false;
     bool Rt3 = (receivedSensorData.RightDistance < rLevel2 && receivedSensorData.RightDistance >= rLevel1) ? true : false;
 
-    bool Reverse = (receivedSensorData.RearDistance < 60) ? true : false;
+    bool Reverse = (receivedSensorData.RearDistance < reverseDistance) ? true : false;
 
     if(F1 || F2 || F3 || LDanger || L1 || L2 || L3 || RtDanger || Rt1 || Rt2 || Rt3) {
         isSensorObstruction = true;
@@ -130,14 +133,6 @@ void SensorProcessingAlgorithm(SensorData receivedSensorData)
     }
 
 //    printf("%d  %d  %d  %d\n", receivedSensorData.FrontDistance, receivedSensorData.LeftDistance, receivedSensorData.RightDistance, receivedSensorData.RearDistance);
-
-    if(F3 && L3 && Rt3)
-    {
-        LE.toggle(1);
-        LE.toggle(2);
-        LE.toggle(3);
-        LE.toggle(4);
-    }
 
     if(!F1 && !F2 && !F3 && !LDanger && !L1 && !L2 && !L3 && !RtDanger && !Rt1 && !Rt2 && !Rt3) {
 
