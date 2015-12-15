@@ -75,33 +75,17 @@ bool CANReception(can_msg_t& canMessageBlock)
         switch (canMessageBlock.msg_id)
         {
             case RSensorDataFromSensor:
-            {
-/*                if (SW.getSwitch(2))
-                {
-                    if(!SensorActivate)
-                        SensorActivate = true;
-                    else
-                        SensorActivate = false;
-                    LD.setNumber(11);
-                }*/
-                if(sentStartFromAndroid && SensorActivate)
-                {
-                    receivedSensorData.FrontDistance    = canMessageBlock.data.bytes[0];
-                    receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
-                    receivedSensorData.RightDistance    = canMessageBlock.data.bytes[2];
-                    receivedSensorData.RearDistance     = canMessageBlock.data.bytes[3];
-                    //memcpy(&receivedSensorData,&canMessageBlock.data,sizeof(SensorData));
-                }
-                else
-                {
-                    MotorDriveFromSensors(false, false, false, false, false, 0, 0);
-                }
+                receivedSensorData.FrontDistance    = canMessageBlock.data.bytes[0];
+                receivedSensorData.LeftDistance     = canMessageBlock.data.bytes[1];
+                receivedSensorData.RightDistance    = canMessageBlock.data.bytes[2];
+                receivedSensorData.RearDistance     = canMessageBlock.data.bytes[3];
+                //memcpy(&receivedSensorData,&canMessageBlock.data,sizeof(SensorData));
                 break;
-            }
 
             case RDistanceFinalAndNextCheckpoint:
                 receivedDistanceData.FinalDistance = canMessageBlock.data.words[0];
                 receivedDistanceData.NextCheckpointDistance = canMessageBlock.data.words[1];
+                receivedDistanceData.DestinationReached = canMessageBlock.data.bytes[4];
                 //memcpy(&receivedDistanceData,&canMessageBlock.data,sizeof(GeoDistanceData));
                 break;
 
@@ -132,30 +116,25 @@ bool CANReception(can_msg_t& canMessageBlock)
 
             case RBootReplyFromAndroid:
                 bootFromAndroid = true;
+                printf("Boot Android");
                 break;
 
             case RBootReplyFromGeo:
                 bootFromGeo = true;
+                printf("Boot Geo");
                 break;
 
             case RBootReplyFromMotorIO:
                 bootFromMotorIO = true;
+                printf("Boot MotorIO");
                 break;
 
             case RBootReplyFromSensor:
                 bootFromSensor = true;
+                printf("Boot Sensor");
                 break;
 
-                // XXX: Why do this in the default case?
             default:
-                if(run)
-                {
-                    //MotorDriveFromSensors(true, false, false, false, false, SpeedLevel3, 0);
-                }
-                else if(stop)
-                {
-                    //MotorDriveFromSensors(false, false, false, false, false, 0, 0);
-                }
                 break;
         }
         receptionSuccessful = true;

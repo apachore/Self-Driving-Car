@@ -119,6 +119,7 @@ typedef struct
 
         uint32_t FinalDistance          :   16;          // Final distance to the destination
         uint32_t NextCheckpointDistance :   16; // Next checkpoint distance to the destination
+        uint32_t DestinationReached     :   8;         // Destination reached byte 1 if reached 0 if not
 }GeoDistanceData;
 
 typedef struct

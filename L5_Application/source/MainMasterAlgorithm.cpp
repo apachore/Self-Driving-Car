@@ -62,8 +62,7 @@ void GPIOInitialization()
     GPIO Port2Pin1(P2_1);
     Port2Pin1.setAsInput();
     Port2Pin1.enablePullDown();
-    eint3_enable_port2(1,eint_falling_edge,KillTask);
-
+    eint3_enable_port2(P2_1, eint_falling_edge, KillTask);
 }
 
 void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, bool rightMotor, bool brakeFlag, uint8_t levelOfSpeed, uint8_t levelOfDirection)
@@ -101,7 +100,7 @@ void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, b
         canMessage.data.bytes[1] = levelOfDirection;
     }
 
-    printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
+//    printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
     CANTransmission(canMessage);
     //CANTransmission(canMessage.msg_id, &canMessage.data.bytes[0], 4);
 }
@@ -338,6 +337,7 @@ bool SendBootRequest()
     delay_ms(3);                        // Delay to properly start all the controllers;
     can_msg_t bootRequestCANMessage;
     bootRequestCANMessage.msg_id = TBootRequestToAll;
+    printf("Boot Sent");
     CANTransmission(bootRequestCANMessage);
     return true;
 }
@@ -355,6 +355,7 @@ void GetBootReplyFromModuleCheck()
 {
     if(bootFromAndroid && bootFromGeo && bootFromMotorIO && bootFromSensor)
     {
+        printf("Boot Received");
         bootRepliesReceived = true;
     }
 }

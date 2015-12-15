@@ -37,7 +37,6 @@
 #include "source/MainMasterAlgorithm.h"
 #include "string.h"
 
-static bool GEOActivate = true;
 extern bool sentStartFromAndroid;
 extern bool sentStopFromAndroid;
 extern bool bootRepliesReceived;
@@ -67,10 +66,14 @@ void period_100Hz(void)
     bool received = CANReception(canMessage);
 
     // Continuously go and check the GEO.
-    if(sentStartFromAndroid/* && bootRepliesReceived*/)
+    if(sentStartFromAndroid && bootRepliesReceived)
     {
         SensorProcessingAlgorithm();
         GeoDecision();       // Need to look at this. Present adjustment
+    }
+    else
+    {
+        MotorDriveFromSensors(false, false, false, false, false, 0, 0);
     }
 }
 
