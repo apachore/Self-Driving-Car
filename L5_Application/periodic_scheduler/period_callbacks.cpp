@@ -52,11 +52,21 @@ void period_1Hz(void)
 
 void period_10Hz(void)
 {
-
     //Recover from CAN Bus off at 10Hz
     if (CAN_is_bus_off(can1))
     {
         CAN_reset_bus(can1);
+    }
+
+    // Continuously go and check the GEO and Sensor
+    if(sentStartFromAndroid && bootRepliesReceived)
+    {
+        SensorProcessingAlgorithm();
+        GeoDecision();                  // Need to look at this. Present adjustment
+    }
+    else
+    {
+        MotorDriveFromSensors(false, false, false, false, false, 0, 0);
     }
 }
 
@@ -64,17 +74,6 @@ void period_100Hz(void)
 {
     can_msg_t canMessage;
     bool received = CANReception(canMessage);
-
-    // Continuously go and check the GEO.
-    if(sentStartFromAndroid && bootRepliesReceived)
-    {
-        SensorProcessingAlgorithm();
-        GeoDecision();       // Need to look at this. Present adjustment
-    }
-    else
-    {
-        MotorDriveFromSensors(false, false, false, false, false, 0, 0);
-    }
 }
 
 void period_1000Hz(void)

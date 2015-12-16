@@ -37,7 +37,7 @@ bool bootFromGeo = false;
 bool bootFromSensor = false;
 bool bootFromMotorIO = false;
 
-bool bootRepliesReceived = false;
+bool bootRepliesReceived = true;
 
 
 void DataOverCanBuffer(uint32_t param)
@@ -116,21 +116,25 @@ bool CANReception(can_msg_t& canMessageBlock)
 
             case RBootReplyFromAndroid:
                 bootFromAndroid = true;
+                LOG_INFO("Boot Reply received from Android Controller.");
                 printf("Boot Android");
                 break;
 
             case RBootReplyFromGeo:
                 bootFromGeo = true;
+                LOG_INFO("Boot Reply received from Geo Controller.");
                 printf("Boot Geo");
                 break;
 
             case RBootReplyFromMotorIO:
                 bootFromMotorIO = true;
+                LOG_INFO("Boot Reply received from MotorIO Controller.");
                 printf("Boot MotorIO");
                 break;
 
             case RBootReplyFromSensor:
                 bootFromSensor = true;
+                LOG_INFO("Boot Reply received from Sensor Controller.");
                 printf("Boot Sensor");
                 break;
 
@@ -139,6 +143,5 @@ bool CANReception(can_msg_t& canMessageBlock)
         }
         receptionSuccessful = true;
     }
-
     return receptionSuccessful;
 }

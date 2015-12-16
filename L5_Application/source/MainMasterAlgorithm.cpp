@@ -69,37 +69,48 @@ void MotorDriveFromSensors(bool frontMotor, bool reverseMotor, bool leftMotor, b
 {
     can_msg_t canMessage;
 
+    static uint8_t defaultMotorMessage = 0x0;
+
+    static uint8_t sendMotorStraight = 0x1;
+    static uint8_t sendMotorReverse  = 0x2;
+    static uint8_t sendMotorLeft     = 0x1;
+    static uint8_t sendMotorRight    = 0x2;
+
+    unsigned static int IsNot29Bit = 0;
+    static int dataLength = 4;
+
     uint32_t msgId = TMotorControlToMotor;
     canMessage.msg_id = TMotorControlToMotor;
-    canMessage.frame_fields.is_29bit = 0;
-    canMessage.frame_fields.data_len = 4;
+    canMessage.frame_fields.is_29bit = IsNot29Bit;
+    canMessage.frame_fields.data_len = dataLength;
 
-    canMessage.data.bytes[0] = 0x0;
-    canMessage.data.bytes[1] = 0x0;
-    canMessage.data.bytes[2] = 0x0;
-    canMessage.data.bytes[3] = 0x0;
+    canMessage.data.bytes[0] = defaultMotorMessage;
+    canMessage.data.bytes[1] = defaultMotorMessage;
+    canMessage.data.bytes[2] = defaultMotorMessage;
+    canMessage.data.bytes[3] = defaultMotorMessage;
 
     if(frontMotor)
     {
-        canMessage.data.bytes[2] = 0x1;
+        canMessage.data.bytes[2] = sendMotorStraight;
         canMessage.data.bytes[3] = levelOfSpeed;
     }
     if(reverseMotor)
     {
-        canMessage.data.bytes[2] = 0x2;
+        canMessage.data.bytes[2] = sendMotorReverse;
         canMessage.data.bytes[3] = levelOfSpeed;
     }
     if(leftMotor)
     {
-        canMessage.data.bytes[0] = 0x1;
+        canMessage.data.bytes[0] = sendMotorLeft;
         canMessage.data.bytes[1] = levelOfDirection;
     }
     if(rightMotor)
     {
-        canMessage.data.bytes[0] = 0x2;
+        canMessage.data.bytes[0] = sendMotorRight;
         canMessage.data.bytes[1] = levelOfDirection;
     }
 
+    LOG_INFO("Sending %d %d %d %d to motor");
 //    printf("%d  %d  %d  %d\n", canMessage.data.bytes[0], canMessage.data.bytes[1], canMessage.data.bytes[2], canMessage.data.bytes[3]);
     CANTransmission(canMessage);
     //CANTransmission(canMessage.msg_id, &canMessage.data.bytes[0], 4);
@@ -130,16 +141,19 @@ void SensorProcessingAlgorithm()
 
     bool Reverse = (receivedSensorData.RearDistance < reverseDistance) ? true : false;
 
-    if(F1 || F2 || F3 || LDanger || L1 || L2 || L3 || RtDanger || Rt1 || Rt2 || Rt3) {
+    if(F1 || F2 || F3 || LDanger || L1 || L2 || L3 || RtDanger || Rt1 || Rt2 || Rt3)
+    {
         isSensorObstruction = true;
     }
-    else {
+    else
+    {
         isSensorObstruction = false;     // Adjustment for now
         return;
     }
     if(destinationReached)
     {
         return;
+        LOG_INFO("Destination reached.");
     }
 
 //    printf("%d  %d  %d  %d\n", receivedSensorData.FrontDistance, receivedSensorData.LeftDistance, receivedSensorData.RightDistance, receivedSensorData.RearDistance);
@@ -338,6 +352,7 @@ bool SendBootRequest()
     can_msg_t bootRequestCANMessage;
     bootRequestCANMessage.msg_id = TBootRequestToAll;
     printf("Boot Sent");
+    LOG_INFO("Send boot request to all the controllers. Now wait for all the controller to respond");
     CANTransmission(bootRequestCANMessage);
     return true;
 }
@@ -348,6 +363,7 @@ void SendKillMessageToAllControllers()
     canMessage.msg_id = TKillMessageToAll;
     canMessage.frame_fields.is_29bit = 0;
     canMessage.frame_fields.data_len = 0;
+    LOG_INFO("Sending kill message to all the controllers.");
     CANTransmission(canMessage);
 }
 
@@ -386,11 +402,11 @@ void GeoDecision(/*uint8_t turningAngle,uint8_t turnDirection*/)
     uint8_t turningAngle = receivedTurnData.TurningAngle;
     uint8_t turnDirection = receivedTurnData.TurnDirection;
 
-//    destinationReached = nextCheckPointDistance < destinationReachedDistance ? true : false;
+    destinationReached = receivedDistanceData.DestinationReached == 1 ? true : false;
 
     LD.setNumber(nextCheckPointDistance);
     // Changed the flag from here to
-    if(!isSensorObstruction)
+    if(!isSensorObstruction && !destinationReached)
     {
         printf("%d  %d  %d  %d\n", finalDistance, nextCheckPointDistance, turningAngle, turnDirection);
         if(nextCheckPointDistance > destinationReachedDistance)  //(distance check)
