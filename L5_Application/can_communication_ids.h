@@ -19,21 +19,21 @@
 
 typedef enum
 {
-    THeartbeatToMaster     = 0x283, // Heart beat message to Master
+    THeartbeatToMaster          = 0x283, // Heart beat message to Master
 
     RBootRequestFromMaster      = 0x610, // Boot request from Master
     TBootReplyToMaster          = 0x621, // Boot status to Master
 
-    TSensorData  = 0x210, // Sensor data to IO and Master
-    TBatteryStatus        = 0x420, // Battery status to IO and Master
+    TSensorData                 = 0x210, // Sensor data to IO and Master
+    TBatteryStatus              = 0x420, // Battery status to IO and Master
 
 
-    RBootStatusFromMaster   = 0x630,
-    RKillMessage          = 0x020,  // Kill Message
-    RSensorModuleStart    = 0x640,  //Start message from Android
+    RBootStatusFromMaster       = 0x630,
+    RKillMessage                = 0x020,  // Kill Message
+    RSensorModuleStart          = 0x640,  //Start message from Android
 
     //DIsabled Filter ID - Used to make Standard ID count even
-     FilterDisabledCANmsgID               = 0xFFFF
+     FilterDisabledCANmsgID     = 0xFFFF
 }CANMessageIds;
 
 /* Following are the HW filter setup for the messages to be received by Geo from other

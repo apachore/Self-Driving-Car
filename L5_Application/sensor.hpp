@@ -11,19 +11,17 @@
 #include <stdint.h>
 
 
-//typedef struct                  //structure to store sensor distance
-//{
-//        uint64_t front:8;
-//        uint64_t right:8;
-//        uint64_t left:8;
-//        uint64_t back:8;
-//}sensor_data_t;
-//sensor_data_t sensor_data_obj;
-
+typedef struct                  //structure to store obstacle distance by sensor
+{
+        uint8_t front ;
+        uint8_t back  ;
+        uint8_t right ;
+        uint8_t left  ;
+}sensor_data_t;
 
 bool sensor_init();
 bool sensor_compute();
-        //QueueHandle_t sensor_data_q;
+
 
 
 

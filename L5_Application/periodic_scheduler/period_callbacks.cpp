@@ -27,17 +27,17 @@
  * For example, the 1000Hz take slot runs periodically every 1ms, and whatever you
  * do must be completed within 1ms.  Running over the time slot will reset the system.
  */
-
+#include <can_communication_ids.h>
 #include <sensor.hpp>
 #include <stdint.h>
 #include "io.hpp"
 #include "periodic_callback.h"
 #include "can.h"
 #include "stdio.h"
-#include "can_Tx_Rx.hpp"
+#include "can_transmission_reception.h"
 /// This is the stack size used for each of the period tasks
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
-
+extern bool BootReplySent;
 /// Called once before the RTOS is started, this is a good place to initialize things once
 bool period_init(void)
 {
@@ -54,24 +54,29 @@ bool period_reg_tlm(void)
 
 void period_1Hz(void)
 {
-    can_Heart_beat();
+    if(BootReplySent)
+       {
+           //Heart Beat message
+           CANTransmit(THeartbeatToMaster,0,0);
+       }
 }
 
 void period_10Hz(void)
 {
+    //Check if CAN bus is off... if yes then reset CAN bus
     if(CAN_is_bus_off(can1))
     {
         CAN_reset_bus(can1);
-        //  LE.toggle(2);
     }
-    sensor_compute();  //LE.on(1);//sensorTask_run();
-
+    if(BootReplySent)
+    {
+    sensor_compute();
+    }
 }
 
 void period_100Hz(void)
 {
-    CANReception();
-    //LE.toggle(3);
+     CANReception();
 }
 
 void period_1000Hz(void)

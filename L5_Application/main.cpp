@@ -43,12 +43,9 @@
  */
 int main(void)
 {
-    int flag_init =0;
-    if(flag_init ==0)
-    {
+
         sensor_init();
-        flag_init =1;
-    }
+
 
      /**
      * A few basic tasks for this bare-bone system :
