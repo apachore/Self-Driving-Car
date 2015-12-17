@@ -54,7 +54,7 @@ bool period_reg_tlm(void)
 
 void period_1Hz(void)
 {
-    can_Boot_stat();
+    can_Heart_beat();
 }
 
 void period_10Hz(void)

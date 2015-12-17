@@ -9,8 +9,9 @@
 #include "can_Tx_Rx.hpp"
 #include "sensor.hpp"
 #include "can_communication_ids.h"
-
+#include "sensor_defines.hpp"
 extern int front, back, right, left;
+bool BootReplySent;
 void can_Tx_Rx_init()
 {
     CAN_init(can1, 100, 30, 30, NULL,NULL);
@@ -66,7 +67,7 @@ void can_Boot_stat()
    msgTx.msg_id = TBootReplyToMaster;
    msgTx.frame_fields.is_29bit = 0;
    msgTx.frame_fields.data_len = 1;       // Send bytes
-   msgTx.data.qword = 20151207;
+   msgTx.data.qword = BOOTREPLYDATA;
    if( !(CAN_tx(can1, &msgTx, 0)))
    {
        LE.toggle(1) ;// printf("Boot status not sent");
@@ -86,14 +87,14 @@ void CANReception()
                                    sys_reboot();
                                     break;
                 case RBootRequestFromMaster :      // Boot status enquire from Master
-//                    if (BootReplySent == 0)
-//                        if (BootReplySent == 0)
-//                        {
-//                            uint32_t bootData = BOOTREPLYDATA;
+                   // if (BootReplySent == 0)
+
+                            //uint32_t bootData = BOOTREPLYDATA;
+                            can_Boot_stat();
 //                            CANTransmit(TBootReplyToMaster,(uint8_t*)&bootData,sizeof(bootData));
-//                            //CANTransmitBootReply();
-//                            BootReplySent = 1;
-//                        }
+                            //CANTransmitBootReply();
+                            BootReplySent = 1;
+                       // }
 
                     break;
                 case RBootStatusFromMaster  :

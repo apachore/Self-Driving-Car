@@ -164,13 +164,13 @@ bool sensor_compute()
 //        can_Boot_stat();
 //    }
 //    can_Heart_beat();
-    adc_val =adc0_get_reading(4);
+   // adc_val =adc0_get_reading(4);
 
 #if DEBUG
-   // printf("%d %d %d %d\n",front, left, right,back);
+    printf("%d %d %d %d\n",front, left, right,back);
 #endif
     LD.setNumber(front/LED_DISP_FACTOR);
-    printf("%d\n",adc_val);
+    //printf("%d\n",adc_val);
     sensor_distance_limit();
 
     can_Tx_Sensor_data();

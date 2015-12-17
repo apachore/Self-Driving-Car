@@ -12,6 +12,7 @@
 #define PW_CM_CONV                              58
 #define LED_DISP_FACTOR                         10
 #define DISTANCE_LIMIT                          255
+#define BOOTREPLYDATA                           20151207
 
 #define TIMER_TICK                              1       // 1us per tick
 #define SENSOR_INIT_DELAY                       250
