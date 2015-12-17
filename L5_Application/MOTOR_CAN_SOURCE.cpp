@@ -84,20 +84,19 @@ void Transmitter_message()
 {
     can_msg_t check_0x610,Boot_send;
     Boot_send.msg_id = 0x620;
-    Boot_send.frame_fields.data_len = 8;
-    Boot_send.data.qword = 0x224; /*Sending Boot reply message data*/
-    if(Boot_req)
-    {
+    Boot_send.frame_fields.data_len = 0;
+    /*if(Boot_req)
+    {*/
 //        printf("Boot request message 0x610 received successfully \n ");
-        CAN_tx(can1,&Boot_send,1000);
-//        printf("Boot response message 0x620 sent successfully \n ");
+        CAN_tx(can1,&Boot_send,0);
+        printf("Boot response message 0x620 sent successfully \n ");
         LOG_INFO("Boot response message 0x620 sent successfully \n");
         Boot_req = 0;
-    }
-    else
+    /*}*/
+    /*else
     {
-       /*do nothing. No need to send any message*/
-    }
+       do nothing. No need to send any message
+    }*/
 }
 
 int CAN_Receive;
@@ -143,6 +142,8 @@ void Receiver_message()
 
             //Boot request from Master
             case 0x610:
+                printf("Boot response message 0x610 receive successfully \n ");
+                Transmitter_message();
                 Boot_req =1;
                break;
 

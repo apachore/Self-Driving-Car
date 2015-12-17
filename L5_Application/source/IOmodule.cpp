@@ -55,24 +55,25 @@ void LCDdisplay()
 
    // printf("int size:%d\t float size:%d\n",sizeof(int),sizeof(float));
     char command_buf[3];
+    u2.put("HEOOOOOOO");
    // char checkpoint_dist_buf[4];
-
+    printf("int size:\t float size:\n");
     //Copying Sensor data
-    sensor_data[0] =Message.canReceivedMsg_Sensor.data.bytes[0];
+   /* sensor_data[0] =Message.canReceivedMsg_Sensor.data.bytes[0];
     sensor_data[1] =Message.canReceivedMsg_Sensor.data.bytes[1];
     sensor_data[2] =Message.canReceivedMsg_Sensor.data.bytes[2];
-    sensor_data[3] =Message.canReceivedMsg_Sensor.data.bytes[3];
+    sensor_data[3] =Message.canReceivedMsg_Sensor.data.bytes[3];*/
     /*sensor_data[0]=11;
     sensor_data[1]=49;
     sensor_data[2]=255;
     sensor_data[3]=8;*/
 
     //Reading Compass data
-    compass_data[0]=Message.canReceivedMsg_compass.data.bytes[0];
-    compass_data[1]=Message.canReceivedMsg_compass.data.bytes[1];
+   /* compass_data[0]=Message.canReceivedMsg_compass.data.bytes[0];
+    compass_data[1]=Message.canReceivedMsg_compass.data.bytes[1];*/
 
     //Distance remaining information from read
-    final_dist_remaining=Message.canReceivedMsg_gps2.data.words[0];
+  //  final_dist_remaining=Message.canReceivedMsg_gps2.data.words[0];
   // checkpoint_dist=Message.canReceivedMsg_gps2.data.words[1];
    /* gps_longitude =24.413;
     gps_latitude=7.89;
@@ -81,18 +82,18 @@ void LCDdisplay()
   // snprintf(checkpoint_dist_buf,4,"%d",checkpoint_dist);
 
     //Printing Distance remaining, Compass and Sensor data
-       snprintf(dist_buf,4,"%d",final_dist_remaining);
+     //  snprintf(dist_buf,4,"%d",final_dist_remaining);
   //  sprintf(gps_lat_buf,"%0.2f",checkpoint.latitude);
  //   sprintf(gps_long_buf,"%0.2f",checkpoint.longitude);
-       snprintf(compass_buf0,4,"%d",compass_data[0]);
+      /* snprintf(compass_buf0,4,"%d",compass_data[0]);
        snprintf(compass_buf1,4,"%d",compass_data[1]);
 
     snprintf(sen_buf0,4,"%d",sensor_data[0]);
     snprintf(sen_buf1,4,"%d",sensor_data[1]);
     snprintf(sen_buf2,4,"%d",sensor_data[2]);
-    snprintf(sen_buf3,4,"%d",sensor_data[3]);
-    command_buf[0] = 0xFE;  // command to place cursor in line 0  */
-    command_buf[1] = 0x45;
+    snprintf(sen_buf3,4,"%d",sensor_data[3]);*/
+  //  command_buf[0] = 0xFE;  // command to place cursor in line 0  */
+  /*  command_buf[1] = 0x45;
     command_buf[2] = 0x04;
     u2.put(command_buf);
     u2.put(team_name_buf);
@@ -140,8 +141,8 @@ void LCDdisplay()
     u2.put(gps_long_buf);
     u2.putChar(s);*/
     vTaskDelay(800);
-    command_buf[0] = 0xFE;     /* clear screen command */
-    command_buf[1] = 0x51;
+   command_buf[0] = 0xFE;     /* clear screen command */
+    command_buf[1] = 0x4B;
     command_buf[2] = 0x00;
     u2.put(command_buf);
 }

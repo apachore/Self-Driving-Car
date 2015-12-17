@@ -106,7 +106,7 @@ bool MotorTask::run(void *p)
             	{
             		pwm2.set(15);
             		vTaskDelay(25);
-            		pwm2.set(12);
+            		pwm2.set(13);
                     vTaskDelay(100);
                     speed_offset = 0;
                     LD.setNumber(13);
@@ -202,7 +202,7 @@ bool MotorTask::run(void *p)
 //    	printf("\nspeed_miss_cont  : %d",speed_miss_cont);
 
         //PWM level value to be increased/decreased on speed mismatch
-    	speed_correction = (speed_miss_cont/20)*0.3;
+    	speed_correction = (speed_miss_cont/20)*0.2;
 
     	//Speed correction done if speed mismatch is observed for two or more times continuously
         if(speed_miss > 1)

@@ -48,6 +48,7 @@ void period_1Hz(void)
     if (CAN_is_bus_off(can1))
     {
         CAN_reset_bus(can1);
+        LE.toggle(4);
     }
 
     //This function processes the Speed sensor information
@@ -63,7 +64,7 @@ void period_1Hz(void)
 void period_10Hz(void)
 {
     //CAN messages transmitted at 10Hz
-	Transmitter_message();
+
 	//LE.toggle(2);
 }
 
