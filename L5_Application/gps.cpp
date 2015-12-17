@@ -10,7 +10,7 @@
 #include "gps.hpp"
 #include "handlers.hpp"
 
-#define FetchCheckpointDistance 40
+#define FetchCheckpointDistance 20
 #define ZeroCoordinate 0.0
 #define CheckPointDistance 200
 
@@ -27,7 +27,6 @@ gps_uart(Uart3::getInstance()),
 gps_data_q(NULL),
 midpoint_q(NULL)
 {
-    //setRunDuration(10);
     gps_uart.init(gps_uart_BaudRate,gps_rx_q_size,1);
 }
 

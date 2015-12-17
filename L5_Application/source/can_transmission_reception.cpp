@@ -155,14 +155,16 @@ void CANReception()
             case RMapResetFromAndroid:
                 printf("Map Reset");
                 xQueueReset(Checkpoint_Queue);
+                LE.toggle(3);
                 LE.off(3);
                 break;
 
             case RBootRequestFromMaster:
-                if (BootReplySent == false)
+                //if (BootReplySent == false)
                 {
                     uint32_t bootData = BootReplyData;
                     CANTransmit(TBootReplyToMaster,(uint8_t*)&bootData,sizeof(bootData));
+                    printf("Boot Reply Sent\n");
                     //CANTransmitBootReply();
                     BootReplySent = true;
                 }
@@ -173,6 +175,8 @@ void CANReception()
                 break;
 
             case RDestinationReached:
+                xQueueReset(Checkpoint_Queue);
+                LE.off(3);
                 //This message will not be used
                 break;
         }
