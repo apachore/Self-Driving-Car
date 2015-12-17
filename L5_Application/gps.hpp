@@ -35,7 +35,7 @@ typedef struct
 
 typedef struct
 {
-        uint16_t Total_Distance_Remaining;
+        uint16_t Total_Travelled_Distance;
         uint16_t Current_Checkpoint_Distance;
         uint8_t is_last_checkpoint;
 }Distance_Data;

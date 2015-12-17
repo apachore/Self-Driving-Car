@@ -219,6 +219,10 @@ Distance_Data GPS_Calculations()
                 current_bearing = calculateBearing(checkpoint,current_gps_data);
                 //LOG_INFO("Current Bearing: %d",current_bearing);
                 //printf("Current Bearing: %d degrees\n",current_bearing);
+                if(!first_after_cp_fetch)
+                {
+                    Total_Distance_Traveled = Total_Distance_Traveled + (Previous_Checkpoint_Distnace - Current_Distances.Current_Checkpoint_Distance);
+                }
                 if (first_after_cp_fetch)
                 {
                     Previous_Checkpoint_Distnace = Current_Distances.Current_Checkpoint_Distance;
@@ -239,19 +243,19 @@ Distance_Data GPS_Calculations()
                 if (Current_Distances.Current_Checkpoint_Distance < FetchCheckpointDistance)
                     Fetch_Checkpoint = 1;
 
-                Total_Distance_Traveled = Total_Distance_Traveled + (Previous_Checkpoint_Distnace - Current_Distances.Current_Checkpoint_Distance);
+
                 //LOG_INFO("Total Distance Traveled: %d",Total_Distance_Traveled);
                 //printf("Total Distance Traveled: %d",Total_Distance_Traveled);
 
                 Previous_Checkpoint_Distnace = Current_Distances.Current_Checkpoint_Distance;
-                Current_Distances.Total_Distance_Remaining = Total_Distance_To_Travel - Total_Distance_Traveled;
+                Current_Distances.Total_Travelled_Distance = /*Total_Distance_To_Travel - */Total_Distance_Traveled;
 
                 //printf("Total Distance Remaining: %d",Current_Distances.Total_Distance_Remaining);
 
                 LOG_INFO("CheckPoint:%f  %f\n",checkpoint.latitude,checkpoint.longitude);
-                LOG_INFO("GPS:%d  %d  %d\n",Current_Distances.Total_Distance_Remaining,
+                LOG_INFO("GPS:%d  %d  %d\n",Current_Distances.Total_Travelled_Distance,
                         Current_Distances.Current_Checkpoint_Distance,current_bearing);
-                printf("%d  %d  %d\n",Current_Distances.Total_Distance_Remaining,
+                printf("%d  %d  %d\n",Current_Distances.Total_Travelled_Distance,
                        Current_Distances.Current_Checkpoint_Distance,current_bearing);
 
                 return Current_Distances;
